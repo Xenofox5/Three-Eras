@@ -624,6 +624,21 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--goldhi);ou
 /* ===== save backup ===== */
 .linkbtn{border:0;background:none;padding:0;color:var(--accent);font:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .codebox{width:100%;margin:8px 0;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--tx);font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;resize:vertical}
+
+/* ===== v0.9 ===== */
+.row.pl .card{width:calc((100% - (var(--n,3) - 1) * 6px) / var(--n,3));max-width:168px}
+.row.pl.many{gap:4px}
+.row.pl.many .card{width:calc((100% - (var(--n,3) - 1) * 4px) / var(--n,3))}
+.row.pl.many .nm{font-size:11px}.row.pl.many .nm em{display:none}
+.row.pl.many .hp{height:13px}.row.pl.many .hp b{font-size:10px}
+.row.pl.many .ab b{font-size:11px}
+.hp .hx{background:repeating-linear-gradient(135deg,#fff3a0 0 4px,#e0b020 4px 8px);opacity:.95;border-right:2px solid #fffbe0}
+.card.vessel .pi{filter:saturate(1.3) hue-rotate(-15deg) contrast(1.1)}
+.card.vessel .por{box-shadow:0 0 0 2px #d1203a,0 0 18px rgba(209,32,58,.7)}
+.card.silenced .por::after{content:"🖋";position:absolute;right:-6px;bottom:-6px;z-index:4;font-size:18px;filter:drop-shadow(0 0 4px #7a8ab0)}
+.frame{position:absolute;border:3px solid #c8d4ff;border-radius:40%;box-shadow:0 0 14px #9fb8ff,inset 0 0 14px #9fb8ff}
+.hexfx{position:absolute;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);background:radial-gradient(circle,rgba(255,243,160,.15) 30%,rgba(255,224,102,.85) 70%,rgba(255,255,255,.9) 76%,transparent 80%)}
+.hexshard{position:absolute;width:12px;height:12px;background:#ffe066;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 8px #ffe066}
 </style></head><body><div id="app"></div><script>
 const OFFLINE = true; const APPMODE = true;
 'use strict';
@@ -1171,7 +1186,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.84';
+const GAME_VERSION = '0.9';
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
 STAGES.forEach(s => { if (s.reward) UNLOCK_FROM[s.reward] = s.id; });
@@ -1201,7 +1216,7 @@ const BUILDS = {
   ],
   elphi: [
     { id: 'sentinel', name: 'Sentinel', icon: '🛡️', desc: 'DEF +10%, ATK -10%. Sanctum Blade Shields are 25% stronger.', mods: { def: 0.1, atk: -0.1 }, tags: { ultShield: 0.19 } },
-    { id: 'dawn', name: 'Dawnbreaker', icon: '🌟', desc: 'Radiant Arc deals 110% ATK and Blinds 85% of the time. DEF -10%.', mods: { def: -0.1 }, tags: { arcMult: 1.1, blindCh: 0.85 } }
+    { id: 'dawn', name: 'Dawnbreaker', icon: '🌟', desc: 'Radiant Arc deals 100% ATK and Blinds 85% of the time. DEF -10%.', mods: { def: -0.1 }, tags: { arcMult: 1.0, blindCh: 0.85 } }
   ],
   daniel: [
     { id: 'bastion', name: 'Bastion', icon: '🔮', desc: 'Crystal Ward Shields are 15% stronger and can reach 45% of the ally\'s max HP. Riposte chance drops from 45% to 30%.', tags: { wardMult: 1.15, wardCap: 0.45, counter: 0.3 } },
@@ -1239,6 +1254,22 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.9', date: 'The court of Ethan', changes: [
+    { t: 'new', kind: 'hero', who: 'trigg', text: 'Summoner. Calls up to 2 creatures (imps; a Hellhound from his ultimate) that fight on their own turns and crumble if he falls.' },
+    { t: 'new', kind: 'hero', who: 'alfred', text: 'Marksman. Tempo shifts every turn (Allegro 80% and acts sooner, Andante, Grave 140%). Finger Frame makes a target easy to hit and crit for the whole team.' },
+    { t: 'new', kind: 'hero', who: 'ethan', text: 'Team buffer. Treasury makes SP, allies deal +8% damage while he stands, Royal Decree buffs the whole team.' },
+    { t: 'new', kind: 'hero', who: 'ben', text: 'Turn controller. Give the Order (free, every other turn) makes an ally act at once; his ultimate delays every enemy.' },
+    { t: 'new', kind: 'hero', who: 'kingsley', text: 'Second healer. Songs heal over time and cleanse; Borrowed Trinket draws one of four magic items at random.' },
+    { t: 'new', kind: 'hero', who: 'vasco', text: 'Trickster. Mimics the last enemy attack on his team. Below 40% HP he becomes the Vessel: ATK +35%, lifesteal, double damage to Shields.' },
+    { t: 'new', kind: 'hero', who: 'aamay', text: 'Hard control. Silence stops skills and ultimates (monsters use only their basic attack). His Chronicle gains a Page for every action and his ultimate spends them.' },
+    { t: 'nerf', kind: 'hero', who: 'soham', what: 'Hexagon', text: 'Single / team Hex Shield', from: '32% / 11%', to: '29% / 10% of his max HP' },
+    { t: 'nerf', kind: 'hero', who: 'soham', what: 'Hexagon Crush', text: 'Team Hex Shield', from: '15%', to: '13%' },
+    { t: 'nerf', kind: 'hero', who: 'soham', what: 'Builds', text: 'Monolith single / Hex Breaker strength and blast', from: '44% / 80% and 70%', to: '40% / 75% and 65%', note: 'Both led Balanced by about 10 points.' },
+    { t: 'nerf', kind: 'hero', who: 'elphi', what: 'Dawnbreaker build', text: 'Radiant Arc', from: '110%', to: '100% ATK' },
+    { t: 'new', kind: 'system', who: 'Creatures', text: 'Summoned creatures fight on your row, act automatically, and do not count for stars or the battle summary.' },
+    { t: 'new', kind: 'system', who: 'Statuses', text: 'Silenced, Framed, Song, Tempo, the Vessel and the Chronicle.' },
+    { t: 'new', kind: 'system', who: 'Sudden death', text: 'From turn 150, all damage rises 5% every 10 turns and healing is halved, so stalemates end. Normal fights finish well before this.' }
+  ] },
   { v: '0.83', date: 'Tightening the field', changes: [
     { t: 'nerf', kind: 'hero', who: 'soham', what: 'Hexagon', text: 'Single / team Hex Shield', from: '38% / 13%', to: '32% / 11% of his max HP', note: 'Campaign 70% was the highest of any hero.' },
     { t: 'nerf', kind: 'hero', who: 'soham', what: 'Hexagon Crush', text: 'Team Hex Shield', from: '20%', to: '15%' },
@@ -1490,6 +1521,7 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.9', items: ['Seven new heroes: Trigg, Alfred, Ethan, Ben, Kingsley, Vasco and Aamay, each filling a role the roster lacked. 24 heroes in total.', 'Five new stages where you fight and unlock them: Trigg\'s Menagerie, The Blurred Duel, The King\'s Trial, The Palace Revels and The Basement Archive. 31 stages in total. Some stages now unlock two heroes.', 'Five new team bonuses: Peguicha\'s Court, The Crown\'s Counsel, Royal Hospitality, Borrowed Magic and The Hollow Vessel.', 'Soham\'s Hex Shields now show in gold, separately from blue Shields, on the HP bar and in the numbers.', 'Hex Breaker has a proper exploding-hexagon effect when a Hex Shield bursts.'] },
   { v: '0.84', items: ['Offline version: a single file you can download and play with no internet. Fonts are built in and progress saves on the device.', 'Save backup on the title screen: copy your save as a code (or download it as a file offline) and load it into the other version. Merge keeps the best of both; Replace overwrites.'] },
   { v: '0.83', items: ['Balance pass across 13 heroes and 3 builds, guided by campaign, 3v3 and 1v1 results. Composite spread narrowed from 44 to 68 down to 46 to 63.', 'Simulated stats refreshed.'] },
   { v: '0.82', items: ['Angus, Flynn and Elphi have more distinct passives.', 'A developer handbook and source bundle now exist so development can continue from anywhere.', 'Simulated stats refreshed.'] },
@@ -1577,8 +1609,8 @@ BUILDS.vehra = [BALANCED,
   { id: 'granite', name: 'Granite', icon: '🪨', desc: 'Stone Form also gives her a Shield worth 6% of her max HP. ATK -15%.', mods: { atk: -0.15 }, tags: { stoneShield: 0.06 } },
   { id: 'bloodwing', name: 'Bloodwing', icon: '🩸', desc: 'Bloodlust rises to +45% and her claws heal for 35% of their damage, but Stone Form only cuts damage by 30%.', tags: { bloodlust: 0.45, lifesteal: 0.35, stoneDr: 0.3 } }];
 BUILDS.soham = [BALANCED,
-  { id: 'monolith', name: 'Monolith', icon: '🧱', desc: 'A single Hex Shield is worth 44% of his max HP and lasts 4 hits. The team wall drops to 9% each.', tags: { singleHex: 0.44, singleHits: 4, teamHex: 0.09 } },
-  { id: 'breaker', name: 'Hex Breaker', icon: '💥', desc: 'Hex Shields are 20% weaker, but whenever one shatters or runs out it explodes for 70% ATK to every enemy.', tags: { hexMult: 0.8, hexBlast: 0.7 } }];
+  { id: 'monolith', name: 'Monolith', icon: '🧱', desc: 'A single Hex Shield is worth 40% of his max HP and lasts 4 hits. The team wall drops to 8% each.', tags: { singleHex: 0.4, singleHits: 4, teamHex: 0.08 } },
+  { id: 'breaker', name: 'Hex Breaker', icon: '💥', desc: 'Hex Shields are 25% weaker, but whenever one shatters or runs out it explodes for 65% ATK to every enemy.', tags: { hexMult: 0.75, hexBlast: 0.65 } }];
 BUILDS.seraphine = [BALANCED,
   { id: 'puppeteer', name: 'Puppeteer', icon: '🎭', desc: 'Halo Storm hands a turn to The Chosen, or to the ally with the highest ATK if she is absent. Halo cuts deal 28% instead of 35%.', tags: { anyPuppet: 1, haloMult: 0.28 } },
   { id: 'twinedge', name: 'Twin Edge', icon: '⭕', desc: 'Halo cuts deal 46% ATK instead of 35%. Max HP -10%.', mods: { hp: -0.1 }, tags: { haloMult: 0.46 } }];
@@ -1617,6 +1649,133 @@ const stageFoes = st => st.enemies.map(x => (isHeroFoe(x)
   ? { id: foeId(x), hero: true, boss: true, atkMul: st.heroAtk || 1, hpMul: st.heroHp || 2.5 }
   : { id: x, atkMul: st.atk, hpMul: st.hp }));
 
+/* ================= v0.9: the court of Ethan, Trigg and Alfred ================= */
+Object.assign(STATUS, {
+  silenced:  { name: 'Silenced', icon: '🖋', type: 'debuff', color: '#7a8ab0', desc: 'Sealed in ink. Heroes cannot use skills or ultimates; monsters can only use their basic attack.' },
+  framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +25% crit chance.' },
+  tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
+  song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 6% max HP and removes a debuff at the start of each of its turns.' },
+  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.35 }, color: '#d1203a', desc: 'Peguicha\'s power wears Vasco\'s face: ATK +35%, hits heal him for 25% of their damage and deal double damage to Shields.' },
+  pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 12, color: '#7a8ab0', desc: 'Pages written about this battle. The Last Page spends them for 30% ATK each against every enemy.' }
+});
+Object.assign(ENEMIES, {
+  imp: { name: 'Pit Imp', color: '#e0502a', creature: true, stats: { hp: 520, atk: 100, def: 50, spd: 118, eva: 0.08 },
+    look: { kind: 'wyvern', scale: '#a8241c', eye: '#ffd56b', bg: '#2a0a06', horns: true },
+    moves: [{ id: 'claw', name: 'Ember Claw', icon: '🔥', target: 'single', mult: 1.0, status: { key: 'burn', turns: 2, chance: 0.4, dot: 0.2 }, w: 3, fx: 'claw' }] },
+  hellhound: { name: 'Hellhound', color: '#ff6a2a', creature: true, stats: { hp: 1100, atk: 110, def: 80, spd: 104, eva: 0.05 },
+    look: { kind: 'wolf', fur: '#3a1410', eye: '#ff8a1f', bg: '#2a0804' },
+    moves: [{ id: 'maul', name: 'Hell Maul', icon: '🐺', target: 'single', mult: 1.2, w: 3, fx: 'claw' },
+      { id: 'howl', name: 'Infernal Howl', icon: '📢', target: 'self', self: { key: 'taunt', turns: 1 }, w: 2, cd: 3 }] },
+  inkwraith: { name: 'Ink Wraith', color: '#7a8ab0', stats: { hp: 900, atk: 104, def: 60, spd: 112, eva: 0.12 },
+    look: { kind: 'hood', cloak: '#0e0e16', eye: '#e8ecff', bg: '#08080e' },
+    moves: [{ id: 'grasp', name: 'Ink Grasp', icon: '🖤', target: 'single', mult: 1.0, status: { key: 'spdDown', turns: 2, chance: 0.4, value: 0.2 }, w: 3, fx: 'hex' },
+      { id: 'blot', name: 'Blot', icon: '💧', target: 'all', mult: 0.6, status: { key: 'blind', turns: 1, chance: 0.3 }, w: 2, cd: 3, fx: 'acidrain' }] }
+});
+Object.assign(HEROES, {
+  trigg: { id: 'trigg', name: 'Trigg', title: 'Right Hand of the Pit', eras: ['first'], role: 'Summoner', color: '#e0502a',
+    stats: { hp: 1280, atk: 120, def: 76, spd: 106, crit: 0.08, cdmg: 0.5, eva: 0.06 },
+    look: { skin: '#e6c0a6', hair: '#141016', hairStyle: 'messy', eye: '#e0102a', body: 'robe', bodyColor: '#2a1210', trim: '#e0502a', bg: '#2a0e08', weapon: 'chains', lanky: true },
+    passive: { name: 'Hellish Retinue', desc: 'Commands up to 2 creatures at a time. They fight on their own turns and crumble if he falls.' },
+    basic: { name: 'Cinder Lash', icon: '⛓️', target: 'enemy', desc: 'Lash one enemy with burning chains for 95% ATK.' },
+    skill: { name: 'Summon Imp', icon: '👹', cost: 1, target: 'self', desc: 'Call an imp from the pit with 32% of his HP and 75% of his ATK. Imps claw and Burn. If he already commands his limit, his creatures are mended for 25% HP instead.' },
+    ult: { name: 'Hellgate', icon: '🔥', target: 'allEnemies', desc: 'Every creature he commands bursts in hellfire for 110% of his ATK to all enemies. Then a Hellhound answers the call: 70% of his HP, 90% of his ATK, and it Taunts.' } },
+  alfred: { id: 'alfred', name: 'Alfred', title: 'The Blurred Blade', eras: ['second'], role: 'Marksman', color: '#9fb8ff',
+    stats: { hp: 1460, atk: 138, def: 88, spd: 118, crit: 0.2, cdmg: 0.6, eva: 0.16, acc: 0.1 },
+    look: { skin: '#e8c6a8', hair: '#141016', hairStyle: 'bun', eye: '#c8d4ff', body: 'coat', bodyColor: '#2a3046', trim: '#9fb8ff', bg: '#1a2238', weapon: 'katana', lines: true },
+    passive: { name: 'Blurred Sight', desc: 'He sees through blur: 16% evasion, he cannot be Blinded, and he ignores half of every target\'s evasion. His tempo changes every turn: Allegro (hits 80%, next turn 50% sooner), Andante (steady) or Grave (slow and crushing: hits 140%).' },
+    basic: { name: 'Odd Cut', icon: '🗡️', target: 'enemy', desc: 'Cut one enemy for 125% ATK, shaped by his current tempo.' },
+    skill: { name: 'Finger Frame', icon: '👌', cost: 1, target: 'enemy', desc: 'He frames an enemy through his fingers: 110% ATK, then it is Framed for 2 turns. Every ally\'s hits on it cannot miss and gain +25% crit chance, and his next hit on it is a certain crit.' },
+    ult: { name: 'Broken Rhythm', icon: '🎼', target: 'allEnemies', desc: '6 cuts of 90% ATK, each in a different tempo, favouring Framed enemies. Cuts on Framed enemies always crit.' } },
+  ethan: { id: 'ethan', name: 'Ethan', title: 'The Merciful King', eras: ['current'], role: 'Sovereign', color: '#f0d070',
+    stats: { hp: 1500, atk: 116, def: 100, spd: 102, crit: 0.08, cdmg: 0.5, eva: 0.04 },
+    look: { skin: '#e8c8a8', hair: '#f2f2f6', hairStyle: 'long', eye: '#6a4426', body: 'armour', bodyColor: '#4a2a6a', trim: '#f0d070', bg: '#2a1a40', weapon: 'sword', crown: true },
+    passive: { name: 'Treasury', desc: 'At the start of each of his turns his team gains 1 SP if it has fewer than 3. While he stands, his allies deal 8% more damage.' },
+    basic: { name: 'Royal Blade', icon: '⚔️', target: 'enemy', desc: 'Strike one enemy for 95% ATK.' },
+    skill: { name: 'Royal Decree', icon: '📜', cost: 1, target: 'allAllies', desc: 'All allies gain ATK +20% and SPD +10% for 2 turns.' },
+    ult: { name: 'Shelter of the Crown', icon: '🏰', target: 'allAllies', desc: 'Every ally gains a Shield worth 15% of his max HP, is cleansed, and has their buffs extended by 1 turn. His team gains 2 SP.' } },
+  ben: { id: 'ben', name: 'Ben', title: 'The King\'s Advisor', eras: ['current'], role: 'Tactician', color: '#c8a070',
+    stats: { hp: 1340, atk: 122, def: 86, spd: 124, crit: 0.12, cdmg: 0.5, eva: 0.08 },
+    look: { skin: '#e8c4a4', hair: '#6b4426', hairStyle: 'swept', eye: '#5a3a20', body: 'coat', bodyColor: '#3a2e22', trim: '#c8a070', bg: '#2a2016', weapon: 'quill' },
+    passive: { name: 'Cold Counsel', desc: 'Deals 40% more damage to enemies whose turn has been delayed, or who are Stunned. He gives the orders a merciful king will not.' },
+    basic: { name: 'Sharp Word', icon: '🗯️', target: 'enemy', desc: '110% ATK to one enemy and its next turn comes 15% later.' },
+    skill: { name: 'Give the Order', icon: '☝️', cost: 0, target: 'ally', desc: 'Costs no SP, usable every other turn. Another ally acts immediately with ATK +25% for that turn and gains 20% ultimate charge.' },
+    ult: { name: 'The Hard Decision', icon: '⚖️', target: 'allEnemies', desc: 'Every enemy\'s next turn comes 40% later (20% for bosses), and the enemy with the highest ATK is Exposed (+50% damage taken) for 2 turns.' } },
+  kingsley: { id: 'kingsley', name: 'Kingsley', title: 'The Palace Bard', eras: ['current'], role: 'Bard', color: '#7ad06a',
+    stats: { hp: 1200, atk: 110, def: 74, spd: 112, crit: 0.1, cdmg: 0.5, eva: 0.08 },
+    look: { skin: '#f0d0b4', hair: '#d8642a', hairStyle: 'messy', eye: '#3aa060', body: 'coat', bodyColor: '#2a4a2a', trim: '#f0c040', bg: '#183018', weapon: 'lute' },
+    passive: { name: 'Encore', desc: 'Allies with a Song heal 6% of their max HP and lose one debuff at the start of each of their turns.' },
+    basic: { name: 'Jaunty Tune', icon: '🎵', target: 'enemy', desc: 'Play at one enemy for 80% ATK. The ally with the lowest HP gains a Song for 2 turns.' },
+    skill: { name: 'Borrowed Trinket', icon: '🎁', cost: 1, target: 'self', desc: 'Pull one of Vasco\'s magic items at random: Lantern (heal all allies 14%), Mirror Charm (Shield the lowest ally for 22% of his max HP), Jester\'s Bell (Blind every enemy and a 50% chance to Stun one) or Spark Box (75% ATK to every enemy).' },
+    ult: { name: 'Grand Finale', icon: '🎶', target: 'allAllies', desc: 'Every ally gains a Song for 3 turns and SPD +15% for 2 turns, and is cleansed.' } },
+  vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',
+    stats: { hp: 1260, atk: 124, def: 76, spd: 116, crit: 0.12, cdmg: 0.55, eva: 0.1 },
+    look: { skin: '#e6c2a2', hair: '#6b4426', hairStyle: 'short', eye: '#141016', glowEye: '#ff2a3a', body: 'coat', bodyColor: '#5a1a6a', trim: '#f0c040', bg: '#24102e', weapon: 'cards', helm: 'jester' },
+    passive: { name: 'Two Faces', desc: 'The first time he drops below 40% HP his alter ego wakes for the rest of the battle: Peguicha\'s Vessel. ATK +35%, his hits heal him for 25% of their damage and deal double damage to Shields, and his kit turns dark.' },
+    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Jester: 80% ATK and a random trick (Blind, ATK -20% or SPD -20%). Vessel: Hellmark, 120% ATK and Burn.' },
+    skill: { name: 'Mimicry', icon: '🎭', cost: 1, target: 'enemy', desc: 'Jester: copies the last attack an enemy used on his team, at his own ATK. Vessel: Peguicha\'s Gift, 150% ATK that strips the target\'s buffs and Shields.' },
+    ult: { name: 'Curtain Call', icon: '🎪', target: 'allEnemies', desc: 'The mask comes off: he wakes as the Vessel if he has not, then deals 190% ATK to every enemy and Burns them.' } },
+  aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',
+    stats: { hp: 1300, atk: 124, def: 80, spd: 110, crit: 0.1, cdmg: 0.5, eva: 0.08 },
+    look: { skin: '#d8a882', hair: '#141016', hairStyle: 'short', eye: '#5a3a20', body: 'robe', bodyColor: '#1a1c26', trim: '#7a8ab0', bg: '#0e1018', weapon: 'quill' },
+    passive: { name: 'The Chronicle', desc: 'Every action anyone takes in the battle adds a Page to his Chronicle, up to 12.' },
+    basic: { name: 'Ink Flick', icon: '🖋️', target: 'enemy', desc: '95% ATK with a 30% chance to Silence for 1 turn.' },
+    skill: { name: 'Seal in Ink', icon: '📕', cost: 1, target: 'enemy', desc: '70% ATK, then the target is Silenced for 2 turns (bosses 1) and loses 20% SPD. Silenced heroes cannot use skills or ultimates; monsters only use their basic attack.' },
+    ult: { name: 'The Last Page', icon: '📖', target: 'allEnemies', desc: 'Read the Chronicle aloud: 30% ATK per Page to every enemy, then Silence them all for 1 turn. The Pages are spent.' } }
+});
+HERO_ORDER.splice(0, HERO_ORDER.length, 'angus', 'flynn', 'leo', 'harry', 'peguicha', 'vehra', 'soham', 'trigg', 'chosen', 'elphi', 'daniel', 'yunze', 'malakai', 'seraphine', 'alfred', 'lachlan', 'yousuf', 'gemia', 'david', 'ethan', 'ben', 'kingsley', 'vasco', 'aamay');
+Object.assign(BUILDS, {
+  trigg: [BALANCED,
+    { id: 'packmaster', name: 'Packmaster', icon: '👹', desc: 'Commands up to 3 creatures, but they have 20% less HP.', tags: { creatureCap: 3, creatureHp: 0.8 } },
+    { id: 'pyrebinder', name: 'Pyrebinder', icon: '🔥', desc: 'Whenever one of his creatures falls it bursts for 50% of his ATK to all enemies. Imps have 15% less ATK.', tags: { deathBurst: 0.5, impAtk: 0.85 } }],
+  alfred: [BALANCED,
+    { id: 'steady', name: 'Steady Eye', icon: '👁️', desc: 'His tempo no longer swings to Grave, only Allegro or Andante. Finger Frame lasts 3 turns. ATK -8%.', mods: { atk: -0.08 }, tags: { noGrave: 1, frameTurns: 3 } },
+    { id: 'chaos', name: 'Wild Rhythm', icon: '🌀', desc: 'Allegro hits for 90% and Grave for 165%, but he never rests in Andante. Evasion -5%.', mods: { eva: -0.05 }, tags: { wild: 1 } }],
+  ethan: [BALANCED,
+    { id: 'warking', name: 'War King', icon: '⚔️', desc: 'Royal Decree grants ATK +30% but no SPD. Treasury only fires below 2 SP.', tags: { decreeAtk: 0.3, decreeSpd: 0.001, treasuryBelow: 2 } },
+    { id: 'patron', name: 'Patron', icon: '💰', desc: 'Treasury fires below 4 SP. Shelter Shields drop to 10%. ATK -10%.', mods: { atk: -0.1 }, tags: { treasuryBelow: 4, shelter: 0.1 } }],
+  ben: [BALANCED,
+    { id: 'schemer', name: 'Schemer', icon: '🕸️', desc: 'Sharp Word delays by 30% instead of 15%, but deals 80% ATK.', tags: { wordDelay: 0.3, wordMult: 0.8 } },
+    { id: 'zealot', name: 'Zealous Aide', icon: '☝️', desc: 'Give the Order grants ATK +40% instead of 25%. Max HP -10%.', mods: { hp: -0.1 }, tags: { orderAtk: 0.4 } }],
+  kingsley: [BALANCED,
+    { id: 'virtuoso', name: 'Virtuoso', icon: '🎶', desc: 'Songs heal 8% instead of 6%, but trinkets are 30% weaker.', tags: { songHeal: 0.08, trinket: 0.7 } },
+    { id: 'collector', name: 'Collector', icon: '🎁', desc: 'Trinkets are 35% stronger, but Songs heal only 4%.', tags: { songHeal: 0.04, trinket: 1.35 } }],
+  vasco: [BALANCED,
+    { id: 'harlequin', name: 'Harlequin', icon: '🃏', desc: 'Pranks always trick twice. The Vessel only wakes below 25% HP.', tags: { doubleTrick: 1, wakeAt: 0.25 } },
+    { id: 'hollow', name: 'Hollow', icon: '😈', desc: 'The Vessel wakes below 60% HP, but its lifesteal drops to 15%.', tags: { wakeAt: 0.6, vesselSteal: 0.15 } }],
+  aamay: [BALANCED,
+    { id: 'archivist', name: 'Archivist', icon: '📚', desc: 'The Chronicle holds 16 Pages, but Seal in Ink only Silences for 1 turn.', tags: { pageMax: 16, sealTurns: 1 } },
+    { id: 'inquisitor', name: 'Inquisitor', icon: '🖋', desc: 'Ink Flick Silences 55% of the time. Each Page is worth 24% instead of 30%.', tags: { flickCh: 0.55, pageMult: 0.24 } }]
+});
+SYNERGIES.push(
+  { id: 'court', name: 'Peguicha\'s Court', icon: '👹', color: '#e0502a', desc: 'Trigg with Peguicha or Vehra. His creatures have 20% more HP and ATK.',
+    test: t => t.includes('trigg') && (t.includes('peguicha') || t.includes('vehra')), apply: P => P.forEach(p => { if (p.id === 'trigg') p.flags.court = true; }) },
+  { id: 'counsel', name: 'The Crown\'s Counsel', icon: '⚖️', color: '#f0d070', desc: 'Ethan and Ben. Royal Decree lasts 3 turns, and Give the Order also gives the team 1 SP.',
+    test: t => t.includes('ethan') && t.includes('ben'), apply: P => P.forEach(p => { if (p.id === 'ethan' || p.id === 'ben') p.flags.counsel = true; }) },
+  { id: 'hospitality', name: 'Royal Hospitality', icon: '🏰', color: '#5dff8f', desc: 'Ethan and Yousuf. Yousuf\'s healing +15%, Ethan DEF +15%.',
+    test: t => t.includes('ethan') && t.includes('yousuf'), apply: P => P.forEach(p => { if (p.id === 'yousuf') p.mods.heal += 0.15; if (p.id === 'ethan') p.mods.def += 0.15; }) },
+  { id: 'borrowed', name: 'Borrowed Magic', icon: '🎁', color: '#a050d0', desc: 'Kingsley and Vasco. Kingsley\'s trinkets are 25% stronger and Vasco gains +10% crit chance.',
+    test: t => t.includes('kingsley') && t.includes('vasco'), apply: P => P.forEach(p => { if (p.id === 'kingsley') p.flags.borrowed = true; if (p.id === 'vasco') p.mods.crit += 0.1; }) },
+  { id: 'hollowvessel', name: 'The Hollow Vessel', icon: '😈', color: '#d1203a', desc: 'Vasco and Peguicha. The Vessel wakes in Vasco below 55% HP instead of 40%.',
+    test: t => t.includes('vasco') && t.includes('peguicha'), apply: P => P.forEach(p => { if (p.id === 'vasco') p.flags.wakeEarly = true; }) }
+);
+(() => {
+  const at = id => STAGES.findIndex(s => s.id === id);
+  STAGES.splice(at('cinder') + 1, 0,
+    { id: 'menagerie', era: 'first', name: 'Trigg\'s Menagerie', atk: 2.2, hp: 1.1, heroAtk: 1.35, heroHp: 3.6, enemies: ['imp', 'h:trigg', 'imp'], boss: true, reward: 'trigg',
+      desc: 'Peguicha\'s lanky right hand fights behind a wall of creatures from the pit. Kill Trigg and they crumble.' });
+  STAGES.splice(at('mirror') + 1, 0,
+    { id: 'blurred', era: 'second', name: 'The Blurred Duel', atk: 1.5, hp: 1.1, heroAtk: 1.6, heroHp: 5.2, enemies: ['h:alfred'], boss: true, reward: 'alfred',
+      desc: 'A swordsman who sees in blurred lines and never keeps the same rhythm twice. Watch his tempo.' });
+  STAGES.splice(at('gate') + 1, 0,
+    { id: 'kingtrial', era: 'current', name: 'The King\'s Trial', atk: 2.3, hp: 1.15, heroAtk: 1.2, heroHp: 3.0, enemies: ['sellsword', 'h:ethan', 'h:ben'], boss: true, reward: ['ethan', 'ben'],
+      desc: 'Before he grants shelter, King Ethan tests the strength of Yousuf\'s guard. His advisor gives the orders the king will not.' },
+    { id: 'revels', era: 'current', name: 'The Palace Revels', atk: 2.0, hp: 1.1, heroAtk: 0.8, heroHp: 1.8, enemies: ['h:kingsley', 'h:vasco'], boss: true, reward: ['kingsley', 'vasco'],
+      desc: 'A performance for the guests goes wrong. Push the jester too far and something darker looks out from behind his face.' },
+    { id: 'archive', era: 'current', name: 'The Basement Archive', atk: 2.3, hp: 1.1, heroAtk: 1.25, heroHp: 3.6, enemies: ['inkwraith', 'h:aamay', 'inkwraith'], boss: true, reward: 'aamay',
+      desc: 'Below the palace a scribe writes down everything that happens. The longer the fight, the longer his Chronicle.' });
+  STAGES.forEach(s => { if (s.reward) [].concat(s.reward).forEach(r => { UNLOCK_FROM[r] = s.id; }); });
+})();
+
 /* ================= ENGINE ================= */
 let UID = 0;
 let BATTLE_ID = 0;
@@ -1653,7 +1812,7 @@ const hpPct = u => u.hp / u.maxHp;
 const lowest = arr => (arr.length ? arr.reduce((a, b) => (hpPct(b) < hpPct(a) ? b : a)) : null);
 
 const bt = (u, k) => (u && u.build && u.build.tags && u.build.tags[k]) || 0;
-function defOf(id, side, hero) { return (side === 'player' || hero) ? HEROES[id] : ENEMIES[id]; }
+function defOf(id, side, hero) { return hero ? HEROES[id] : ENEMIES[id]; }
 const sideList = u => (u.side === 'player' ? B.players : B.enemies);
 const spOf = u => (u.side === 'player' ? B.sp : (B.spE || 0));
 function addSp(u, n) { if (u.side === 'player') B.sp = clamp(B.sp + n, 0, B.spMax); else B.spE = clamp((B.spE || 0) + n, 0, B.spMaxE || 5); }
@@ -1661,7 +1820,7 @@ function newStats() { return { falls: 0, dmg: 0, heal: 0, shield: 0, taken: 0, k
 function lookOf(u) { return u.def.heroId ? HEROES[u.def.heroId].look : u.def.look; }
 
 function makeUnit(id, side, slot, o = {}) {
-  const isHero = side === 'player' || !!o.hero;
+  const isHero = !o.minion && (side === 'player' || !!o.hero);
   let def = defOf(id, side, isHero);
   if (isHero && o.boss) def = Object.assign(Object.create(def), { boss: true, title: o.title || def.title });
   const s = def.stats;
@@ -1711,6 +1870,7 @@ function addStatus(t, key, turns, o = {}) {
     if (chanOf(t)) endChannel(t, 'broken');
   }
   if (key === 'terrified' && has(t, 'resolute')) return false;
+  if (key === 'blind' && t.isHero && t.id === 'alfred') return false;
   if (o.value == null) {
     if (key === 'poison' || key === 'burn' || key === 'bleed' || key === 'shock') { /* dot carried */ }
     else if (d.stat) o.value = 0.2;
@@ -1768,6 +1928,8 @@ function dmgBonus(u, t) {
   if (u.isHero && u.id === 'flynn' && has(t, 'shock')) m += 0.25;
   if (u.isHero && u.id === 'leo' && has(t, 'burn')) m += 0.2;
   if (u.isHero && u.id === 'vehra' && hpPct(t) < 0.5) m += bt(u, 'bloodlust') || 0.3;
+  if (u.side && u.id !== 'ethan' && sideList(u).some(p => isUp(p) && p.isHero && p.id === 'ethan')) m += 0.08;
+  if (u.isHero && u.id === 'ben' && (t.flags.delayed || has(t, 'stun'))) m += 0.4;
   if (u.flags && u.flags.pact && t.statuses.some(x => STATUS[x.key].type === 'debuff')) m += 0.15;
   if (u.isHero && u.id === 'yunze') {
     const f = foesOf(u);
@@ -1795,16 +1957,17 @@ function calcDmg(u, t, mult, o = {}, est = false) {
   let bonus = 1 + (u.mods.dmg || 0) + dmgBonus(u, t) + (o.bonus || 0) + (has(u, 'unsealed') ? 0.35 : 0);
   const rival = isRival(u, t);
   if (rival) bonus += 0.2;
-  d *= bonus * takenMult(t, u);
+  d *= bonus * takenMult(t, u) * suddenDeath();
   if (est) return { dmg: Math.round(d), rival };
-  const crit = !o.noCrit && rnd() < stat(u, 'crit') + (o.critBonus || 0);
+  const crit = !o.noCrit && (o.forceCrit || rnd() < stat(u, 'crit') + (o.critBonus || 0) + (has(t, 'framed') ? 0.25 : 0));
   if (crit) d *= 1 + stat(u, 'cdmg');
   d *= 0.92 + rnd() * 0.16;
   return { dmg: Math.max(1, Math.round(d)), crit, rival };
 }
 function hitChance(u, t, o = {}) {
   if (o.sure || o.canMiss === false) return 1;
-  let h = 1 + stat(u, 'acc') + (o.acc || 0) - stat(t, 'eva');
+  if (has(t, 'framed')) return 1;
+  let h = 1 + stat(u, 'acc') + (o.acc || 0) - stat(t, 'eva') * (u.isHero && u.id === 'alfred' ? 0.5 : 1);
   h = Math.min(1, h);
   if (has(u, 'blind')) h -= 0.35;
   return clamp(h, 0.05, 1);
@@ -1835,7 +1998,7 @@ function shatterHex(t, why) {
   removeStatus(t, 'hexshield');
   if (why === 'hits') { HOOK.float(t, '⬡ HEX SHATTERED', 'debuff'); HOOK.fx('shieldbreak', { tgt: t }); HOOK.sfx('break'); }
   const so = h.src;
-  if (so && isUp(so) && bt(so, 'hexBlast')) { HOOK.fx('wallblast', { src: so, tgts: foesOf(so) }); for (const e of foesOf(so)) resolveHit(so, e, bt(so, 'hexBlast'), { aoe: true, sure: true }); }
+  if (so && isUp(so) && bt(so, 'hexBlast')) { HOOK.float(t, '💥 HEX BURST', 'special'); HOOK.fx('hexburst', { src: t, owner: so, tgts: foesOf(so) }); for (const e of foesOf(so)) resolveHit(so, e, bt(so, 'hexBlast'), { aoe: true, sure: true }); }
 }
 const unseen = p => p.isHero && p.id === 'seraphine' && sideList(p).some(x => x !== p && isUp(x));
 const seenOnly = list => { const v = list.filter(p => !unseen(p)); return v.length ? v : list; };
@@ -1844,6 +2007,44 @@ function raiseWall(u, amt) {
   const w = getSt(u, 'hexwall');
   if (w) w.value = Math.min(wallMax(u), w.value + amt);
   else addStatus(u, 'hexwall', 99, { value: Math.min(wallMax(u), amt), silent: true });
+}
+const creaturesOf = u => sideList(u).filter(x => isUp(x) && x.owner === u);
+function summonCreature(owner, kind) {
+  const list = sideList(owner), def = ENEMIES[kind], court = owner.flags.court ? 1.2 : 1;
+  const hpF = (kind === 'imp' ? 0.32 : 0.7) * (bt(owner, 'creatureHp') || 1) * court;
+  const atkF = (kind === 'imp' ? 0.75 * (bt(owner, 'impAtk') || 1) : 0.9) * court;
+  const slot = list.reduce((m, x) => Math.max(m, x.slot), -1) + 1;
+  const c = makeUnit(kind, owner.side, slot, { minion: true, hpMul: owner.maxHp * hpF / def.stats.hp, atkMul: stat(owner, 'atk') * atkF / def.stats.atk });
+  finalize(c); c.owner = owner; c.creature = true; c.gauge = 10000;
+  list.push(c);
+  B.units = [...B.players, ...B.enemies]; B.st[c.uid] = newStats();
+  HOOK.rebuild(); HOOK.float(c, '✦ SUMMONED', 'info');
+  return c;
+}
+const TEMPO = { allegro: { icon: '⏩', name: 'Allegro' }, andante: { icon: '🎵', name: 'Andante' }, grave: { icon: '🐢', name: 'Grave' } };
+function tempoOf(u) { const st = getSt(u, 'tempo'); return st ? st.value : 'andante'; }
+function tempoMult(u) { const t = tempoOf(u), w = bt(u, 'wild'); return t === 'allegro' ? (w ? 0.9 : 0.8) : t === 'grave' ? (w ? 1.65 : 1.4) : 1; }
+function shiftTempo(u, first) {
+  const cur = first ? null : tempoOf(u);
+  const opts = (bt(u, 'wild') ? ['allegro', 'grave'] : bt(u, 'noGrave') ? ['allegro', 'andante'] : ['allegro', 'andante', 'grave']).filter(x => x !== cur);
+  const nx = pick(opts);
+  removeStatus(u, 'tempo'); addStatus(u, 'tempo', 99, { value: nx, silent: true });
+  if (!first) HOOK.float(u, `${TEMPO[nx].icon} ${TEMPO[nx].name.toUpperCase()}`, 'info');
+}
+function delayUnit(t, f) { if (!isUp(t)) return; t.gauge = Math.min(16000, t.gauge + 10000 * f); t.flags.delayed = true; HOOK.float(t, '⏳ DELAYED', 'info'); }
+function silence(t, turns) { if (!isUp(t)) return; addStatus(t, 'silenced', turns); if (!t.isHero) t.intents = []; HOOK.float(t, '🖋 SILENCED', 'debuff'); }
+function bumpPages() {
+  for (const a of B.units) if (isUp(a) && a.isHero && a.id === 'aamay') {
+    const st = getSt(a, 'pages'), max = bt(a, 'pageMax') || 12;
+    if (!st) addStatus(a, 'pages', 99, { stacks: 1, silent: true }); else st.stacks = Math.min(max, st.stacks + 1);
+  }
+}
+async function wakeVessel(u) {
+  if (u.flags.vessel) return;
+  u.flags.vessel = true; addStatus(u, 'vessel', 99, { silent: true }); HOOK.update();
+  HOOK.float(u, '😈 THE VESSEL WAKES', 'special'); HOOK.log('Something darker looks out from behind Vasco\'s face.', 'i');
+  HOOK.fx('vesselwake', { src: u });
+  await HOOK.banner('The Vessel wakes', 'Peguicha looks out through Vasco\'s eyes', '#d1203a');
 }
 const BEAM_RAMP = [1.25, 1.7, 2.1, 2.5];
 const beamRamp = u => bt(u, 'ramp') || BEAM_RAMP;
@@ -1857,6 +2058,8 @@ function endChannel(u, why) {
   else if (why === 'release') { HOOK.float(u, 'Beam released', 'info'); }
   HOOK.update();
 }
+const SUDDEN_TURN = 150;
+const suddenDeath = () => (B.turn > SUDDEN_TURN ? 1 + 0.05 * Math.floor((B.turn - SUDDEN_TURN) / 10 + 1) : 1);
 function tally(u, k, n = 1) { const s = u && B.st[u.uid]; if (s) s[k] = (s[k] || 0) + n; }
 function resolveHit(u, t, mult, o = {}) {
   if (!isUp(t)) return null;
@@ -1909,7 +2112,8 @@ function applyDamage(t, dmg, o = {}) {
   }
   let left = dmg, absorbed = 0;
   if (t.shield > 0 && !o.pure) {
-    absorbed = Math.min(t.shield, left); t.shield -= absorbed; left -= absorbed;
+    const breaker = o.src && has(o.src, 'vessel') ? 2 : 1;
+    absorbed = Math.min(t.shield, left * breaker); t.shield -= absorbed; left -= Math.ceil(absorbed / breaker);
     const hx = getSt(t, 'hexshield');
     if (hx && absorbed > 0) { hx.value -= absorbed; hx.hits--; if (hx.value <= 0 || t.shield <= 0) shatterHex(t, 'spent'); else if (hx.hits <= 0) shatterHex(t, 'hits'); }
     if (t.shield <= 0) { t.shield = 0; HOOK.float(t, 'SHIELD BROKEN', 'info'); HOOK.fx('shieldbreak', { tgt: t }); HOOK.sfx('break'); }
@@ -1925,6 +2129,8 @@ function applyDamage(t, dmg, o = {}) {
     if (t.hp <= 0) ss.kills++;
   }
   if (absorbed > 0) tally(t, 'absorbed', absorbed);
+  if (o.src && has(o.src, 'vessel') && !o.dot && total > 0 && isUp(o.src)) heal(o.src, o.src, total * (bt(o.src, 'vesselSteal') || 0.25), { tick: true, noCrit: true });
+  if (t.isHero && t.id === 'vasco' && !t.flags.vessel && t.hp > 0 && hpPct(t) < (bt(t, 'wakeAt') || (t.flags.wakeEarly ? 0.55 : 0.4))) wakeVessel(t);
   if (t.isHero && t.id === 'angus' && o.src && o.src.side !== t.side && !o.dot && isUp(o.src) && total > 0) addStatus(o.src, 'sapped', 1, { silent: true, src: t });
   if (t.isHero && t.hp > 0 && hpPct(t) < 0.3 && !t.flags.vowed) {
     const el = sideList(t).find(p => isUp(p) && p.isHero && p.id === 'elphi');
@@ -1960,7 +2166,7 @@ function applyDamage(t, dmg, o = {}) {
 }
 function heal(src, t, amt, o = {}) {
   if (!isUp(t)) return 0;
-  let a = amt * (1 + (src && src.mods ? src.mods.heal : 0));
+  let a = amt * (1 + (src && src.mods ? src.mods.heal : 0)) * (B.turn > SUDDEN_TURN ? 0.5 : 1);
   const yh = src && src.isHero && src.id === 'yousuf' && !o.tick;
   if (yh && has(t, 'mended')) a *= 0.7;
   let crit = false;
@@ -2066,6 +2272,7 @@ function battleStart(u) {
   if (u.isHero) {
     if (u.id === 'lachlan') { u.shield = Math.round(u.maxHp * lachCap(u)); addStatus(u, 'stance', 99, { value: 'close', silent: true }); }
     if (u.id === 'harry') u.flags.cheat = true;
+    if (u.id === 'alfred') shiftTempo(u, true);
     if (u.id === 'peguicha') { u.flags.beadMax = bt(u, 'beads') || 5; u.flags.beads = u.flags.beadMax; syncBeads(u); }
     if (u.id === 'gemia' && B.units.some(x => x !== u && x.heroId === 'yunze')) addStatus(u, 'terrified', 99, { silent: true });
     if (u.flags.wallShield) u.shield += Math.round(u.maxHp * 0.1);
@@ -2078,7 +2285,7 @@ function battleStart(u) {
 const lachCap = u => bt(u, 'shieldCap') || 0.35;
 function checkEnd() {
   if (!B.enemies.some(isUp)) return 'win';
-  if (!B.players.some(isUp)) return 'lose';
+  if (!B.players.some(p => isUp(p) && p.isHero)) return 'lose';
   return null;
 }
 
@@ -2128,6 +2335,9 @@ async function turnStart(u) {
   const rg = getSt(u, 'regen');
   if (rg) heal(rg.src || u, u, u.maxHp * (rg.value || 0.05), { noCrit: true, tick: true });
   if (u.isHero && u.id === 'angus') heal(u, u, u.maxHp * 0.03);
+  u.flags.delayed = false;
+  if (u.isHero && u.id === 'ethan' && spOf(u) < (bt(u, 'treasuryBelow') || 3)) { addSp(u, 1); HOOK.float(u, '💰 +1 SP', 'buff'); }
+  const sg = getSt(u, 'song'); if (sg) { heal(sg.src || u, u, u.maxHp * (sg.value || 0.06), { tick: true, noCrit: true }); cleanse(u, 1); }
   if (has(u, 'stone')) { heal(u, u, u.maxHp * 0.09, { noCrit: true }); HOOK.float(u, '🗿 Stone mends', 'buff'); }
   if (u.isHero && u.id === 'lachlan') {
     const cap = Math.round(u.maxHp * lachCap(u));
@@ -2174,11 +2384,18 @@ async function processDeaths() {
           if (next) { await HOOK.fx('bolt', { src: u, tgt: next, color: '#9fe6ff', chain: true }); addStatus(next, 'shock', 2, { stacks: sk.stacks, dot: sk.dot, src: sk.src }); HOOK.float(next, '⚡ ARCED', 'debuff'); }
         }
         u.alive = false; u.statuses = []; u.shield = 0; u.intents = [];
-        if (u.side === 'player') B.kos++;
+        if (u.side === 'player' && u.isHero) B.kos++;
         tally(u, 'falls');
         HOOK.log(`${u.name} falls.`, 'ko');
         HOOK.sfx('ko');
         await HOOK.ko(u);
+        if (u.creature) {
+          const ow = u.owner;
+          if (ow && isUp(ow) && bt(ow, 'deathBurst')) { await HOOK.fx('hellgate', { src: u, tgts: foesOf(ow) }); for (const e of foesOf(ow)) resolveHit(ow, e, bt(ow, 'deathBurst'), { aoe: true, sure: true }); }
+          const L = sideList(u), ix = L.indexOf(u); if (ix >= 0) L.splice(ix, 1);
+          B.units = [...B.players, ...B.enemies]; HOOK.rebuild();
+        }
+        if (u.isHero && u.id === 'trigg') for (const c of sideList(u).filter(x => x.owner === u && isUp(x))) { c.hp = 0; HOOK.float(c, 'crumbles', 'info'); changed = true; }
         if (u.def.onDeath === 'explode') {
           const ts = foesOf(u);
           HOOK.float(u, '💥 BURSTS', 'special');
@@ -2214,6 +2431,139 @@ async function phaseTwo(u) {
 /* ---------- hero kits ---------- */
 const toggleStance = u => { const s = getSt(u, 'stance'); if (s) { s.value = s.value === 'far' ? 'close' : 'far'; HOOK.float(u, statusLabel('stance', 0, s), 'buff'); } };
 const KIT = {
+  trigg: {
+    async basic(u, t) { await strike(u, t, 0.95, { fx: 'lash' }); },
+    async skill(u) {
+      const cap = bt(u, 'creatureCap') || 2, mine = creaturesOf(u);
+      if (mine.length < cap) { await HOOK.fx('summon', { src: u, color: '#e0502a' }); summonCreature(u, 'imp'); }
+      else { await HOOK.fx('heal', { tgts: mine }); for (const c of mine) heal(u, c, c.maxHp * 0.25, { noCrit: true }); }
+    },
+    async ult(u) {
+      const mine = creaturesOf(u);
+      if (mine.length) {
+        await HOOK.fx('hellgate', { src: u, tgts: foesOf(u) });
+        for (const c of mine) { for (const e of foesOf(u)) resolveHit(u, e, 1.1, { aoe: true, sure: true }); c.hp = 0; HOOK.float(c, '🔥 BURSTS', 'special'); }
+        await processDeaths();
+      }
+      if (!isUp(u)) return;
+      await HOOK.fx('summon', { src: u, color: '#ff6a2a' });
+      const hd = summonCreature(u, 'hellhound'); addStatus(hd, 'taunt', 1);
+    }
+  },
+  alfred: {
+    async basic(u, t) {
+      const fc = u.flags.frameCrit === t.uid && has(t, 'framed');
+      await strike(u, t, 1.25 * tempoMult(u), { fx: 'katana', forceCrit: fc, acc: 0.05 });
+      if (fc) u.flags.frameCrit = null;
+    },
+    async skill(u, t) {
+      await HOOK.fx('frame', { src: u, tgt: t });
+      resolveHit(u, t, 1.1 * tempoMult(u), { acc: 0.1 });
+      if (isUp(t)) { addStatus(t, 'framed', bt(u, 'frameTurns') || 2, { src: u }); u.flags.frameCrit = t.uid; HOOK.float(t, '👌 FRAMED', 'debuff'); }
+    },
+    async ult(u) {
+      const tempos = [0.8, 1, 1.4];
+      for (let i = 0; i < 6; i++) {
+        const f = foesOf(u); if (!f.length) break;
+        const fr = f.filter(e => has(e, 'framed'));
+        const e = fr.length && rnd() < 0.6 ? pick(fr) : pick(f);
+        await HOOK.fx('dash', { src: u, tgt: e, i });
+        resolveHit(u, e, 0.9 * tempos[i % 3], { aoe: true, acc: 0.1, forceCrit: has(e, 'framed') });
+        HOOK.update();
+      }
+    }
+  },
+  ethan: {
+    async basic(u, t) { await strike(u, t, 0.95, { fx: 'slash' }); },
+    async skill(u) {
+      const turns = u.flags.counsel ? 3 : 2, sp = bt(u, 'decreeSpd') || 0.1;
+      await HOOK.fx('decree', { src: u, tgts: friendsOf(u) });
+      for (const a of friendsOf(u)) { addStatus(a, 'atkUp', turns, { value: bt(u, 'decreeAtk') || 0.2 }); if (sp > 0.01) addStatus(a, 'spdUp', turns, { value: sp }); }
+    },
+    async ult(u) {
+      await HOOK.fx('shelter', { src: u, tgts: friendsOf(u) });
+      for (const a of friendsOf(u)) { addShield(u, a, u.maxHp * (bt(u, 'shelter') || 0.15)); cleanse(a); for (const st of a.statuses) if (STATUS[st.key].type === 'buff' && st.turns < 99) st.turns++; }
+      addSp(u, 2); HOOK.float(u, '💰 +2 SP', 'buff');
+    }
+  },
+  ben: {
+    async basic(u, t) { await strike(u, t, bt(u, 'wordMult') || 1.1, { fx: 'quill' }); if (isUp(t)) delayUnit(t, bt(u, 'wordDelay') || 0.15); },
+    async skill(u, t) {
+      await HOOK.fx('order', { src: u, tgt: t });
+      t.gauge = 0; addStatus(t, 'atkUp', 1, { value: bt(u, 'orderAtk') || 0.25 }); if (t.isHero) t.ult = Math.min(100, t.ult + 20);
+      if (u.flags.counsel) addSp(u, 1);
+      HOOK.float(t, '☝️ ORDERED', 'buff');
+    },
+    async ult(u) {
+      const f = foesOf(u);
+      await HOOK.fx('decision', { src: u, tgts: f });
+      for (const e of f) delayUnit(e, e.def.boss ? 0.2 : 0.4);
+      const top = f.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a), f[0]);
+      if (top) addStatus(top, 'exposed', 2);
+    }
+  },
+  kingsley: {
+    async basic(u, t) {
+      await strike(u, t, 0.8, { fx: 'note' });
+      const l = lowest(friendsOf(u)); if (l) { addStatus(l, 'song', 2, { src: u, value: bt(u, 'songHeal') || 0.06 }); HOOK.fx('song', { tgts: [l] }); }
+    },
+    async skill(u) {
+      const k = (bt(u, 'trinket') || 1) * (u.flags.borrowed ? 1.25 : 1);
+      const item = pick(['lantern', 'mirror', 'bell', 'spark']);
+      HOOK.float(u, { lantern: '🏮 LANTERN', mirror: '🪞 MIRROR CHARM', bell: '🔔 JESTER\'S BELL', spark: '🎆 SPARK BOX' }[item], 'special');
+      await HOOK.fx('trinket', { src: u, item, tgts: item === 'lantern' ? friendsOf(u) : foesOf(u) });
+      if (item === 'lantern') { for (const a of friendsOf(u)) heal(u, a, a.maxHp * 0.14 * k); HOOK.sfx('heal'); }
+      else if (item === 'mirror') { const l = lowest(friendsOf(u)); if (l) addShield(u, l, u.maxHp * 0.22 * k); }
+      else if (item === 'bell') { const f = foesOf(u); for (const e of f) addStatus(e, 'blind', 1); const e = pick(f); if (e && rnd() < Math.min(1, 0.5 * k)) addStatus(e, 'stun', 1); }
+      else { for (const e of foesOf(u)) resolveHit(u, e, 0.75 * k, { aoe: true }); }
+    },
+    async ult(u) {
+      await HOOK.fx('blessing', { tgts: friendsOf(u), color: '#7ad06a' });
+      for (const a of friendsOf(u)) { addStatus(a, 'song', 3, { src: u, value: bt(u, 'songHeal') || 0.06 }); addStatus(a, 'spdUp', 2, { value: 0.15 }); cleanse(a); }
+    }
+  },
+  vasco: {
+    async basic(u, t) {
+      if (has(u, 'vessel')) { await strike(u, t, 1.2, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
+      const r = await strike(u, t, 0.8, { fx: 'cards' });
+      if (hitOK(r) && isUp(t)) { const n = bt(u, 'doubleTrick') ? 2 : 1; for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, k === 'blind' ? 1 : 2, { value: 0.2 }); }
+    },
+    async skill(u, t) {
+      if (has(u, 'vessel')) {
+        await HOOK.fx('gift', { src: u, tgt: t });
+        const r = resolveHit(u, t, 1.5, { acc: 0.05 });
+        if (hitOK(r) && isUp(t)) { stripBuffs(t); if (t.shield > 0) { HOOK.float(t, 'SHIELD TORN', 'debuff'); t.shield = 0; removeStatus(t, 'hexshield'); } }
+        return;
+      }
+      const lh = B.lastHit && B.lastHit[u.side];
+      HOOK.float(u, `🎭 ${lh ? lh.name.toUpperCase() : 'IMPROVISED'}`, 'special');
+      await HOOK.fx('mimic', { src: u, tgt: t });
+      const r = resolveHit(u, t, lh ? Math.max(0.8, Math.min(2.2, lh.mult)) : 1.2, { acc: 0.05 });
+      if (hitOK(r) && lh && lh.status && isUp(t)) applyOnHit(u, t, lh.status);
+    },
+    async ult(u) {
+      if (!has(u, 'vessel')) await wakeVessel(u);
+      const f = foesOf(u);
+      await HOOK.fx('curtain', { src: u, tgts: f });
+      for (const e of f) { const r = resolveHit(u, e, 1.9, { aoe: true, sure: true }); if (hitOK(r)) addStatus(e, 'burn', 2, { stacks: 1, dot: 0.3 * stat(u, 'atk'), src: u }); }
+    }
+  },
+  aamay: {
+    async basic(u, t) { const r = await strike(u, t, 0.95, { fx: 'ink' }); if (hitOK(r) && isUp(t) && rnd() < (bt(u, 'flickCh') || 0.3)) silence(t, 1); },
+    async skill(u, t) {
+      await HOOK.fx('seal', { src: u, tgt: t });
+      resolveHit(u, t, 0.7, { acc: 0.1 });
+      if (isUp(t)) { silence(t, t.def.boss ? 1 : (bt(u, 'sealTurns') || 2)); addStatus(t, 'spdDown', 2, { value: 0.2 }); }
+    },
+    async ult(u) {
+      const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0;
+      removeStatus(u, 'pages');
+      const f = foesOf(u);
+      await HOOK.fx('lastpage', { src: u, tgts: f, n });
+      for (const e of f) { resolveHit(u, e, Math.max(0.5, (bt(u, 'pageMult') || 0.3) * n), { aoe: true, sure: true }); if (isUp(e)) silence(e, 1); }
+      HOOK.float(u, `📖 ${n} PAGES`, 'special');
+    }
+  },
   peguicha: {
     async basic(u, t) { const n = bt(u, 'reapHits') || 2; for (let i = 0; i < n; i++) { if (!isUp(t)) break; await strike(u, t, bt(u, 'reapMult') || 0.78, { fx: 'scythe', i }); } },
     async skill(u, t) {
@@ -2268,18 +2618,18 @@ const KIT = {
       const m = bt(u, 'hexMult') || 1;
       if (t === u) {
         await HOOK.fx('hexraise', { src: u, tgts: friendsOf(u) });
-        for (const a of friendsOf(u)) giveHex(u, a, u.maxHp * (bt(u, 'teamHex') || 0.11) * m, 2);
+        for (const a of friendsOf(u)) giveHex(u, a, u.maxHp * (bt(u, 'teamHex') || 0.1) * m, 2);
         HOOK.float(u, '⬡ HEX WALL', 'buff');
       } else {
         await HOOK.fx('hexsingle', { src: u, tgt: t });
-        giveHex(u, t, u.maxHp * (bt(u, 'singleHex') || 0.32) * m, bt(u, 'singleHits') || 3);
+        giveHex(u, t, u.maxHp * (bt(u, 'singleHex') || 0.29) * m, bt(u, 'singleHits') || 3);
       }
     },
     async ult(u) {
       const f = foesOf(u);
       await HOOK.fx('hexcrush', { src: u, tgts: f });
       for (const e of f) { const r = resolveHit(u, e, 1.7, { aoe: true }); if (hitOK(r) && rnd() < 0.35) addStatus(e, 'stun', 1); }
-      for (const a of friendsOf(u)) giveHex(u, a, u.maxHp * 0.15 * (bt(u, 'hexMult') || 1), 2);
+      for (const a of friendsOf(u)) giveHex(u, a, u.maxHp * 0.13 * (bt(u, 'hexMult') || 1), 2);
     }
   },
   seraphine: {
@@ -2596,11 +2946,32 @@ function previewFor(u, kind, t) {
     case 'vehra.skill': return { txt: '🗿 Stone Form' };
     case 'vehra.ult': return D(u, t, 2.2, { sure: true, note: 'others 80%' });
     case 'soham.basic': return D(u, t, bt(u, 'palmMult') || 1.0);
-    case 'soham.skill': { const m = bt(u, 'hexMult') || 1; if (t === u) return { txt: `⬡ Team ${Math.round(u.maxHp * (bt(u, 'teamHex') || 0.11) * m)}` }; return { shield: Math.round(u.maxHp * (bt(u, 'singleHex') || 0.32) * m * (1 + u.mods.shield)), note: `${bt(u, 'singleHits') || 3} hits` }; }
+    case 'soham.skill': { const m = bt(u, 'hexMult') || 1; if (t === u) return { txt: `⬡ Team ${Math.round(u.maxHp * (bt(u, 'teamHex') || 0.1) * m)}` }; return { shield: Math.round(u.maxHp * (bt(u, 'singleHex') || 0.29) * m * (1 + u.mods.shield)), note: `${bt(u, 'singleHits') || 3} hits` }; }
     case 'soham.ult': return D(u, t, 1.7);
     case 'seraphine.basic': return D(u, t, 1.1);
     case 'seraphine.skill': return D(u, t, 0.8, { acc: 0.05, note: '+Encircled' });
     case 'seraphine.ult': return D(u, t, 0.45, { note: 'per cut', acc: 0.1 });
+    case 'trigg.basic': return D(u, t, 0.95);
+    case 'trigg.skill': { const cap = bt(u, 'creatureCap') || 2, n = creaturesOf(u).length; return { txt: n < cap ? `👹 Imp (${n + 1}/${cap})` : '✚ Mend creatures' }; }
+    case 'trigg.ult': { const n = creaturesOf(u).length; return n ? D(u, t, 1.1 * n, { sure: true, note: `${n} burst + Hellhound` }) : { txt: '🐺 Hellhound' }; }
+    case 'alfred.basic': return D(u, t, 1.25 * tempoMult(u), { acc: 0.05, note: TEMPO[tempoOf(u)].name });
+    case 'alfred.skill': return D(u, t, 1.1 * tempoMult(u), { acc: 0.1, note: '+Framed' });
+    case 'alfred.ult': return D(u, t, 0.9, { note: 'per cut', acc: 0.1 });
+    case 'ethan.basic': return D(u, t, 0.95);
+    case 'ethan.skill': return { txt: `📜 ATK +${Math.round((bt(u, 'decreeAtk') || 0.2) * 100)}%` };
+    case 'ethan.ult': return { shield: Math.round(u.maxHp * (bt(u, 'shelter') || 0.15) * (1 + u.mods.shield)) };
+    case 'ben.basic': return D(u, t, bt(u, 'wordMult') || 1.1, { note: 'delays' });
+    case 'ben.skill': return { txt: '☝️ Acts now' };
+    case 'ben.ult': return { txt: t.def.boss ? '⏳ Delay 20%' : '⏳ Delay 40%' };
+    case 'kingsley.basic': return D(u, t, 0.8);
+    case 'kingsley.skill': return { txt: '🎁 Random trinket' };
+    case 'kingsley.ult': return { txt: '🎶 Song' };
+    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.2 : 0.8);
+    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.5, { note: 'strips' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, lh ? Math.max(0.8, Math.min(2.2, lh.mult)) : 1.2, { acc: 0.05, note: lh ? 'copies ' + lh.name : 'improvised' }); }
+    case 'vasco.ult': return D(u, t, 1.9, { sure: true });
+    case 'aamay.basic': return D(u, t, 0.95);
+    case 'aamay.skill': return D(u, t, 0.7, { acc: 0.1, note: 'Silence' });
+    case 'aamay.ult': { const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0; return D(u, t, Math.max(0.5, (bt(u, 'pageMult') || 0.3) * n), { sure: true, note: `${n} pages` }); }
     case 'angus.basic': return D(u, t, bt(u, 'basicMult') || 1.15);
     case 'angus.skill': return { txt: '🎯 Taunt +🛡' };
     case 'angus.ult': return D(u, t, 1.45);
@@ -2644,6 +3015,7 @@ function previewFor(u, kind, t) {
   return null;
 }
 function validTargets(u, kind) {
+  if (kind === 'skill' && u.id === 'ben' && u.isHero) return friendsOf(u).filter(x => x !== u);
   if (kind === 'skill' && u.id === 'leo' && chanOf(u) && isUp(chanOf(u).target)) return [chanOf(u).target];
   const tt = HEROES[u.id][kind].target;
   if (tt === 'enemy') { const f = seenOnly(foesOf(u)), tn = f.filter(x => has(x, 'taunt')); return tn.length ? tn : f; }
@@ -2653,9 +3025,11 @@ function validTargets(u, kind) {
   return [];
 }
 function canUse(u, kind) {
+  if ((kind === 'skill' || kind === 'ult') && has(u, 'silenced')) return false;
   if (kind === 'skill' && u.id === 'leo' && chanOf(u) && isUp(chanOf(u).target)) return true;
   if (kind === 'skill' && u.id === 'peguicha' && !(u.flags.beads > 0)) return false;
   if (kind === 'skill' && u.id === 'soham' && u.flags.skillCd > 0) return false;
+  if (kind === 'skill' && u.id === 'ben' && (!friendsOf(u).some(x => x !== u) || u.flags.skillCd > 0)) return false;
   if (kind === 'skill') return u.id === 'yunze' ? !(u.flags.skillCd > 0) : spOf(u) >= (HEROES[u.id].skill.cost || 1);
   if (kind === 'ult') return u.ult >= 100;
   return true;
@@ -2671,13 +3045,16 @@ async function heroAct(u, ch) {
   const lone = u.id === 'yunze';
   const sustaining = u.id === 'leo' && kind === 'skill' && chanOf(u) && isUp(chanOf(u).target);
   if (u.id === 'leo' && kind !== 'skill' && chanOf(u)) endChannel(u, 'release');
-  if (kind === 'skill' && !sustaining) { if (lone) u.flags.skillCd = 3; else addSp(u, -(a.cost || 1)); if (u.id === 'soham') u.flags.skillCd = 2; }
+  if (kind === 'skill' && !sustaining) { if (lone) u.flags.skillCd = 3; else if (u.id === 'ben') u.flags.skillCd = 2; else addSp(u, -(a.cost || 1)); if (u.id === 'soham') u.flags.skillCd = 2; }
   if (kind === 'basic' && !lone) addSp(u, 1);
   tally(u, 'acts'); if (kind === 'ult') tally(u, 'ults');
   HOOK.log(`${u.name} uses ${sustaining ? 'Sustain Beam' : a.name}.`, 'p');
   if (kind === 'ult') { u.ult = 0; HOOK.update(); await HOOK.ult(u, a); }
   else { HOOK.actName(u, sustaining ? 'Sustain Beam' : a.name, kind); HOOK.update(); }
+  bumpPages();
+  if (h[kind].target === 'enemy' || h[kind].target === 'allEnemies') { B.lastHit = B.lastHit || {}; B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: kind === 'basic' ? 1.0 : kind === 'skill' ? 1.4 : 1.8, name: h[kind].name }; }
   await KIT[u.id][kind](u, t);
+  if (u.isHero && u.id === 'alfred' && isUp(u)) { const t0 = tempoOf(u); u.flags.advance = t0 === 'allegro' ? 0.5 : 0; shiftTempo(u); }
   if (u.isHero && u.id === 'seraphine' && isUp(u)) {
     for (let i = 0; i < 2; i++) {
       const f = foesOf(u); if (!f.length) break;
@@ -2729,6 +3106,17 @@ function aiChoose(u) {
       }
       case 'malakai': { const c = al.filter(a => a !== u && !has(a, 'atkUp') && hpPct(a) > 0.4).sort((a, b) => stat(b, 'atk') - stat(a, 'atk'))[0]; if (c && sp >= 2) return { kind: 'skill', target: c }; break; }
       case 'yunze': return { kind: 'skill', target: tgtFor('skill') };
+      case 'trigg': if (sp >= 1 && creaturesOf(u).length < (bt(u, 'creatureCap') || 2)) return { kind: 'skill', target: u }; break;
+      case 'alfred': {
+        if (sp >= 1 && !en.some(e => has(e, 'framed'))) return { kind: 'skill', target: taunter || boss || en.reduce((a, b) => (b.hp > a.hp ? b : a)) };
+        const fr = en.find(e => has(e, 'framed')); if (fr && !taunter) return { kind: 'basic', target: fr };
+        break;
+      }
+      case 'ethan': if (sp >= 1 && !mine.some(a => isUp(a) && a !== u && has(a, 'atkUp'))) return { kind: 'skill', target: u }; break;
+      case 'ben': { const others = mine.filter(a => isUp(a) && a !== u && a.isHero); if (!(u.flags.skillCd > 0) && others.length) return { kind: 'skill', target: others.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a)) }; break; }
+      case 'kingsley': if (sp >= 1 && hpPct(lowA) < 0.65) return { kind: 'skill', target: u }; break;
+      case 'vasco': if (sp >= 1 && (has(u, 'vessel') || (B.lastHit && B.lastHit[u.side]))) return { kind: 'skill', target: tgtFor('skill') }; break;
+      case 'aamay': { const t2 = en.filter(e => !has(e, 'silenced')); if (sp >= 1 && t2.length) return { kind: 'skill', target: taunter || (t2.includes(boss) ? boss : t2.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a))) }; break; }
       case 'peguicha': {
         if (sp >= 1 && u.flags.beads > 0) { const cap = bt(u, 'beadMax') || 3; const c = en.filter(e => { const x = getSt(e, 'cinder'); return !x || x.stacks < cap; }); if (c.length) { const pickT = taunter || (c.includes(boss) ? boss : c.reduce((a, b) => (b.hp > a.hp ? b : a))); return { kind: 'skill', target: pickT }; } }
         break;
@@ -2806,6 +3194,7 @@ function planIntents(e) {
   const used = {};
   for (let i = 0; i < n; i++) {
     let ms = movesFor(e).filter(m => !(e.cd[m.id] > 0) && !used[m.id] && (!m.cond || m.cond(e)));
+    if (has(e, 'silenced')) ms = [movesFor(e).find(x => x.mult && x.target === 'single') || movesFor(e)[0]];
     if (!ms.length) ms = movesFor(e).filter(m => !m.cd && !m.cond);
     if (!ms.length) break;
     const m = weighted(ms);
@@ -2912,6 +3301,7 @@ const SPECIAL = {
   }
 };
 async function execMove(e, m, t) {
+  if (m.mult) { B.lastHit = B.lastHit || {}; B.lastHit[e.side === 'player' ? 'enemy' : 'player'] = { mult: m.mult * (m.hits || 1), name: m.name, status: m.status && m.status.key !== 'alch' ? m.status : null }; }
   if (m.mult && !m.run) {
     if (m.target === 'all') {
       const ts = foesOf(e);
@@ -2958,6 +3348,7 @@ async function enemyAct(e) {
     await heroAct(e, ch);
     return;
   }
+  bumpPages();
   if (!e.intents.length) planIntents(e);
   const list = e.intents.slice();
   for (let i = 0; i < list.length; i++) {
@@ -2965,6 +3356,7 @@ async function enemyAct(e) {
     const it = list[i];
     let m = it.move;
     if (m === e.def.charged && !has(e, 'charging')) continue;
+    if (has(e, 'silenced') && m !== movesFor(e)[0]) { m = movesFor(e).find(x => x.mult && x.target === 'single') || movesFor(e)[0]; it.target = null; HOOK.float(e, '🖋 SILENCED', 'debuff'); }
     if (m.cond && !m.cond(e)) m = movesFor(e).find(x => !x.cond && !x.cd) || m;
     let t = it.target;
     if ((m.target === 'single' || m.target === 'ally') && !isUp(t)) t = pickTarget(e, m);
@@ -2996,6 +3388,7 @@ async function runBattle() {
     const end = checkEnd();
     if (end) { B.over = true; B.result = end; B.actor = null; HOOK.update(); return end; }
     if (gone()) return 'abort';
+    if (B.turn === SUDDEN_TURN && !B.sudden) { B.sudden = true; HOOK.log('Sudden death: damage rises every 10 turns and healing is halved.', 'i'); await HOOK.banner('Sudden death', 'Damage rises every 10 turns. Healing is halved.', '#ff6a2a'); }
     const a = nextActor();
     B.actor = a; B.turn++;
     HOOK.update();
@@ -3011,7 +3404,7 @@ async function runBattle() {
       turnEnd(a); B.actor = null; refreshIntents(); HOOK.update();
       continue;
     }
-    if (a.side === 'player') {
+    if (a.side === 'player' && a.isHero) {
       let ch = (B.auto || HOOK.headless) ? aiChoose(a) : await HOOK.choose(a);
       if (gone()) return 'abort';
       if (!ch) ch = aiChoose(a);
@@ -3051,7 +3444,7 @@ function gauntletEnemies(w) {
   });
 }
 /* Generated by the balance simulator: campaign fights, 3v3 hero battles and 1v1 duels. */
-const SIM_STATS = {"v":"0.83","stages":["cult","prophet","malakai","mirror","elphi","chosen","gate","warden","shadows","yunze","harry"],"heroes":{"angus":{"n":660,"win":58,"imp":47.3,"dmg":13.4,"sup":18.8,"falls":50.5,"taken":254.5,"acts":18.8,"ults":4.6,"crit":8.1,"hit":83.9,"share":16.3,"t3":55.4,"d1":21.4},"flynn":{"n":660,"win":45.8,"imp":53.7,"dmg":42.2,"sup":0,"falls":78.3,"taken":128,"acts":14.3,"ults":1.9,"crit":12.1,"hit":92.4,"share":36.7,"t3":54.1,"d1":54.5},"leo":{"n":660,"win":47.1,"imp":54.6,"dmg":43.2,"sup":0,"falls":72,"taken":125.3,"acts":13.1,"ults":1.8,"crit":10,"hit":91.1,"share":37,"t3":49.5,"d1":61.9},"harry":{"n":660,"win":59.5,"imp":74.6,"dmg":62.1,"sup":0,"falls":49.5,"taken":110.7,"acts":20.8,"ults":1.3,"crit":27.9,"hit":96.8,"share":49.5,"t3":67.2,"d1":66.2},"peguicha":{"n":660,"win":51.1,"imp":65.3,"dmg":49,"sup":3.7,"falls":64.2,"taken":128.5,"acts":17,"ults":1.8,"crit":9.7,"hit":90.4,"share":41.9,"t3":40.1,"d1":72.3},"vehra":{"n":660,"win":62.4,"imp":52.8,"dmg":28,"sup":14,"falls":50.2,"taken":166.7,"acts":21.8,"ults":3.4,"crit":12,"hit":87.3,"share":28.7,"t3":53.4,"d1":45.1},"soham":{"n":660,"win":64.5,"imp":57.1,"dmg":15.2,"sup":44.6,"falls":40.3,"taken":163.9,"acts":18.8,"ults":4.2,"crit":8.2,"hit":86.4,"share":18.4,"t3":46.2,"d1":8.8},"chosen":{"n":660,"win":60.3,"imp":87,"dmg":50.7,"sup":27,"falls":41.8,"taken":204.7,"acts":27.5,"ults":4.9,"crit":23.2,"hit":93.9,"share":48.8,"t3":52.4,"d1":84.3},"elphi":{"n":660,"win":56.8,"imp":59,"dmg":27.3,"sup":25.5,"falls":54.1,"taken":171.1,"acts":17.7,"ults":3.4,"crit":11.2,"hit":89,"share":28,"t3":51.8,"d1":23.2},"daniel":{"n":660,"win":62.3,"imp":43,"dmg":21,"sup":15.2,"falls":42.7,"taken":142,"acts":21.3,"ults":4,"crit":26.7,"hit":95.2,"share":23.1,"t3":49,"d1":41.7},"yunze":{"n":660,"win":59.7,"imp":64.7,"dmg":54.2,"sup":0,"falls":53.3,"taken":113.2,"acts":26.4,"ults":2.6,"crit":32.3,"hit":94.8,"share":47.1,"t3":58.8,"d1":97.3},"malakai":{"n":660,"win":55.9,"imp":49.5,"dmg":16.3,"sup":17.6,"falls":60.9,"taken":165.5,"acts":16.9,"ults":2.8,"crit":11.3,"hit":83.2,"share":17.1,"t3":48,"d1":21.3},"seraphine":{"n":660,"win":59.1,"imp":94.2,"dmg":82.5,"sup":0,"falls":42.1,"taken":68.2,"acts":24.9,"ults":2.6,"crit":16.4,"hit":94.8,"share":58.3,"t3":49.2,"d1":82.4},"lachlan":{"n":660,"win":56.2,"imp":83.3,"dmg":50.2,"sup":11.5,"falls":45.8,"taken":455.8,"acts":30.9,"ults":7.1,"crit":12,"hit":92.7,"share":52.5,"t3":53.9,"d1":90.1},"yousuf":{"n":660,"win":59.8,"imp":49.8,"dmg":7.4,"sup":31.9,"falls":58,"taken":240.2,"acts":18.7,"ults":3.2,"crit":12.1,"hit":85.9,"share":9.1,"t3":36,"d1":20.2},"gemia":{"n":660,"win":48.2,"imp":53.8,"dmg":43.3,"sup":0,"falls":66.5,"taken":117.1,"acts":18.8,"ults":2.9,"crit":13.7,"hit":90.4,"share":39.3,"t3":47.2,"d1":58.2},"david":{"n":660,"win":56.8,"imp":36.1,"dmg":15.4,"sup":5,"falls":62.1,"taken":199.3,"acts":15.9,"ults":4.1,"crit":10.4,"hit":85.7,"share":17.9,"t3":41,"d1":5.5}},"builds":{"angus":{"balanced":{"n":330,"win":56.7,"imp":45.6,"dmg":13.3,"sup":18.1,"falls":53.3,"taken":265.1,"acts":18.2,"ults":4.9,"crit":8.5,"hit":84.8,"share":17.2},"bulwark":{"n":330,"win":60.9,"imp":44.9,"dmg":12.1,"sup":17.7,"falls":47.3,"taken":240.4,"acts":18.4,"ults":5,"crit":8.2,"hit":84,"share":15.4},"warlord":{"n":330,"win":60.6,"imp":52.9,"dmg":18.7,"sup":18.4,"falls":48.2,"taken":237.2,"acts":17.8,"ults":4,"crit":7.6,"hit":84.3,"share":21.2}},"flynn":{"balanced":{"n":330,"win":47.9,"imp":51.7,"dmg":40.6,"sup":0,"falls":74.5,"taken":127.3,"acts":13.7,"ults":2,"crit":12.3,"hit":92.4,"share":35.9},"overload":{"n":330,"win":43.9,"imp":52.2,"dmg":41,"sup":0,"falls":78.2,"taken":129.3,"acts":13.4,"ults":1.8,"crit":12.8,"hit":91.9,"share":36.6},"static":{"n":330,"win":52.1,"imp":58.9,"dmg":47.6,"sup":0,"falls":73.3,"taken":129,"acts":15.2,"ults":2.1,"crit":11.7,"hit":93,"share":40.4}},"leo":{"balanced":{"n":330,"win":47,"imp":58.2,"dmg":46.1,"sup":0,"falls":77.6,"taken":131.6,"acts":13.7,"ults":2,"crit":10.6,"hit":91.2,"share":39.7},"pyro":{"n":330,"win":45.2,"imp":58.6,"dmg":46.6,"sup":0,"falls":77,"taken":122.1,"acts":13,"ults":1.7,"crit":9.2,"hit":90.8,"share":38.3},"lancer":{"n":330,"win":46.1,"imp":52.5,"dmg":41.2,"sup":0,"falls":78.8,"taken":130.2,"acts":12.7,"ults":1.8,"crit":10.2,"hit":91.5,"share":36.7}},"harry":{"balanced":{"n":330,"win":57.9,"imp":72.8,"dmg":60.2,"sup":0,"falls":54.8,"taken":111.8,"acts":20.4,"ults":1.2,"crit":28.4,"hit":96.1,"share":48.3},"stillwater":{"n":330,"win":58.8,"imp":67.3,"dmg":56.2,"sup":0,"falls":53.6,"taken":109.4,"acts":18.7,"ults":1.2,"crit":26.4,"hit":96.7,"share":46.5},"force":{"n":330,"win":64.2,"imp":79.4,"dmg":67.2,"sup":0,"falls":49.1,"taken":103.2,"acts":18.8,"ults":1.1,"crit":28.5,"hit":96.5,"share":50.6}},"peguicha":{"balanced":{"n":330,"win":52.1,"imp":65.3,"dmg":48.8,"sup":3.7,"falls":64.8,"taken":127.4,"acts":17.1,"ults":1.8,"crit":10.7,"hit":90.7,"share":41.6},"reaper":{"n":330,"win":53.6,"imp":64.8,"dmg":48.8,"sup":3.4,"falls":64.8,"taken":123.5,"acts":16.9,"ults":1.7,"crit":10.8,"hit":91.7,"share":40.5},"hellbinder":{"n":330,"win":50,"imp":67.2,"dmg":51.2,"sup":2.6,"falls":67,"taken":121.9,"acts":16.6,"ults":2.2,"crit":11,"hit":91.7,"share":41.3}},"vehra":{"balanced":{"n":330,"win":60.9,"imp":54,"dmg":28.7,"sup":14.5,"falls":50.3,"taken":161.8,"acts":22.4,"ults":3.3,"crit":11.9,"hit":87.3,"share":28.6},"granite":{"n":330,"win":64.5,"imp":52.1,"dmg":25.9,"sup":16.3,"falls":43,"taken":185.1,"acts":22.9,"ults":4.1,"crit":12.6,"hit":88.5,"share":28.5},"bloodwing":{"n":330,"win":60,"imp":58.1,"dmg":30.2,"sup":16.3,"falls":51.8,"taken":173.7,"acts":22.4,"ults":3.3,"crit":11.8,"hit":87.3,"share":30.2}},"soham":{"balanced":{"n":330,"win":66.4,"imp":59.2,"dmg":14.8,"sup":46.7,"falls":41.8,"taken":174.1,"acts":19.4,"ults":4.1,"crit":7.8,"hit":85.1,"share":17.6},"monolith":{"n":330,"win":64.8,"imp":58.3,"dmg":15.1,"sup":45.8,"falls":43.6,"taken":159,"acts":19.1,"ults":3.9,"crit":7.4,"hit":85.2,"share":17.8},"breaker":{"n":330,"win":70,"imp":64.5,"dmg":27.4,"sup":37.2,"falls":37.6,"taken":132.5,"acts":18.9,"ults":3.3,"crit":8.3,"hit":94.3,"share":27.3}},"chosen":{"balanced":{"n":330,"win":56.1,"imp":85.2,"dmg":49.6,"sup":26.3,"falls":44.5,"taken":198.6,"acts":27.2,"ults":4.7,"crit":23.7,"hit":93.2,"share":47.8},"valkyrie":{"n":330,"win":60.3,"imp":87.7,"dmg":53.3,"sup":25.2,"falls":42.1,"taken":194.5,"acts":26.8,"ults":4.6,"crit":23.3,"hit":93.2,"share":49.1},"dancer":{"n":330,"win":60,"imp":77.9,"dmg":55.3,"sup":11.2,"falls":40.9,"taken":132.2,"acts":25.9,"ults":4,"crit":24,"hit":93.3,"share":48.9}},"elphi":{"balanced":{"n":330,"win":55.8,"imp":59.5,"dmg":27.4,"sup":25.9,"falls":55.2,"taken":161.1,"acts":17.8,"ults":3.2,"crit":10.9,"hit":89.4,"share":27.7},"sentinel":{"n":330,"win":62.4,"imp":61.7,"dmg":25.6,"sup":32,"falls":45.5,"taken":174.3,"acts":18.9,"ults":4,"crit":10.8,"hit":88.6,"share":27.5},"dawn":{"n":330,"win":65.8,"imp":66.5,"dmg":31.6,"sup":27.2,"falls":48.8,"taken":168,"acts":18.5,"ults":3.2,"crit":10.8,"hit":88.5,"share":30}},"daniel":{"balanced":{"n":330,"win":62.7,"imp":41.5,"dmg":20.4,"sup":14.6,"falls":41.8,"taken":140.8,"acts":20.7,"ults":4,"crit":27.3,"hit":95.1,"share":22.9},"bastion":{"n":330,"win":65.5,"imp":42.7,"dmg":19.5,"sup":17.2,"falls":39.1,"taken":139,"acts":20.8,"ults":3.9,"crit":28.3,"hit":93.6,"share":21.6},"duelist":{"n":330,"win":60.6,"imp":45.5,"dmg":25.7,"sup":11.9,"falls":46.4,"taken":143.9,"acts":19.5,"ults":3.5,"crit":27.8,"hit":96,"share":27.1}},"yunze":{"balanced":{"n":330,"win":59.1,"imp":63.2,"dmg":52.6,"sup":0,"falls":55.2,"taken":109.6,"acts":25.5,"ults":2.4,"crit":31.8,"hit":95.7,"share":44.9},"phantom":{"n":330,"win":62.4,"imp":65,"dmg":54.8,"sup":0,"falls":47.9,"taken":103,"acts":29.9,"ults":3.1,"crit":32.8,"hit":94.5,"share":48.6},"reaper":{"n":330,"win":63.6,"imp":75,"dmg":63.3,"sup":0,"falls":53.9,"taken":112.1,"acts":26.7,"ults":2.3,"crit":32.4,"hit":94.6,"share":50.4}},"malakai":{"balanced":{"n":330,"win":55.5,"imp":48.4,"dmg":15.8,"sup":17.5,"falls":62.4,"taken":152.1,"acts":16.4,"ults":2.6,"crit":9.6,"hit":82,"share":16.2},"apothecary":{"n":330,"win":56.4,"imp":48.4,"dmg":15.5,"sup":17.3,"falls":64.2,"taken":157.3,"acts":16.4,"ults":2.5,"crit":10.9,"hit":82.8,"share":15.5},"toxin":{"n":330,"win":50.6,"imp":52,"dmg":24.9,"sup":12,"falls":70,"taken":147.6,"acts":15.5,"ults":2.2,"crit":9.5,"hit":82.7,"share":23.8}},"seraphine":{"balanced":{"n":330,"win":57.9,"imp":94.5,"dmg":82.6,"sup":0,"falls":43,"taken":70.5,"acts":25,"ults":2.7,"crit":16.6,"hit":94.8,"share":59.1},"puppeteer":{"n":330,"win":58.2,"imp":89.3,"dmg":77.8,"sup":0,"falls":42.1,"taken":69.5,"acts":24.7,"ults":2.6,"crit":16.5,"hit":94.7,"share":55.6},"twinedge":{"n":330,"win":59.4,"imp":98.8,"dmg":87.2,"sup":0,"falls":41.5,"taken":69.9,"acts":24.6,"ults":2.5,"crit":16.6,"hit":95,"share":59}},"lachlan":{"balanced":{"n":330,"win":57.3,"imp":78.6,"dmg":48,"sup":10.2,"falls":46.7,"taken":383.9,"acts":28.8,"ults":5.9,"crit":12.3,"hit":92.5,"share":47.9},"aegis":{"n":330,"win":57.9,"imp":88.4,"dmg":50.9,"sup":12.8,"falls":41.2,"taken":702.1,"acts":35.6,"ults":10.8,"crit":12.1,"hit":93.5,"share":59.6},"orbcaster":{"n":330,"win":60,"imp":71,"dmg":45.1,"sup":7.7,"falls":43.3,"taken":282.6,"acts":24.5,"ults":4.4,"crit":12.3,"hit":91.8,"share":42}},"yousuf":{"balanced":{"n":330,"win":56.7,"imp":48.5,"dmg":7.2,"sup":31.4,"falls":60,"taken":237.9,"acts":18,"ults":3.3,"crit":11.8,"hit":85.3,"share":9},"mender":{"n":330,"win":60,"imp":49.1,"dmg":6.3,"sup":32.5,"falls":59.7,"taken":235.4,"acts":17.5,"ults":2.9,"crit":12.9,"hit":86.2,"share":7.6},"battlemage":{"n":330,"win":57,"imp":51.8,"dmg":10,"sup":30.9,"falls":61.5,"taken":263.9,"acts":18.6,"ults":3.2,"crit":11.9,"hit":87.1,"share":12.3}},"gemia":{"balanced":{"n":330,"win":49.4,"imp":56.7,"dmg":46.1,"sup":0,"falls":65.5,"taken":114.7,"acts":19.7,"ults":2.9,"crit":14.2,"hit":90.4,"share":42.1},"tempo":{"n":330,"win":47,"imp":57.6,"dmg":46.6,"sup":0,"falls":66.7,"taken":114.1,"acts":20.9,"ults":3,"crit":14,"hit":90.1,"share":42},"storm":{"n":330,"win":52.7,"imp":59.7,"dmg":48.8,"sup":0,"falls":61.8,"taken":113.1,"acts":17.8,"ults":2.6,"crit":14,"hit":90.1,"share":41.5}},"david":{"balanced":{"n":330,"win":57.3,"imp":36.4,"dmg":15.2,"sup":5,"falls":59.7,"taken":175.8,"acts":16,"ults":3.6,"crit":10.6,"hit":84.5,"share":16.6},"phalanx":{"n":330,"win":65.5,"imp":36.8,"dmg":15,"sup":5.4,"falls":52.1,"taken":195.1,"acts":17.7,"ults":4.5,"crit":10.3,"hit":84.4,"share":17.5},"impaler":{"n":330,"win":58.8,"imp":42.1,"dmg":19.6,"sup":5.4,"falls":60,"taken":225.9,"acts":17,"ults":4.8,"crit":9.7,"hit":87.1,"share":23}}},"team3":{"angus":55.4,"flynn":54.1,"leo":49.5,"harry":67.2,"peguicha":40.1,"vehra":53.4,"soham":46.2,"chosen":52.4,"elphi":51.8,"daniel":49,"yunze":58.8,"malakai":48,"seraphine":49.2,"lachlan":53.9,"yousuf":36,"gemia":47.2,"david":41},"games3":8000,"draws3":270,"duel":{"angus":21.4,"flynn":54.5,"leo":61.9,"harry":66.2,"peguicha":72.3,"vehra":45.1,"soham":8.8,"chosen":84.3,"elphi":23.2,"daniel":41.7,"yunze":97.3,"malakai":21.3,"seraphine":82.4,"lachlan":90.1,"yousuf":20.2,"gemia":58.2,"david":5.5},"matrix":{"angus":{"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":73.4,"chosen":0,"elphi":65.6,"daniel":46.9,"yunze":0,"malakai":6.3,"seraphine":0,"lachlan":0,"yousuf":50,"gemia":0,"david":100},"flynn":{"angus":100,"leo":3.1,"harry":37.5,"peguicha":0,"vehra":84.4,"soham":100,"chosen":6.3,"elphi":100,"daniel":93.8,"yunze":0,"malakai":100,"seraphine":6.3,"lachlan":0,"yousuf":100,"gemia":40.6,"david":100},"leo":{"angus":100,"flynn":100,"harry":46.9,"peguicha":12.5,"vehra":90.6,"soham":100,"chosen":0,"elphi":100,"daniel":100,"yunze":0,"malakai":100,"seraphine":3.1,"lachlan":0,"yousuf":100,"gemia":37.5,"david":100},"harry":{"angus":100,"flynn":59.4,"leo":28.1,"peguicha":6.3,"vehra":100,"soham":100,"chosen":81.3,"elphi":100,"daniel":100,"yunze":9.4,"malakai":100,"seraphine":0,"lachlan":6.3,"yousuf":100,"gemia":68.8,"david":100},"peguicha":{"angus":100,"flynn":100,"leo":81.3,"harry":87.5,"vehra":96.9,"soham":100,"chosen":0,"elphi":100,"daniel":100,"yunze":0,"malakai":100,"seraphine":6.3,"lachlan":0,"yousuf":100,"gemia":84.4,"david":100},"vehra":{"angus":100,"flynn":31.3,"leo":3.1,"harry":0,"peguicha":3.1,"soham":100,"chosen":0,"elphi":100,"daniel":78.1,"yunze":0,"malakai":96.9,"seraphine":3.1,"lachlan":0,"yousuf":100,"gemia":6.3,"david":100},"soham":{"angus":31.3,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"chosen":0,"elphi":0,"daniel":0,"yunze":0,"malakai":0,"seraphine":0,"lachlan":0,"yousuf":25,"gemia":0,"david":84.4},"chosen":{"angus":100,"flynn":96.9,"leo":100,"harry":18.8,"peguicha":100,"vehra":100,"soham":100,"elphi":100,"daniel":100,"yunze":18.8,"malakai":100,"seraphine":65.6,"lachlan":48.4,"yousuf":100,"gemia":100,"david":100},"elphi":{"angus":29.7,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":3.1,"soham":100,"chosen":0,"daniel":3.1,"yunze":0,"malakai":90.6,"seraphine":0,"lachlan":0,"yousuf":51.6,"gemia":0,"david":93.8},"daniel":{"angus":50,"flynn":12.5,"leo":0,"harry":0,"peguicha":9.4,"vehra":15.6,"soham":100,"chosen":0,"elphi":96.9,"yunze":0,"malakai":100,"seraphine":0,"lachlan":0,"yousuf":98.4,"gemia":84.4,"david":100},"yunze":{"angus":100,"flynn":100,"leo":100,"harry":90.6,"peguicha":100,"vehra":100,"soham":100,"chosen":71.9,"elphi":100,"daniel":96.9,"malakai":100,"seraphine":96.9,"lachlan":100,"yousuf":100,"gemia":100,"david":100},"malakai":{"angus":100,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":100,"chosen":0,"elphi":28.1,"daniel":0,"yunze":0,"seraphine":0,"lachlan":0,"yousuf":50,"gemia":0,"david":62.5},"seraphine":{"angus":100,"flynn":87.5,"leo":100,"harry":100,"peguicha":90.6,"vehra":100,"soham":100,"chosen":46.9,"elphi":100,"daniel":100,"yunze":9.4,"malakai":100,"lachlan":3.1,"yousuf":100,"gemia":81.3,"david":100},"lachlan":{"angus":100,"flynn":100,"leo":100,"harry":93.8,"peguicha":100,"vehra":100,"soham":100,"chosen":48.4,"elphi":100,"daniel":100,"yunze":0,"malakai":100,"seraphine":100,"yousuf":100,"gemia":100,"david":100},"yousuf":{"angus":50,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":75,"chosen":0,"elphi":48.4,"daniel":0,"yunze":0,"malakai":50,"seraphine":0,"lachlan":0,"gemia":0,"david":100},"gemia":{"angus":100,"flynn":71.9,"leo":65.6,"harry":31.3,"peguicha":34.4,"vehra":93.8,"soham":100,"chosen":0,"elphi":100,"daniel":15.6,"yunze":0,"malakai":100,"seraphine":28.1,"lachlan":0,"yousuf":100,"david":90.6},"david":{"angus":0,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":21.9,"chosen":0,"elphi":3.1,"daniel":0,"yunze":0,"malakai":62.5,"seraphine":0,"lachlan":0,"yousuf":0,"gemia":0}},"duelN":32};
+const SIM_STATS = {"v":"0.9","stages":["cult","prophet","malakai","mirror","elphi","chosen","gate","warden","shadows","yunze","harry"],"heroes":{"angus":{"n":495,"win":51.5,"imp":46.2,"dmg":13.5,"sup":18.1,"falls":56.6,"taken":275.7,"acts":17.9,"ults":4.9,"crit":9.2,"hit":84.4,"share":18.4,"t3":50.3,"d1":31.2},"flynn":{"n":495,"win":42.4,"imp":55.3,"dmg":43.8,"sup":0,"falls":77.4,"taken":125.3,"acts":14.2,"ults":1.8,"crit":13.1,"hit":93,"share":40.6,"t3":56.5,"d1":64.1},"leo":{"n":495,"win":40,"imp":54.5,"dmg":42.8,"sup":0,"falls":79.4,"taken":126.5,"acts":12.6,"ults":1.7,"crit":10.3,"hit":91.1,"share":38.8,"t3":51.6,"d1":69.9},"harry":{"n":495,"win":54.3,"imp":75.2,"dmg":63.1,"sup":0,"falls":53.5,"taken":109.9,"acts":19.6,"ults":1.3,"crit":29.1,"hit":97.5,"share":52.8,"t3":68.8,"d1":72.8},"peguicha":{"n":495,"win":49.7,"imp":65.8,"dmg":49.7,"sup":3.6,"falls":64.6,"taken":127.7,"acts":16.9,"ults":1.8,"crit":10.9,"hit":91,"share":44.2,"t3":46.1,"d1":78.6},"vehra":{"n":495,"win":56.8,"imp":54.9,"dmg":29.3,"sup":14.8,"falls":54.1,"taken":178.6,"acts":22,"ults":3.7,"crit":12.5,"hit":87.6,"share":33.2,"t3":49.1,"d1":49.8},"soham":{"n":495,"win":59.4,"imp":56.7,"dmg":15.4,"sup":43.6,"falls":45.5,"taken":155.8,"acts":19.1,"ults":4,"crit":8,"hit":85.5,"share":19.8,"t3":43.8,"d1":18.3},"trigg":{"n":495,"win":51.5,"imp":19,"dmg":12.4,"sup":0,"falls":61.4,"taken":120.8,"acts":13.8,"ults":2.5,"crit":7.9,"hit":93.9,"share":18.8,"t3":51.2,"d1":60.7},"chosen":{"n":495,"win":52.3,"imp":87.6,"dmg":51,"sup":26.7,"falls":48.1,"taken":207.3,"acts":27.1,"ults":4.8,"crit":23.1,"hit":93.6,"share":51.9,"t3":49.6,"d1":80.6},"elphi":{"n":495,"win":58.4,"imp":61.9,"dmg":28.8,"sup":27,"falls":53.1,"taken":167.3,"acts":18.2,"ults":3.4,"crit":11.2,"hit":89.7,"share":31,"t3":50.1,"d1":35},"daniel":{"n":495,"win":58.2,"imp":43.8,"dmg":21.5,"sup":15.4,"falls":44.8,"taken":145.6,"acts":21.1,"ults":4.2,"crit":28.1,"hit":95.7,"share":26.1,"t3":43.8,"d1":48.2},"yunze":{"n":495,"win":58.8,"imp":67.8,"dmg":57.3,"sup":0,"falls":53.3,"taken":107.7,"acts":26.6,"ults":2.6,"crit":33,"hit":95.1,"share":50.3,"t3":59.2,"d1":94.7},"malakai":{"n":495,"win":45.7,"imp":52,"dmg":16.4,"sup":18.9,"falls":67.9,"taken":166.7,"acts":17.1,"ults":2.8,"crit":12.2,"hit":81.2,"share":18.8,"t3":49.1,"d1":28.4},"seraphine":{"n":495,"win":52.1,"imp":96.3,"dmg":84.2,"sup":0,"falls":48.7,"taken":71.2,"acts":24.6,"ults":2.5,"crit":16,"hit":94.8,"share":59.9,"t3":47.7,"d1":85.9},"alfred":{"n":495,"win":40,"imp":63.8,"dmg":51.9,"sup":0,"falls":70.1,"taken":109.7,"acts":18,"ults":2.2,"crit":59.6,"hit":96.5,"share":44.6,"t3":44.5,"d1":86.6},"lachlan":{"n":495,"win":52.3,"imp":85.3,"dmg":52.4,"sup":11.3,"falls":49.3,"taken":443.8,"acts":30.4,"ults":7,"crit":12.5,"hit":92.9,"share":56.6,"t3":58.8,"d1":90.9},"yousuf":{"n":495,"win":59,"imp":51.2,"dmg":7.7,"sup":32.8,"falls":56.4,"taken":264.7,"acts":18.4,"ults":3.5,"crit":12.9,"hit":86.9,"share":10.6,"t3":32.8,"d1":11.1},"gemia":{"n":495,"win":47.7,"imp":61.6,"dmg":50.4,"sup":0,"falls":66.7,"taken":110.4,"acts":20.6,"ults":2.8,"crit":14.7,"hit":90.6,"share":44.9,"t3":54,"d1":62.3},"david":{"n":495,"win":54.7,"imp":37.6,"dmg":16.5,"sup":5,"falls":61,"taken":180.4,"acts":16.1,"ults":3.8,"crit":10.3,"hit":85.2,"share":19.4,"t3":43.2,"d1":18.3},"ethan":{"n":495,"win":50.9,"imp":39.9,"dmg":6.5,"sup":21.7,"falls":58,"taken":160.8,"acts":18.7,"ults":3.5,"crit":8.7,"hit":85,"share":7.7,"t3":47.6,"d1":0},"ben":{"n":495,"win":40.2,"imp":19.7,"dmg":8.4,"sup":0,"falls":69.9,"taken":138,"acts":19.6,"ults":3.2,"crit":12.2,"hit":85.2,"share":10.1,"t3":39.8,"d1":15.9},"kingsley":{"n":495,"win":55.8,"imp":50.4,"dmg":7.9,"sup":29.8,"falls":57.8,"taken":240.1,"acts":19.1,"ults":4.7,"crit":9.7,"hit":86.2,"share":11.3,"t3":45.1,"d1":20.3},"vasco":{"n":495,"win":42.4,"imp":62.7,"dmg":42.5,"sup":7.2,"falls":68.3,"taken":156.9,"acts":16.7,"ults":2.6,"crit":13.3,"hit":91.6,"share":41.1,"t3":58.9,"d1":54.5},"aamay":{"n":495,"win":42.8,"imp":42.5,"dmg":28.6,"sup":0,"falls":74.9,"taken":117.7,"acts":15.9,"ults":2.3,"crit":10.4,"hit":94.9,"share":29.2,"t3":60.4,"d1":21.7}},"builds":{"angus":{"balanced":{"n":220,"win":50.5,"imp":47,"dmg":14,"sup":18.1,"falls":57.3,"taken":283.8,"acts":18.3,"ults":5.2,"crit":8.3,"hit":83.4,"share":19.9},"bulwark":{"n":220,"win":57.3,"imp":44.3,"dmg":12.4,"sup":17.5,"falls":54.1,"taken":246.3,"acts":18.2,"ults":5.3,"crit":8.4,"hit":83.3,"share":17.6},"warlord":{"n":220,"win":54.1,"imp":46.8,"dmg":17,"sup":15.7,"falls":55,"taken":260.4,"acts":15.1,"ults":4.3,"crit":9.3,"hit":85.1,"share":21.7}},"flynn":{"balanced":{"n":220,"win":43.2,"imp":57.3,"dmg":46,"sup":0,"falls":78.2,"taken":123.9,"acts":14.7,"ults":2.1,"crit":12.6,"hit":93,"share":41.9},"overload":{"n":220,"win":40.5,"imp":44.4,"dmg":35.3,"sup":0,"falls":76.8,"taken":118.2,"acts":11,"ults":1.7,"crit":12.8,"hit":92,"share":33.1},"static":{"n":220,"win":42.3,"imp":57.9,"dmg":46.5,"sup":0,"falls":80,"taken":121.1,"acts":14.2,"ults":1.9,"crit":13.3,"hit":92.2,"share":41.4}},"leo":{"balanced":{"n":220,"win":40.9,"imp":53.9,"dmg":42.5,"sup":0,"falls":76.8,"taken":131.3,"acts":12.5,"ults":1.8,"crit":9.8,"hit":90.8,"share":39},"pyro":{"n":220,"win":41.4,"imp":58.7,"dmg":47.3,"sup":0,"falls":79.1,"taken":120.3,"acts":12.4,"ults":1.7,"crit":11.2,"hit":91.8,"share":43},"lancer":{"n":220,"win":40,"imp":52.7,"dmg":41.4,"sup":0,"falls":79.5,"taken":121.8,"acts":12,"ults":1.6,"crit":10.6,"hit":90.8,"share":38.3}},"harry":{"balanced":{"n":220,"win":56.4,"imp":75.1,"dmg":62.7,"sup":0,"falls":54.1,"taken":103.6,"acts":19.6,"ults":1.2,"crit":27.5,"hit":97.7,"share":50.2},"stillwater":{"n":220,"win":55.9,"imp":78.2,"dmg":65.7,"sup":0,"falls":50,"taken":101.7,"acts":21.6,"ults":1.3,"crit":27.9,"hit":97.2,"share":53.3},"force":{"n":220,"win":63.6,"imp":86.8,"dmg":73.8,"sup":0,"falls":43.6,"taken":102.8,"acts":19.5,"ults":1.1,"crit":29.4,"hit":97.1,"share":56.6}},"peguicha":{"balanced":{"n":220,"win":50.9,"imp":69.6,"dmg":52.9,"sup":3.8,"falls":59.1,"taken":125.1,"acts":17.2,"ults":1.8,"crit":10,"hit":91.2,"share":46.9},"reaper":{"n":220,"win":52.7,"imp":64.8,"dmg":49,"sup":3.4,"falls":64.5,"taken":128.1,"acts":16.7,"ults":1.7,"crit":11.4,"hit":90.1,"share":44},"hellbinder":{"n":220,"win":49.1,"imp":68.7,"dmg":52.9,"sup":2.6,"falls":65.5,"taken":119.4,"acts":16.4,"ults":2.3,"crit":11.1,"hit":92.9,"share":45.6}},"vehra":{"balanced":{"n":220,"win":51.8,"imp":52.3,"dmg":28,"sup":14.1,"falls":55.9,"taken":163.9,"acts":21,"ults":3.5,"crit":12.7,"hit":88.2,"share":31.7},"granite":{"n":220,"win":54.5,"imp":57.3,"dmg":26.9,"sup":19.7,"falls":50.9,"taken":216.3,"acts":25.5,"ults":4.8,"crit":12.6,"hit":88.9,"share":33.4},"bloodwing":{"n":220,"win":60.9,"imp":58.7,"dmg":31.8,"sup":15.8,"falls":45.5,"taken":177.4,"acts":22.7,"ults":3.7,"crit":12.5,"hit":88.8,"share":35.9}},"soham":{"balanced":{"n":275,"win":57.8,"imp":57.4,"dmg":16.8,"sup":42.3,"falls":48,"taken":181,"acts":19.4,"ults":4.6,"crit":8,"hit":87.5,"share":22.7},"monolith":{"n":275,"win":64.4,"imp":55.6,"dmg":15.1,"sup":43.2,"falls":41.5,"taken":154.1,"acts":18.9,"ults":4.1,"crit":7.9,"hit":86.1,"share":19},"breaker":{"n":275,"win":60.7,"imp":62.2,"dmg":28.2,"sup":32.8,"falls":48,"taken":138.8,"acts":18.7,"ults":3.3,"crit":7.7,"hit":94.4,"share":30}},"trigg":{"balanced":{"n":220,"win":54.1,"imp":19.4,"dmg":12.9,"sup":0,"falls":57.3,"taken":118,"acts":14.4,"ults":2.6,"crit":8.5,"hit":94.2,"share":20.9},"packmaster":{"n":220,"win":47.7,"imp":19,"dmg":12.5,"sup":0,"falls":63.2,"taken":119.3,"acts":13.6,"ults":2.6,"crit":8.7,"hit":95.7,"share":20},"pyrebinder":{"n":220,"win":53.2,"imp":23.3,"dmg":16.6,"sup":0,"falls":62.3,"taken":117.9,"acts":13.6,"ults":2.5,"crit":8.7,"hit":96.3,"share":23.5}},"chosen":{"balanced":{"n":220,"win":53.6,"imp":85.2,"dmg":49.5,"sup":26.2,"falls":47.7,"taken":214.1,"acts":26.2,"ults":5,"crit":22.8,"hit":94,"share":50.9},"valkyrie":{"n":220,"win":55.9,"imp":88.9,"dmg":53.7,"sup":25.5,"falls":45.5,"taken":198.4,"acts":26.6,"ults":4.5,"crit":23.2,"hit":93.3,"share":52.8},"dancer":{"n":220,"win":51.8,"imp":83.1,"dmg":58.7,"sup":12.1,"falls":50,"taken":137.1,"acts":26.8,"ults":3.9,"crit":23,"hit":93.1,"share":52.5}},"elphi":{"balanced":{"n":275,"win":57.8,"imp":63,"dmg":29.7,"sup":27.2,"falls":53.1,"taken":159.5,"acts":18.2,"ults":3.3,"crit":11.7,"hit":89.4,"share":31.5},"sentinel":{"n":275,"win":59.6,"imp":68.5,"dmg":29.6,"sup":34,"falls":48.7,"taken":182.5,"acts":20.8,"ults":4.1,"crit":11.9,"hit":89.6,"share":32.3},"dawn":{"n":275,"win":60.4,"imp":65.8,"dmg":31.4,"sup":27.1,"falls":50.5,"taken":159.9,"acts":18.3,"ults":3.2,"crit":11.9,"hit":88.5,"share":31.7}},"daniel":{"balanced":{"n":220,"win":56.8,"imp":44.4,"dmg":22,"sup":15.6,"falls":45.9,"taken":139,"acts":21.1,"ults":4,"crit":27.5,"hit":96.2,"share":26.3},"bastion":{"n":220,"win":60.9,"imp":41.5,"dmg":19.4,"sup":16.5,"falls":45,"taken":135.1,"acts":20.4,"ults":4.3,"crit":26.4,"hit":95.3,"share":24.1},"duelist":{"n":220,"win":59.1,"imp":46,"dmg":26.5,"sup":11.6,"falls":45,"taken":133.5,"acts":19.5,"ults":3.5,"crit":28.7,"hit":96.4,"share":29.2}},"yunze":{"balanced":{"n":220,"win":60.9,"imp":71.4,"dmg":60.2,"sup":0,"falls":50.9,"taken":110,"acts":28,"ults":2.6,"crit":33,"hit":94.9,"share":52.8},"phantom":{"n":220,"win":64.5,"imp":70.8,"dmg":60.2,"sup":0,"falls":46.4,"taken":99.2,"acts":31.7,"ults":3.2,"crit":32.5,"hit":95.4,"share":53.4},"reaper":{"n":220,"win":60.5,"imp":73.4,"dmg":62.5,"sup":0,"falls":56.8,"taken":105.6,"acts":25.1,"ults":2.2,"crit":32.3,"hit":94.9,"share":52.1}},"malakai":{"balanced":{"n":220,"win":48.2,"imp":49.2,"dmg":16.2,"sup":17.7,"falls":67.3,"taken":166.2,"acts":16,"ults":2.8,"crit":10.9,"hit":84.7,"share":18.8},"apothecary":{"n":220,"win":55.5,"imp":50.2,"dmg":14.9,"sup":18.4,"falls":69.1,"taken":191.1,"acts":16.4,"ults":3.2,"crit":10.6,"hit":81.7,"share":18.5},"toxin":{"n":220,"win":45.5,"imp":52.5,"dmg":25,"sup":12.3,"falls":76.4,"taken":153.5,"acts":15.4,"ults":2.3,"crit":9.9,"hit":81.8,"share":25.6}},"seraphine":{"balanced":{"n":220,"win":48.6,"imp":98.3,"dmg":85.7,"sup":0,"falls":51.8,"taken":78.2,"acts":25,"ults":2.7,"crit":15.4,"hit":94.8,"share":63.9},"puppeteer":{"n":220,"win":52.7,"imp":91.7,"dmg":80.2,"sup":0,"falls":48.2,"taken":71.4,"acts":24.3,"ults":2.7,"crit":16.6,"hit":94.8,"share":61.1},"twinedge":{"n":220,"win":54.1,"imp":100.7,"dmg":88.9,"sup":0,"falls":46.8,"taken":73.6,"acts":24.4,"ults":2.6,"crit":16.1,"hit":95.2,"share":63.2}},"alfred":{"balanced":{"n":220,"win":43.2,"imp":67.2,"dmg":54.7,"sup":0,"falls":68.6,"taken":108.3,"acts":19.1,"ults":2.2,"crit":58.8,"hit":97,"share":46.3},"steady":{"n":220,"win":45.5,"imp":63.9,"dmg":52.2,"sup":0,"falls":62.7,"taken":106.3,"acts":21.7,"ults":2.4,"crit":58.2,"hit":96.7,"share":44},"chaos":{"n":220,"win":50.5,"imp":79.1,"dmg":65.7,"sup":0,"falls":63.2,"taken":110,"acts":20.9,"ults":2.3,"crit":60.9,"hit":96.9,"share":50.7}},"lachlan":{"balanced":{"n":220,"win":51.8,"imp":85.8,"dmg":51.7,"sup":12,"falls":49.5,"taken":463.4,"acts":31.2,"ults":7.2,"crit":12,"hit":93.5,"share":56.6},"aegis":{"n":220,"win":52.3,"imp":96,"dmg":55.5,"sup":14.4,"falls":44.5,"taken":926.1,"acts":38.3,"ults":14.3,"crit":12.1,"hit":93.9,"share":69.4},"orbcaster":{"n":220,"win":53.6,"imp":74.4,"dmg":47.7,"sup":8.3,"falls":50.5,"taken":286.6,"acts":24.8,"ults":4.5,"crit":12.8,"hit":91.7,"share":46.7}},"yousuf":{"balanced":{"n":220,"win":52.7,"imp":49.8,"dmg":8.2,"sup":30.8,"falls":63.6,"taken":294.1,"acts":18.5,"ults":3.5,"crit":12.7,"hit":87.8,"share":11.3},"mender":{"n":220,"win":52.7,"imp":52.3,"dmg":7.1,"sup":34.6,"falls":61.4,"taken":294.9,"acts":17.9,"ults":3.7,"crit":12,"hit":86.9,"share":10.1},"battlemage":{"n":220,"win":60,"imp":52.7,"dmg":9.3,"sup":32.4,"falls":58.6,"taken":270.1,"acts":18.5,"ults":3.2,"crit":11.6,"hit":86.6,"share":12.2}},"gemia":{"balanced":{"n":220,"win":48.2,"imp":60.5,"dmg":49.6,"sup":0,"falls":67.3,"taken":114.6,"acts":19.7,"ults":2.9,"crit":14.7,"hit":90.3,"share":45.2},"tempo":{"n":220,"win":47.7,"imp":64.4,"dmg":52.7,"sup":0,"falls":64.1,"taken":112,"acts":22.8,"ults":3.1,"crit":13.8,"hit":90.5,"share":48},"storm":{"n":220,"win":50,"imp":62.3,"dmg":51.2,"sup":0,"falls":67.3,"taken":107.4,"acts":18,"ults":2.5,"crit":14.4,"hit":90.6,"share":43.9}},"david":{"balanced":{"n":220,"win":51.8,"imp":38.8,"dmg":17,"sup":5.3,"falls":62.3,"taken":188.6,"acts":16.6,"ults":4,"crit":11,"hit":86.4,"share":20.6},"phalanx":{"n":220,"win":59.1,"imp":35.8,"dmg":15.3,"sup":5,"falls":53.6,"taken":179,"acts":16.1,"ults":4.1,"crit":11.2,"hit":85.7,"share":18.7},"impaler":{"n":220,"win":54.1,"imp":42.6,"dmg":21.5,"sup":4.7,"falls":61.4,"taken":215.7,"acts":16.4,"ults":4.9,"crit":11.9,"hit":88.3,"share":26.9}},"ethan":{"balanced":{"n":220,"win":52.7,"imp":40.1,"dmg":6.6,"sup":21.5,"falls":61.8,"taken":149.7,"acts":18.9,"ults":3.3,"crit":8,"hit":86.6,"share":7.4},"warking":{"n":220,"win":46.8,"imp":36,"dmg":6.6,"sup":21.3,"falls":61.8,"taken":152.2,"acts":18,"ults":3.1,"crit":8,"hit":82.1,"share":7.6},"patron":{"n":220,"win":45.5,"imp":35.4,"dmg":6,"sup":15.5,"falls":64.1,"taken":158.2,"acts":19.3,"ults":3.6,"crit":8.8,"hit":83.5,"share":7.6}},"ben":{"balanced":{"n":275,"win":42.2,"imp":19.2,"dmg":7.6,"sup":0,"falls":73.8,"taken":149.1,"acts":19,"ults":3.2,"crit":14.1,"hit":82.5,"share":9.1},"schemer":{"n":275,"win":45.5,"imp":16.6,"dmg":5.7,"sup":0,"falls":68.7,"taken":152.2,"acts":19.4,"ults":3.7,"crit":12.9,"hit":82,"share":7.1},"zealot":{"n":275,"win":41.1,"imp":17,"dmg":7,"sup":0,"falls":72.7,"taken":137.2,"acts":16.8,"ults":2.7,"crit":11.7,"hit":82.9,"share":7.6}},"kingsley":{"balanced":{"n":275,"win":58.9,"imp":52.3,"dmg":7.3,"sup":32,"falls":55.6,"taken":209.9,"acts":19.2,"ults":4,"crit":10.9,"hit":85.2,"share":9.5},"virtuoso":{"n":275,"win":62.5,"imp":55.2,"dmg":7.7,"sup":33.9,"falls":50.9,"taken":233.4,"acts":19.6,"ults":4.3,"crit":10.5,"hit":85.5,"share":10.3},"collector":{"n":275,"win":57.5,"imp":48.3,"dmg":8.3,"sup":27.9,"falls":56.4,"taken":223.4,"acts":19.3,"ults":4.4,"crit":11.2,"hit":85.3,"share":11.2}},"vasco":{"balanced":{"n":220,"win":39.1,"imp":64.8,"dmg":43.8,"sup":7.1,"falls":70,"taken":154.3,"acts":17.1,"ults":2.4,"crit":14.1,"hit":91.4,"share":41.3},"harlequin":{"n":220,"win":40.5,"imp":62.1,"dmg":41.7,"sup":6.8,"falls":70.5,"taken":151.1,"acts":16.4,"ults":2.4,"crit":13.2,"hit":91.2,"share":39},"hollow":{"n":220,"win":38.6,"imp":58,"dmg":41.2,"sup":4.3,"falls":72.7,"taken":135.3,"acts":16,"ults":2.2,"crit":14.1,"hit":91.1,"share":39.4}},"aamay":{"balanced":{"n":220,"win":40.5,"imp":40.4,"dmg":27.2,"sup":0,"falls":77.3,"taken":117.1,"acts":15.5,"ults":2.3,"crit":10,"hit":94.7,"share":28.9},"archivist":{"n":220,"win":43.6,"imp":46.1,"dmg":32.6,"sup":0,"falls":71.4,"taken":110.2,"acts":15.5,"ults":2.2,"crit":10.6,"hit":94.8,"share":31.7},"inquisitor":{"n":220,"win":38.6,"imp":37.9,"dmg":24,"sup":0,"falls":77.3,"taken":122.4,"acts":15.8,"ults":2.4,"crit":9.7,"hit":94.5,"share":27.6}}},"team3":{"angus":50.3,"flynn":56.5,"leo":51.6,"harry":68.8,"peguicha":46.1,"vehra":49.1,"soham":43.8,"trigg":51.2,"chosen":49.6,"elphi":50.1,"daniel":43.8,"yunze":59.2,"malakai":49.1,"seraphine":47.7,"alfred":44.5,"lachlan":58.8,"yousuf":32.8,"gemia":54,"david":43.2,"ethan":47.6,"ben":39.8,"kingsley":45.1,"vasco":58.9,"aamay":60.4},"games3":10000,"draws3":3,"duel":{"angus":31.2,"flynn":64.1,"leo":69.9,"harry":72.8,"peguicha":78.6,"vehra":49.8,"soham":18.3,"trigg":60.7,"chosen":80.6,"elphi":35,"daniel":48.2,"yunze":94.7,"malakai":28.4,"seraphine":85.9,"alfred":86.6,"lachlan":90.9,"yousuf":11.1,"gemia":62.3,"david":18.3,"ethan":0,"ben":15.9,"kingsley":20.3,"vasco":54.5,"aamay":21.7},"matrix":{"angus":{"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":95.8,"trigg":0,"chosen":0,"elphi":25,"daniel":0,"yunze":0,"malakai":8.3,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":0,"david":100,"ethan":100,"ben":87.5,"kingsley":100,"vasco":0,"aamay":100},"flynn":{"angus":100,"leo":4.2,"harry":45.8,"peguicha":0,"vehra":91.7,"soham":100,"trigg":91.7,"chosen":4.2,"elphi":100,"daniel":83.3,"yunze":4.2,"malakai":100,"seraphine":12.5,"alfred":4.2,"lachlan":0,"yousuf":100,"gemia":33.3,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"leo":{"angus":100,"flynn":91.7,"harry":66.7,"peguicha":12.5,"vehra":91.7,"soham":100,"trigg":100,"chosen":0,"elphi":100,"daniel":100,"yunze":0,"malakai":100,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":45.8,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"harry":{"angus":100,"flynn":54.2,"leo":50,"peguicha":16.7,"vehra":100,"soham":100,"trigg":100,"chosen":83.3,"elphi":100,"daniel":100,"yunze":4.2,"malakai":100,"seraphine":0,"alfred":8.3,"lachlan":12.5,"yousuf":100,"gemia":45.8,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"peguicha":{"angus":100,"flynn":100,"leo":87.5,"harry":79.2,"vehra":100,"soham":100,"trigg":95.8,"chosen":0,"elphi":100,"daniel":100,"yunze":0,"malakai":100,"seraphine":12.5,"alfred":83.3,"lachlan":0,"yousuf":100,"gemia":50,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"vehra":{"angus":100,"flynn":4.2,"leo":4.2,"harry":0,"peguicha":0,"soham":100,"trigg":25,"chosen":0,"elphi":100,"daniel":54.2,"yunze":0,"malakai":100,"seraphine":4.2,"alfred":0,"lachlan":0,"yousuf":100,"gemia":4.2,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":50,"aamay":100},"soham":{"angus":8.3,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"trigg":0,"chosen":0,"elphi":0,"daniel":0,"yunze":0,"malakai":0,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":0,"david":62.5,"ethan":100,"ben":33.3,"kingsley":87.5,"vasco":0,"aamay":29.2},"trigg":{"angus":100,"flynn":8.3,"leo":0,"harry":0,"peguicha":0,"vehra":66.7,"soham":100,"chosen":100,"elphi":100,"daniel":100,"yunze":54.2,"malakai":100,"seraphine":0,"alfred":4.2,"lachlan":0,"yousuf":100,"gemia":95.8,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":20.8,"aamay":45.8},"chosen":{"angus":100,"flynn":100,"leo":100,"harry":25,"peguicha":100,"vehra":100,"soham":100,"trigg":0,"elphi":100,"daniel":100,"yunze":12.5,"malakai":100,"seraphine":54.2,"alfred":62.5,"lachlan":0,"yousuf":100,"gemia":100,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"elphi":{"angus":83.3,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":8.3,"soham":100,"trigg":0,"chosen":0,"daniel":0,"yunze":0,"malakai":66.7,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":0,"david":79.2,"ethan":100,"ben":100,"kingsley":100,"vasco":0,"aamay":66.7},"daniel":{"angus":100,"flynn":8.3,"leo":0,"harry":0,"peguicha":4.2,"vehra":25,"soham":100,"trigg":0,"chosen":0,"elphi":100,"yunze":0,"malakai":100,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":87.5,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":0,"aamay":83.3},"yunze":{"angus":100,"flynn":95.8,"leo":100,"harry":95.8,"peguicha":100,"vehra":100,"soham":100,"trigg":41.7,"chosen":91.7,"elphi":100,"daniel":100,"malakai":100,"seraphine":91.7,"alfred":70.8,"lachlan":91.7,"yousuf":100,"gemia":100,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"malakai":{"angus":95.8,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":4.2,"soham":100,"trigg":0,"chosen":0,"elphi":25,"daniel":0,"yunze":0,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":0,"david":37.5,"ethan":100,"ben":41.7,"kingsley":100,"vasco":0,"aamay":50},"seraphine":{"angus":100,"flynn":87.5,"leo":100,"harry":100,"peguicha":91.7,"vehra":100,"soham":100,"trigg":100,"chosen":45.8,"elphi":100,"daniel":100,"yunze":4.2,"malakai":100,"alfred":50,"lachlan":0,"yousuf":100,"gemia":95.8,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"alfred":{"angus":100,"flynn":100,"leo":100,"harry":83.3,"peguicha":45.8,"vehra":100,"soham":100,"trigg":100,"chosen":37.5,"elphi":100,"daniel":100,"yunze":54.2,"malakai":100,"seraphine":37.5,"lachlan":33.3,"yousuf":100,"gemia":100,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"lachlan":{"angus":100,"flynn":100,"leo":100,"harry":75,"peguicha":100,"vehra":100,"soham":100,"trigg":100,"chosen":100,"elphi":100,"daniel":100,"yunze":4.2,"malakai":100,"seraphine":100,"alfred":50,"yousuf":100,"gemia":100,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":62.5,"aamay":100},"yousuf":{"angus":0,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":0,"trigg":0,"chosen":0,"elphi":0,"daniel":0,"yunze":0,"malakai":0,"seraphine":0,"alfred":0,"lachlan":0,"gemia":0,"david":87.5,"ethan":100,"ben":66.7,"kingsley":0,"vasco":0,"aamay":0},"gemia":{"angus":100,"flynn":79.2,"leo":62.5,"harry":29.2,"peguicha":37.5,"vehra":100,"soham":100,"trigg":4.2,"chosen":0,"elphi":100,"daniel":8.3,"yunze":0,"malakai":100,"seraphine":8.3,"alfred":4.2,"lachlan":0,"yousuf":100,"david":100,"ethan":100,"ben":100,"kingsley":100,"vasco":100,"aamay":100},"david":{"angus":0,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":45.8,"trigg":0,"chosen":0,"elphi":8.3,"daniel":0,"yunze":0,"malakai":66.7,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":4.2,"gemia":0,"ethan":100,"ben":91.7,"kingsley":4.2,"vasco":0,"aamay":100},"ethan":{"angus":0,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":0,"trigg":0,"chosen":0,"elphi":0,"daniel":0,"yunze":0,"malakai":0,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":0,"gemia":0,"david":0,"ben":0,"kingsley":0,"vasco":0,"aamay":0},"ben":{"angus":8.3,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":87.5,"trigg":0,"chosen":0,"elphi":8.3,"daniel":0,"yunze":0,"malakai":29.2,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":37.5,"gemia":0,"david":8.3,"ethan":100,"kingsley":16.7,"vasco":4.2,"aamay":66.7},"kingsley":{"angus":0,"flynn":0,"leo":0,"harry":0,"peguicha":0,"vehra":0,"soham":25,"trigg":0,"chosen":0,"elphi":0,"daniel":0,"yunze":0,"malakai":0,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":0,"david":100,"ethan":100,"ben":87.5,"vasco":0,"aamay":54.2},"vasco":{"angus":100,"flynn":4.2,"leo":0,"harry":0,"peguicha":4.2,"vehra":62.5,"soham":100,"trigg":66.7,"chosen":0,"elphi":100,"daniel":87.5,"yunze":0,"malakai":100,"seraphine":0,"alfred":0,"lachlan":33.3,"yousuf":100,"gemia":4.2,"david":100,"ethan":100,"ben":95.8,"kingsley":100,"aamay":95.8},"aamay":{"angus":0,"flynn":0,"leo":0,"harry":4.2,"peguicha":0,"vehra":0,"soham":75,"trigg":54.2,"chosen":0,"elphi":25,"daniel":8.3,"yunze":0,"malakai":70.8,"seraphine":0,"alfred":0,"lachlan":0,"yousuf":100,"gemia":0,"david":0,"ethan":100,"ben":37.5,"kingsley":25,"vasco":0}},"duelN":32};
 /* ================= ART ================= */
 let ARTID = 0;
 const shade = (hex, f) => {
@@ -3089,6 +3482,10 @@ function weaponArt(w, L, id) {
     case 'claws': return `<g><g filter="url(#gs${id})" opacity=".7"><path d="M70 98 Q74 76 86 66 M76 98 Q80 78 92 70 M82 98 Q86 82 96 76" stroke="#ff3b6b" stroke-width="5" fill="none"/></g><path d="M70 98 Q74 76 86 66 M76 98 Q80 78 92 70 M82 98 Q86 82 96 76" stroke="#ffd0dc" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>`;
     case 'hex': return `<g><g filter="url(#gl${id})"><path d="M81 64 L93 71 L93 85 L81 92 L69 85 L69 71Z" fill="#ffe066" opacity=".55"/></g><path d="M81 64 L93 71 L93 85 L81 92 L69 85 L69 71Z" fill="none" stroke="#fff3a0" stroke-width="2"/><path d="M81 70 L88 74 L88 82 L81 86 L74 82 L74 74Z" fill="#ffe066" opacity=".35" stroke="#fff3a0" stroke-width=".8"/><circle cx="81" cy="78" r="1.6" fill="#fffbe0"/></g>`;
     case 'halos': return `<g>${[[17, 80], [83, 80]].map(([x, y]) => `<g filter="url(#gl${id})"><ellipse cx="${x}" cy="${y}" rx="11" ry="5" fill="none" stroke="#e8dcff" stroke-width="4"/></g><ellipse cx="${x}" cy="${y}" rx="11" ry="5" fill="none" stroke="#fffaff" stroke-width="1.6"/>`).join('')}</g>`;
+    case 'chains': return `<g><path d="M70 98 Q74 80 82 72 Q90 64 92 50" stroke="#5a2a20" stroke-width="5" fill="none" stroke-dasharray="4 2.5"/><path d="M70 98 Q74 80 82 72 Q90 64 92 50" stroke="#ff6a2a" stroke-width="1.6" fill="none" stroke-dasharray="4 2.5" opacity=".9"/><g filter="url(#gs${id})"><circle cx="92" cy="49" r="4" fill="#ff8a2a"/></g></g>`;
+    case 'lute': return `<g transform="rotate(-28 80 80)"><ellipse cx="80" cy="86" rx="11" ry="13" fill="#b07a3a" stroke="#6a4420" stroke-width="1.2"/><circle cx="80" cy="84" r="3" fill="#3a2410"/><rect x="78.5" y="52" width="3" height="24" fill="#6a4420"/><rect x="76" y="48" width="8" height="6" rx="1" fill="#4a2e14"/><path d="M79 56 L79 98 M81 56 L81 98" stroke="#f0e0b0" stroke-width=".4"/></g>`;
+    case 'quill': return `<g transform="rotate(-25 80 80)"><path d="M80 98 L82 60 Q90 52 86 40 Q78 52 79 60Z" fill="#f0ece0" stroke="#9a9488" stroke-width=".8"/><path d="M80.5 96 L81.5 60" stroke="#9a9488" stroke-width=".6"/><circle cx="80" cy="99" r="1.6" fill="#1a1a2a"/></g>`;
+    case 'cards': return `<g>${[[70, 82, -18, '#f4f0e8'], [78, 79, -4, '#f4f0e8'], [86, 82, 12, '#f4f0e8']].map(([x, y, r, c], i) => `<g transform="rotate(${r} ${x} ${y})"><rect x="${x - 5}" y="${y - 7}" width="10" height="14" rx="1.5" fill="${c}" stroke="#5a1a6a" stroke-width=".8"/><text x="${x}" y="${y + 2.5}" font-size="7" text-anchor="middle" fill="${i === 1 ? '#c8102e' : '#1a1a2a'}">${['♠', '♥', '♣'][i]}</text></g>`).join('')}</g>`;
     case 'club': return `<g transform="rotate(-30 80 70)"><path d="M77 30 q3 -4 7 0 l2 44 h-11z" fill="#6b4a2a"/><circle cx="80" cy="34" r=".9" fill="#aaa"/><circle cx="83" cy="42" r=".9" fill="#aaa"/></g>`;
   }
   return '';
@@ -3110,6 +3507,7 @@ function frontHair(L) {
     case 'messy': return `<path d="M31.5 48 C29 27 41 20 50 20 C60 20 71 26 68.5 47 L66 40 L64 44 L61 35 L58 41 L55 33 L52 40 L49 33 L46 40 L43 34 L40 41 L38 35 L35 42Z" fill="${c}"/><path d="M36 26 Q33 19 39 21 Q41 15 47 19 Q51 13 55 19 Q61 15 62 22 Q68 20 66 27Z" fill="${c}"/>`;
     case 'long': return `<path d="M31 50 C28 26 41 20 50 20 C59 20 72 26 69 50 C67 40 64 33 57 31 C52 33 47 33 43 31 C37 33 33 40 31 50Z" fill="${c}"/>`;
     case 'ponytail': return `<path d="M32.5 46 C31 27 42 21.5 50 21.5 C59 21.5 69.5 27 67.5 46 C66 38 62 32 52 31 C46 33 40 34 32.5 46Z" fill="${c}"/><rect x="62" y="35" width="5" height="4" rx="1.5" fill="${L.trim || '#ff8fae'}" transform="rotate(30 64 37)"/>`;
+    case 'bun': return `<path d="M32.5 46 C31 27 42 21.5 50 21.5 C59 21.5 69.5 27 67.5 46 C66 38 62 33 56 32 C50 34 44 34 40 32 C36 35 34 40 32.5 46Z" fill="${c}"/><circle cx="50" cy="17" r="7" fill="${c}"/><path d="M44 19 Q50 22 56 19" stroke="${d}" stroke-width="1" fill="none"/>`;
     case 'bald': return `<ellipse cx="45" cy="30" rx="5" ry="2.5" fill="#fff" opacity=".18"/>`;
   }
   return '';
@@ -3147,6 +3545,7 @@ function eyesArt(L, glow, id) {
   let s = '';
   if (glowing) s += `<g filter="url(#gl${id})" opacity=".95"><ellipse cx="43" cy="48" rx="6" ry="3.6" fill="${col}"/><ellipse cx="57" cy="48" rx="6" ry="3.6" fill="${col}"/></g>`;
   s += eye(43) + eye(57);
+  if (L.lines) s += `<g opacity=".55" stroke="#c8d4ff" stroke-width=".7"><path d="M36 45.5 L64 45.5 M35 47.5 L65 47.5 M36 49.5 L64 49.5 M38 51.2 L62 51.2"/></g>`;
   if (L.lashes) s += `<path d="M39 46.2 l-1.6 -1.4 M41 45.5 l-1 -1.8 M61 46.2 l1.6 -1.4 M59 45.5 l1 -1.8" stroke="#2a1a10" stroke-width=".9" stroke-linecap="round"/>`;
   return s;
 }
@@ -3156,7 +3555,7 @@ function heroFace(L, o, id) {
   let s = '';
   if (L.aura) s += `<circle cx="50" cy="56" r="44" fill="none" stroke="${L.aura}" stroke-width="5" opacity=".45" filter="url(#gl${id})"/><circle cx="50" cy="56" r="38" fill="${L.aura}" opacity=".12"/>`;
   if (o.glow && L.glowEye) s += `<circle cx="50" cy="50" r="40" fill="${L.glowEye}" opacity=".14" filter="url(#gl${id})"/>`;
-  const front = ['crystal', 'flask', 'orb', 'flame', 'bolt', 'claws', 'hex', 'halos'].includes(L.weapon);
+  const front = ['crystal', 'flask', 'orb', 'flame', 'bolt', 'claws', 'hex', 'halos', 'lute', 'cards', 'chains'].includes(L.weapon);
   if (L.wings === 'demon') s += `<g fill="#2a0c18" stroke="#c0507a" stroke-width="1"><path d="M38 66 Q20 40 2 34 Q8 44 6 52 Q12 48 16 54 Q14 60 20 62 Q24 58 28 64 Q30 66 34 70Z"/><path d="M62 66 Q80 40 98 34 Q92 44 94 52 Q88 48 84 54 Q86 60 80 62 Q76 58 72 64 Q70 66 66 70Z"/></g><path d="M36 64 Q22 46 6 38 M64 64 Q78 46 94 38" stroke="#5a1a30" stroke-width="1" fill="none"/>`;
   if (!front) s += weaponArt(L.weapon, L, id);
   s += backHair(L);
@@ -3169,6 +3568,16 @@ function heroFace(L, o, id) {
   s += `<ellipse cx="32.8" cy="49" rx="2.4" ry="3.6" fill="${sd}"/><ellipse cx="67.2" cy="49" rx="2.4" ry="3.6" fill="${sd}"/>`;
   s += `<path d="M${50 - rx} 44 Q${50 - rx} 66 50 68 Q${50 + rx} 66 ${50 + rx} 44 Q${50 + rx} 24 50 24 Q${50 - rx} 24 ${50 - rx} 44Z" fill="${sk}"/>`;
   s += `<path d="M${50 - rx + 2} 56 Q50 70 ${50 + rx - 2} 56 Q${50 + rx - 4} 66 50 67.6 Q${50 - rx + 4} 66 ${50 - rx + 2} 56Z" fill="${sd}" opacity=".35"/>`;
+  if (L.helm === 'jester') {
+    const s2 = s;
+    s += eyesArt(L, o.glow, id);
+    s += `<path d="M45.5 60.5 Q50 64 54.5 60.5" stroke="#5a2a2a" stroke-width="1.4" fill="none" stroke-linecap="round"/>`;
+    s += `<path d="M31 40 Q50 26 69 40 L66 42 Q50 32 34 42Z" fill="#f0c040"/>`;
+    s += `<path d="M33 40 Q22 22 10 26 Q18 30 20 40Z" fill="#5a1a6a" stroke="#f0c040" stroke-width=".8"/><path d="M67 40 Q78 22 90 26 Q82 30 80 40Z" fill="#c8102e" stroke="#f0c040" stroke-width=".8"/>`;
+    s += `<path d="M34 41 Q50 22 66 41Z" fill="#a050d0"/><circle cx="10" cy="26" r="3" fill="#f0c040"/><circle cx="90" cy="26" r="3" fill="#f0c040"/>`;
+    s += `<path d="M40 52 L42 56 M60 52 L58 56" stroke="#1a1a2a" stroke-width="1"/>`;
+    return s;
+  }
   if (L.helm === 'mask') {
     s += frontHair(L);
     s += `<path d="M34 42 Q34 30 50 29 Q66 30 66 42 L65 56 Q59 66 50 67 Q41 66 35 56Z" fill="#f4f0f8" stroke="#b89cff" stroke-width="1"/>`;
@@ -3303,7 +3712,7 @@ function portraitSVG(look, o = {}) {
   const inner = (look.kind && look.kind !== 'human') ? monsterArt(look, id) : heroFace(look, o, id);
   return svgWrap(inner, look.bg || '#333', id);
 }
-function unitPortrait(u) { return portraitSVG(lookOf(u), { glow: !!u.flags.glow || (u.statuses || []).some(x => x.key === 'unsealed') }); }
+function unitPortrait(u) { return portraitSVG(lookOf(u), { glow: !!u.flags.glow || (u.statuses || []).some(x => x.key === 'unsealed' || x.key === 'vessel') }); }
 function heroPortrait(id, o) { return portraitSVG(HEROES[id].look, o); }
 function enemyPortrait(id) { const d = ENEMIES[id]; return portraitSVG(d.heroId ? HEROES[d.heroId].look : d.look); }
 
@@ -3881,6 +4290,51 @@ const FX = {
   hexsingle: async d => { SND.play('shield'); beam(P(d.src), P(d.tgt), { color: '#ffe066', width: 8, dur: 360 }); await W(160); const p = P(d.tgt); ring(p, { color: '#ffe066', size: p.w * 1.4, from: 0.4, to: 1.1, dur: 460, width: 6 }); burst(p, { color: '#fff3a0', n: 10, spread: 40 }); },
   sever: async d => { const p = P(d.tgt); for (let k = 0; k < Math.min(5, d.n || 1); k++) later(() => slashAt(p, { color: '#fff', angle: -60 + k * 30, len: p.w * 1.2, thick: 3, dur: 220 }), k * 50); burst(p, { color: '#e8dcff', n: 10, spread: 40 }); await W(160); },
   lastlight: d => { if (!live()) return; SND.play('shield'); const p = P(d.tgt); beam(P(d.src), p, { color: '#fff2a8', width: 6, dur: 360 }); ring(p, { color: '#fff2a8', size: p.w * 1.5, from: 0.3, to: 1.1, dur: 520, width: 5 }); burst(p, { color: '#fffbe0', n: 12, spread: 40, up: 30 }); },
+  lash: d => melee(d, { color: '#ff6a2a', angle: -20, len: 1.6, thick: 5, extra: p => burst(p, { color: '#ff8a2a', n: 8, spread: 36 }) }),
+  hellgate: async d => {
+    SND.play('fire'); flash('#5a0a06', 0.4, 480); shakeArena(true);
+    const a = P(d.src); ring(a, { color: '#ff6a2a', size: 200, from: 0.2, to: 1.6, dur: 520, width: 7 });
+    await W(220); allP(d).forEach(p => { column(p, { color: '#ff4a1a', width: p.w * 0.8, dur: 520 }); burst(p, { color: '#ffb057', n: 14, spread: 60, up: 30 }); });
+    await W(240);
+  },
+  frame: async d => {
+    SND.play('select'); const p = P(d.tgt);
+    const f = fxEl('frame', { left: (p.x - p.w * 0.45) + 'px', top: (p.y - p.h * 0.45) + 'px', width: p.w * 0.9 + 'px', height: p.h * 0.9 + 'px' });
+    await anim(f, [{ opacity: 0, transform: 'scale(1.6) rotate(-8deg)' }, { opacity: 1, transform: 'scale(1) rotate(0)' }], 260);
+    slashAt(p, { color: '#c8d4ff', angle: -35, len: p.w * 1.3, thick: 4 });
+    anim(f, [{ opacity: 1 }, { opacity: 0 }], 360).then(() => f.remove());
+  },
+  decree: async d => { SND.play('banner'); flash('#f0d070', 0.2, 360); allP(d).forEach(p => { ring(p, { color: '#f0d070', size: p.w * 1.3, from: 0.5, to: 1.1, width: 4 }); burst(p, { color: '#fff3a0', n: 8, spread: 30, up: 50 }); }); await W(320); },
+  shelter: async d => { SND.play('shield'); flash('#f0d070', 0.25, 420); allP(d).forEach(p => { ring(p, { color: '#f0d070', size: p.w * 1.5, from: 0.3, to: 1.1, dur: 560, width: 6 }); }); await W(380); },
+  order: async d => { SND.play('select'); beam(P(d.src), P(d.tgt), { color: '#c8a070', width: 6, dur: 320 }); await W(150); const p = P(d.tgt); ring(p, { color: '#f0d070', size: p.w * 1.2, from: 1.2, to: 0.7, dur: 300, width: 4 }); },
+  decision: async d => { SND.play('banner'); allP(d).forEach(p => ring(p, { color: '#c8a070', size: p.w * 1.4, from: 0.6, to: 1.2, dur: 480, width: 4 })); flash('#2a2016', 0.3, 400); await W(360); },
+  quill: d => melee(d, { color: '#f0ece0', angle: -60, thick: 3, f: 0.45, len: 1.1 }),
+  note: async d => { SND.play('gain'); await projectile(P(d.src), P(d.tgt), { color: '#7ad06a', size: 14, dur: 260 }); burst(P(d.tgt), { color: '#b8ffcf', n: 8 }); },
+  song: d => { (d.tgts || []).forEach(t => { const p = P(t); burst(p, { color: '#7ad06a', n: 8, spread: 30, up: 50 }); }); },
+  trinket: async d => {
+    SND.play('gain'); const a = P(d.src);
+    const col = { lantern: '#ffd56b', mirror: '#cfe8ff', bell: '#f0c040', spark: '#ff6a2a' }[d.item] || '#fff';
+    ring(a, { color: col, size: 90, width: 4 }); burst(a, { color: col, n: 12, spread: 40, up: 30 });
+    await W(220); allP(d).forEach(p => { ring(p, { color: col, size: p.w * 1.2, dur: 360 }); burst(p, { color: col, n: 8 }); });
+    if (d.item === 'spark') shakeArena(false);
+  },
+  cards: async d => { SND.play('whoosh'); const a = P(d.src), b = P(d.tgt); for (let k = 0; k < 3; k++) later(() => projectile(a, { x: b.x + (k - 1) * 10, y: b.y }, { color: '#f4f0e8', size: 10, dur: 220, ease: 'linear' }), k * 60); await W(300); burst(b, { color: '#a050d0', n: 8 }); },
+  hellmark: d => melee(d, { color: '#d1203a', angle: 40, thick: 7, len: 1.4, extra: p => burst(p, { color: '#ff4a2a', n: 10, up: 20 }) }),
+  mimic: async d => { SND.play('whoosh'); ghost(d.src, 0, 0, 380, '#a050d0'); await projectile(P(d.src), P(d.tgt), { color: '#a050d0', size: 20, dur: 260 }); ring(P(d.tgt), { color: '#d8a8ff', size: 80 }); },
+  gift: async d => { SND.play('break'); const p = P(d.tgt); beam(P(d.src), p, { color: '#d1203a', width: 16, dur: 420 }); await W(200); burst(p, { color: '#8fd0ff', n: 16, spread: 60, size: 8 }); burst(p, { color: '#d1203a', n: 10 }); shakeArena(false); },
+  curtain: async d => { SND.play('ult'); flash('#3a0a3a', 0.45, 500); const a = P(d.src); ring(a, { color: '#d1203a', size: 220, from: 0.2, to: 1.8, dur: 560, width: 7 }); await W(300); allP(d).forEach(p => { burst(p, { color: '#d1203a', n: 16, spread: 60 }); ring(p, { color: '#a050d0', size: 110, width: 5 }); }); shakeArena(true); },
+  vesselwake: d => { if (!live()) return; const p = P(d.src); flash('#5a0010', 0.5, 600); shakeArena(true); ring(p, { color: '#d1203a', size: p.w * 2.2, from: 1.4, to: 0.4, dur: 520, width: 8 }); burst(p, { color: '#ff2a3a', n: 24, spread: 80, size: 8 }); SND.play('crush'); },
+  ink: async d => { await projectile(P(d.src), P(d.tgt), { color: '#2a2e44', size: 14, dur: 240 }); burst(P(d.tgt), { color: '#1a1c26', n: 12, spread: 34, size: 8 }); },
+  seal: async d => { SND.play('break'); const p = P(d.tgt); await projectile(P(d.src), p, { color: '#7a8ab0', size: 18, dur: 260 }); ring(p, { color: '#1a1c26', size: p.w * 1.4, from: 1.3, to: 0.6, dur: 420, width: 8 }); burst(p, { color: '#7a8ab0', n: 10 }); },
+  lastpage: async d => { SND.play('ult'); flash('#0e1018', 0.5, 520); const a = P(d.src); for (let k = 0; k < Math.min(8, Math.max(2, Math.ceil((d.n || 2) / 2))); k++) later(() => projectile(a, P(pick(d.tgts || [d.src])), { color: '#e8ecff', size: 10, dur: 300 }), k * 60); await W(420); allP(d).forEach(p => burst(p, { color: '#7a8ab0', n: 12, spread: 50 })); shakeArena(true); },
+  hexburst: d => {
+    if (!live()) return;
+    const p = P(d.src); SND.play('break'); flash('#ffe066', 0.35, 360); shakeArena(true);
+    const h = fxEl('hexfx', { left: p.x + 'px', top: p.y + 'px', width: p.w * 1.1 + 'px', height: p.w * 1.1 + 'px' });
+    anim(h, [{ transform: 'translate(-50%,-50%) scale(.6) rotate(0deg)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(2.6) rotate(40deg)', opacity: 0 }], 560).then(() => h.remove());
+    for (let k = 0; k < 6; k++) { const ang = k * Math.PI / 3; const sh = fxEl('hexshard', { left: p.x + 'px', top: p.y + 'px' }); anim(sh, [{ transform: 'translate(-50%,-50%) rotate(' + (k * 60) + 'deg)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(ang) * p.w * 1.2}px), calc(-50% + ${Math.sin(ang) * p.w * 1.2}px)) rotate(${k * 60 + 120}deg)`, opacity: 0 }], 520).then(() => sh.remove()); }
+    later(() => (d.tgts || []).forEach(t => { const q = P(t); zap(p, q, { color: '#ffe066', jag: 10 }); ring(q, { color: '#ffe066', size: q.w * 1.2, width: 5 }); burst(q, { color: '#fff3a0', n: 10 }); }), 220);
+  },
   wave: async d => { const a = P(d.src); ring(a, { color: d.color || '#fff', size: 200, from: 0.2, to: 1.8, dur: 500, width: 5 }); await W(260); allP(d).forEach(p => burst(p, { color: d.color || '#fff', n: 8 })); }
 };
 
@@ -3990,7 +4444,7 @@ function caption(html, color) {
 const app = () => document.getElementById('app');
 const MINI = {};
 function miniPortrait(u) {
-  const k = u.uid + (u.flags.glow || has(u, 'unsealed') ? 'g' : '');
+  const k = u.uid + (u.flags.glow || (has(u, 'unsealed') || has(u, 'vessel')) ? 'g' : '');
   return MINI[k] || (MINI[k] = unitPortrait(u));
 }
 function eraVar(e) { return e === 'first' ? 'var(--e1)' : e === 'second' ? 'var(--e2)' : 'var(--e3)'; }
@@ -3999,12 +4453,12 @@ function cardHTML(u) {
   const en = u.side === 'enemy';
   const solo = en && B.enemies.length === 1;
   const many = en && B.enemies.length >= 4;
-  const tag = u.isHero ? HEROES[u.id].role : (u.def.boss ? 'Boss' : u.def.elite ? 'Elite' : u.def.priority ? 'Support' : '');
+  const tag = u.isHero ? HEROES[u.id].role : (u.creature || u.def.creature) ? 'Creature' : (u.def.boss ? 'Boss' : u.def.elite ? 'Elite' : u.def.priority ? 'Support' : '');
   return `<div class="card ${en ? 'en' : 'pl'} ${u.def.boss ? 'boss' : ''} ${solo ? 'solo' : ''} ${u.def.ghost ? 'ghostly' : ''}" data-uid="${u.uid}" style="--c:${u.color}">
 ${en ? `<div class="intent" style="min-height:${(u.def.multi || 1) * (many ? 23 : 31)}px"></div>` : ''}
 <div class="por"><div class="pi">${unitPortrait(u)}</div><button class="ci" aria-label="Details for ${esc(u.name)}">i</button><div class="hit"></div><div class="bub"></div><div class="kotag">Fallen</div><div class="turnflag">${en ? 'Acting' : 'Your turn'}</div>${en ? '' : '<div class="inc hide"></div>'}</div>
 <div class="nm"><span>${esc(u.name)}</span><em>${tag}</em></div>
-<div class="hp"><i class="g"></i><i class="f"></i><i class="s"></i><b></b></div>
+<div class="hp"><i class="g"></i><i class="f"></i><i class="s"></i><i class="hx"></i><b></b></div>
 ${u.isHero ? '<div class="ult"><i></i></div>' : ''}
 <div class="sts"></div>
 </div>`;
@@ -4072,6 +4526,8 @@ function renderRows() {
   rowE.classList.toggle('many', ens.length >= 4);
   rowE.classList.toggle('five', ens.length >= 5);
   rowP.innerHTML = B.players.map(cardHTML).join('');
+  rowP.style.setProperty('--n', Math.max(3, B.players.length));
+  rowP.classList.toggle('many', B.players.length >= 4);
   UI.cards = {};
   $$('.card', UI.arena).forEach(c => { UI.cards[c.dataset.uid] = c; });
   if (UI.pending) markTargets();
@@ -4102,6 +4558,7 @@ function badge(st) {
   else if (st.key === 'channel') num = '×' + st.value;
   else if (st.key === 'hexwall') num = Math.round(st.value);
   else if (st.key === 'hexshield') num = st.hits + '✦';
+  else if (st.key === 'tempo') { icon = (TEMPO[st.value] || TEMPO.andante).icon; num = ''; }
   else if (d.max && st.stacks > 1) num = '×' + st.stacks;
   else if (st.turns < 99) num = st.turns;
   return `<span class="sb ${d.type}" style="--c:${d.color}">${icon}${num !== '' ? `<b>${num}</b>` : ''}</span>`;
@@ -4128,18 +4585,26 @@ function updateUnit(u) {
   c.classList.toggle('crys', up && has(u, 'crystal'));
   c.classList.toggle('stone', up && has(u, 'stone'));
   c.classList.toggle('aloft', up && has(u, 'aloft'));
+  c.classList.toggle('vessel', up && has(u, 'vessel'));
+  c.classList.toggle('silenced', up && has(u, 'silenced'));
   c.classList.toggle('hexed', up && has(u, 'hexshield'));
   c.classList.toggle('unseen', up && unseen(u));
   if (u.isHero) c.classList.toggle('ready', up && u.ult >= 100);
-  const glow = !!u.flags.glow || has(u, 'unsealed');
+  const glow = !!u.flags.glow || has(u, 'unsealed') || has(u, 'vessel');
   if (c._glow !== glow) { if (c._glow !== undefined) c.querySelector('.pi').innerHTML = unitPortrait(u); c._glow = glow; }
   const hpP = Math.max(0, u.hp / u.maxHp * 100), shP = Math.min(100, u.shield / u.maxHp * 100);
   const f = c.querySelector('.hp .f'), g = c.querySelector('.hp .g'), s = c.querySelector('.hp .s'), b = c.querySelector('.hp b');
   f.style.width = hpP + '%'; g.style.width = hpP + '%';
   f.classList.toggle('low', u.side === 'player' && hpP < 30);
-  if (shP > 0) { s.style.display = 'block'; s.style.left = (hpP + shP <= 100 ? hpP : 100 - shP) + '%'; s.style.width = shP + '%'; } else s.style.display = 'none';
-  const compact = u.side === 'enemy' && B.enemies.length >= 4;
-  const txt = compact ? `${Math.ceil(u.hp)}` : u.shield > 0 ? `${Math.ceil(u.hp)} <span style="color:#cfe8ff">+${u.shield}🛡</span>` : `${Math.ceil(u.hp)} / ${u.maxHp}`;
+  const hxSt = getSt(u, 'hexshield'), hxV = hxSt ? Math.max(0, Math.min(u.shield, Math.round(hxSt.value))) : 0, blV = u.shield - hxV;
+  const hxP = Math.min(100, hxV / u.maxHp * 100), blP = Math.min(100, blV / u.maxHp * 100);
+  const start = hpP + shP <= 100 ? hpP : Math.max(0, 100 - shP);
+  const hxEl = c.querySelector('.hp .hx');
+  if (blP > 0) { s.style.display = 'block'; s.style.left = start + '%'; s.style.width = blP + '%'; } else s.style.display = 'none';
+  if (hxEl) { if (hxP > 0) { hxEl.style.display = 'block'; hxEl.style.left = Math.min(100 - hxP, start + blP) + '%'; hxEl.style.width = hxP + '%'; } else hxEl.style.display = 'none'; }
+  const compact = (u.side === 'enemy' && B.enemies.length >= 4) || (u.side === 'player' && B.players.length >= 4);
+  const shTxt = (blV > 0 ? ` <span style="color:#cfe8ff">+${blV}🛡</span>` : '') + (hxV > 0 ? ` <span style="color:#ffe066">+${hxV}⬡</span>` : '');
+  const txt = compact ? `${Math.ceil(u.hp)}` : u.shield > 0 ? `${Math.ceil(u.hp)}${shTxt}` : `${Math.ceil(u.hp)} / ${u.maxHp}`;
   if (b._t !== txt) { b.innerHTML = txt; b._t = txt; }
   const ul = c.querySelector('.ult i'); if (ul) ul.style.width = u.ult + '%';
   let sh = '';
@@ -4221,7 +4686,7 @@ function drawChannels() {
 function renderTL() {
   const tl = $('#tl'); if (!tl) return;
   const order = B.over ? [] : turnOrder(8);
-  const key = order.map(u => u.uid + (u.flags.glow || has(u, 'unsealed') ? 'g' : '')).join(',') + '|' + (B.actor ? B.actor.uid : '');
+  const key = order.map(u => u.uid + (u.flags.glow || (has(u, 'unsealed') || has(u, 'vessel')) ? 'g' : '')).join(',') + '|' + (B.actor ? B.actor.uid : '');
   if (key === UI.tlKey) return;
   UI.tlKey = key;
   tl.innerHTML = '<span class="tlab">Next</span>' + order.map((u, i) => `<div class="t ${u.side === 'enemy' ? 'e' : ''} ${i === 0 && B.actor === u ? 'now' : ''}" style="--c:${u.side === 'enemy' ? '#ff5a68' : u.color}" title="${esc(u.name)}" data-uid="${u.uid}" role="button" aria-label="${esc(u.name)} details">${miniPortrait(u)}</div>`).join('');
@@ -4327,7 +4792,7 @@ async function startBattle(cfg, ctx) {
   await W(250);
   const boss = B.enemies.find(e => e.def.boss);
   if (ctx.mode === 'gauntlet') await HOOK.banner('Wave ' + ctx.wave, boss ? `${boss.name}: ${boss.def.title}` : (ctx.wave % 5 === 4 ? 'A boss waits on the next wave' : ''), boss ? boss.color : '#ffdf8a');
-  else if (ctx.mode === 'custom') await HOOK.banner('Heroes clash', `${B.players.length} against ${B.enemies.length}`, '#ffdf8a');
+  else if (ctx.mode === 'custom') await HOOK.banner('Heroes clash', `${B.players.filter(p => p.isHero).length} against ${B.enemies.length}`, '#ffdf8a');
   else if (boss) await HOOK.banner(boss.name, boss.def.title, boss.color);
   else await HOOK.banner(ctx.stage.name, ERA[ctx.stage.era].name, ERA[ctx.stage.era].color);
   if (B.id !== myId || !UI.bt) return;
@@ -4393,7 +4858,7 @@ function statsTable(units) {
 function statsHTML() {
   const foes = B.enemies.filter(e => e.isHero);
   const tabs = foes.length ? `<div class="sttabs"><button class="on" data-st="p">Your team</button><button data-st="e">Opponents</button></div>` : '';
-  return `<div class="stats2">${tabs}<div data-stp="p">${statsTable(B.players)}</div>${foes.length ? `<div data-stp="e" class="hide">${statsTable(foes)}</div>` : ''}<p class="impnote">${IMPACT_NOTE} Gold numbers lead their row.</p></div>`;
+  return `<div class="stats2">${tabs}<div data-stp="p">${statsTable(B.players.filter(p => p.isHero))}</div>${foes.length ? `<div data-stp="e" class="hide">${statsTable(foes)}</div>` : ''}<p class="impnote">${IMPACT_NOTE} Gold numbers lead their row.</p></div>`;
 }
 function wireStatTabs(o) {
   $$('[data-st]', o).forEach(b => b.onclick = () => {
@@ -4425,7 +4890,8 @@ ${statsHTML()}
     return;
   }
   if (ctx.mode === 'campaign') {
-    const avg = B.players.reduce((a, p) => a + (p.alive ? p.hp / p.maxHp : 0), 0) / B.players.length;
+    const heroes = B.players.filter(p => p.isHero);
+    const avg = heroes.reduce((a, p) => a + (p.alive ? p.hp / p.maxHp : 0), 0) / heroes.length;
     const conds = [['Win the battle', win], ['No hero falls', win && B.kos === 0], ['Team HP averages 50% or more', win && avg >= 0.5]];
     const stars = conds.filter(c => c[1]).length;
     const before = new Set(HERO_ORDER.filter(isUnlocked));
@@ -4457,7 +4923,7 @@ ${win ? '' : `<p style="margin:0;font-size:13px;color:var(--tx2);max-width:330px
   if (win) {
     recordBest(G.wave);
     G.carry = {};
-    B.players.forEach(p => { G.carry[p.id] = { hp: p.alive ? Math.min(1, p.hp / p.maxHp + 0.3) : 0.25, ult: p.alive ? p.ult : 0 }; });
+    B.players.filter(p => p.isHero).forEach(p => { G.carry[p.id] = { hp: p.alive ? Math.min(1, p.hp / p.maxHp + 0.3) : 0.25, ult: p.alive ? p.ult : 0 }; });
     const keys = shuffle(Object.keys(BOONS)).slice(0, 3);
     o.innerHTML = `<h2 class="win" style="font-size:48px">Wave ${G.wave} cleared</h2>
 <p style="margin:0;color:var(--tx2);font-size:13.5px;text-align:center">Your team heals 30% of max HP. The fallen return at 25%. Choose one boon.</p>
@@ -4525,12 +4991,13 @@ function recState() {
 }
 function recordBattle(res, extra = {}) {
   if (!B || !B.players || !B.players.length || UI.recorded === B.id) return;
+  const PL = B.players.filter(p => p.isHero);
   UI.recorded = B.id;
   const r = recState(), win = res === 'win', ctx = UI.ctx || {};
-  const S = B.players.map(p => B.st[p.uid] || newStats());
+  const S = PL.map(p => B.st[p.uid] || newStats());
   const imps = S.map(impactOf);
   const mvpI = imps.indexOf(Math.max(...imps));
-  B.players.forEach((p, i) => {
+  PL.forEach((p, i) => {
     const bid = p.build ? p.build.id : 'balanced';
     const h = r.heroes[p.id] || (r.heroes[p.id] = {});
     const a = h[bid] || (h[bid] = { n: 0, w: 0, imp: 0, mvp: 0, big: 0 });
@@ -4540,12 +5007,12 @@ function recordBattle(res, extra = {}) {
     a.big = Math.max(a.big || 0, s.big || 0);
     for (const k of REC_FIELDS) a[k] = (a[k] || 0) + (s[k] || 0);
   });
-  const name = ctx.mode === 'campaign' ? ctx.stage.name : ctx.mode === 'gauntlet' ? `Gauntlet wave ${ctx.wave}` : `Custom ${B.players.length} vs ${B.enemies.length}`;
+  const name = ctx.mode === 'campaign' ? ctx.stage.name : ctx.mode === 'gauntlet' ? `Gauntlet wave ${ctx.wave}` : `Custom ${PL.length} vs ${B.enemies.filter(e => e.isHero).length}`;
   r.hist.unshift({
     t: Date.now(), m: ctx.mode || 'campaign', name, r: win ? 'w' : 'l', turns: B.turn, stars: extra.stars,
-    team: B.players.map((p, i) => [p.id, p.build ? p.build.id : 'balanced', imps[i], Math.round(S[i].dmg), Math.round(S[i].heal + S[i].shield), S[i].falls ? 1 : 0]),
-    mvp: B.players[mvpI].id,
-    foes: uniq(B.enemies.map(e => (e.isHero ? 'h:' : '') + e.id)).slice(0, 6)
+    team: PL.map((p, i) => [p.id, p.build ? p.build.id : 'balanced', imps[i], Math.round(S[i].dmg), Math.round(S[i].heal + S[i].shield), S[i].falls ? 1 : 0]),
+    mvp: PL[mvpI].id,
+    foes: uniq(B.enemies.filter(e => !e.creature).map(e => (e.isHero ? 'h:' : '') + e.id)).slice(0, 6)
   });
   if (r.hist.length > 50) r.hist.length = 50;
   store();
@@ -4675,6 +5142,13 @@ const BIO = {
   lachlan: 'An icon of the people, known for his range from close combat to long-range orbs. Surrounded by a strong round blue shield. Killed by Yunze.',
   yousuf: 'A young prodigy healer, so important that an escort of elite fighters was assigned to guard him. Killed by Yunze along with that escort.',
   gemia: 'One of Yousuf\'s guards, faster than most. She met Yunze alone and lost. He left her alive so others would fear him, and the scars beneath her eyes are from that fight.',
+  trigg: 'Peguicha\'s servant and right hand, alongside Vehra. Tall, lanky and wingless, he summons hellish creatures and other things from the pit.',
+  alfred: 'A katana user whose eyes see only a mass of blurry lines, which somehow lets him see more clearly. He frames targets with his fingers for sharper clarity and fights with an odd tempo that never stays the same.',
+  ethan: 'King of a large and powerful kingdom, known as a talented, merciful ruler. He gives shelter and hospitality to Yousuf, his guards and his followers, and supports their campaign.',
+  ben: 'Ethan\'s advisor. Smart and a sycophant, but genuinely useful: he gives the orders the king is too merciful to give himself.',
+  kingsley: 'A joyous bard who performs in Ethan\'s palace for Yousuf and his people. There was always an odd depth to him, and it turned out he really was magical. His magic items are borrowed from Vasco.',
+  vasco: 'The jester of Ethan\'s castle and the source of Kingsley\'s magic items. He keeps a collection of dark materials and has a far more evil alter ego he rarely shows. Secretly, he is a semi-vessel of Peguicha.',
+  aamay: 'A mysterious scribe who works by pen and ink in a dark basement, documenting and chronicling everything that happens.',
   david: 'A spear user and one of Yousuf\'s guards. Killed when Yunze massacred the escort.'
 };
 
@@ -4748,8 +5222,8 @@ function showCampaign() {
     const st = SAVE.stars[s.id] || 0;
     let reward = '';
     if (s.reward) {
-      const got = isUnlocked(s.reward);
-      reward = `<div class="reward ${got ? 'got' : ''}"><span class="rp">${heroPortrait(s.reward)}</span>${got ? `${esc(HEROES[s.reward].name)} unlocked` : `Clear to unlock ${esc(HEROES[s.reward].name)}`}</div>`;
+      const rs = [].concat(s.reward), got = rs.every(isUnlocked), nm = rs.map(r => HEROES[r].name).join(' and ');
+      reward = `<div class="reward ${got ? 'got' : ''}">${rs.map(r => `<span class="rp">${heroPortrait(r)}</span>`).join('')}${got ? `${esc(nm)} unlocked` : `Clear to unlock ${esc(nm)}`}</div>`;
     }
     html += `<button class="stage ${s.boss ? 'boss' : ''} ${locked ? 'locked' : ''}" data-i="${i}" style="--ec:${eraVar(s.era)}">
 <div class="no"><span>${locked ? '🔒' : i + 1}</span></div>
@@ -4995,6 +5469,8 @@ function statusLine(st, u) {
   if (st.key === 'hexwall') desc = `Strength ${Math.round(st.value)} of ${u ? wallMax(u) : '?'}. Soaks ${Math.round((u ? (bt(u, 'wallSoak') || 0.3) : 0.3) * 100)}% of every direct hit on his team.`;
   if (st.key === 'bracelet') desc = `${st.stacks} beads left on the bracelet.`;
   if (st.key === 'cinder') desc = `${st.stacks} ${st.stacks === 1 ? 'bead' : 'beads'} embedded: ${Math.round((st.dot || 0) * st.stacks)} pain per turn, ATK and DEF -${st.stacks * 8}%.`;
+  if (st.key === 'tempo') desc = { allegro: 'Allegro: hits for 80% and his next turn comes 50% sooner.', andante: 'Andante: steady, normal hits.', grave: 'Grave: slow and crushing, hits for 140%.' }[st.value] || '';
+  if (st.key === 'pages') desc = `${st.stacks} Pages. The Last Page deals ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.3) : 0.3) * 100)}% ATK to every enemy.`;
   if (st.key === 'vengeance') desc = `${st.stacks} stored. Next Spear Thrust: +${st.stacks * 12}% damage and heals ${st.stacks * 2}% max HP.`;
   if (st.key === 'hunted') desc = `Takes ${pctTxt(st.value || 0.25)} more damage from the Yunze who marked it.`;
   const extra = [];
@@ -5242,7 +5718,7 @@ function guideBody(tab) {
 <p>Harry counts as all three eras. Yunze and Malakai count as Second and Current Era.</p>
 <h4>Rivals</h4><p>Rivals deal 20% more damage to each other. Afterimages of Yunze count as Yunze.</p>${Object.entries(RIVALS).map(([a, bs]) => `<p>${esc(HEROES[a].name)} → ${esc(bs.map(b => HEROES[b].name).join(', '))}</p>`).join('')}
 <h4>Legends</h4><p>Harry and Yunze are Legends. Only one per team.</p>
-<h4>Unlocks</h4><p>Starters: Angus, Flynn and Leo.</p>${STAGES.filter(s => s.reward).map(s => `<p>${isUnlocked(s.reward) ? '✓' : '🔒'} ${esc(HEROES[s.reward].name)}: clear ${esc(s.name)}</p>`).join('')}`;
+<h4>Unlocks</h4><p>Starters: Angus, Flynn and Leo.</p>${STAGES.filter(s => s.reward).flatMap(s => [].concat(s.reward).map(r => `<p>${isUnlocked(r) ? '✓' : '🔒'} ${esc(HEROES[r].name)}: clear ${esc(s.name)}</p>`)).join('')}`;
   if (tab === 'builds') return `<p>Each hero has a Balanced kit and two builds that trade one strength for another. Pick builds on the team screen by tapping a hero in a slot, or from the hero's details. Builds don't cost anything and can be swapped any time outside battle.</p>
 ${HERO_ORDER.map(id => `<h4 style="color:${HEROES[id].color}">${esc(HEROES[id].name)}${isUnlocked(id) ? '' : ' 🔒'}</h4>${BUILDS[id].slice(1).map(b => `<p><b style="color:var(--tx)">${b.icon} ${esc(b.name)}.</b> ${esc(b.desc)}</p>`).join('')}`).join('')}`;
   if (tab === 'enemies') {
