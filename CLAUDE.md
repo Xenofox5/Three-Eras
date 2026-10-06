@@ -1,6 +1,6 @@
 # Three Eras
 
-A turn-based team battler in one self-contained HTML file. Build a team of 3 from 24 heroes across three eras; fight a 31-stage campaign, an endless Gauntlet, or custom hero-vs-hero battles. Current version: v0.92 (`GAME_VERSION` in `data.js`).
+A turn-based team battler in one self-contained HTML file. Build a team of 3 from 24 heroes across three eras; fight a 31-stage campaign, an endless Gauntlet, or custom hero-vs-hero battles. Current version: v0.93 (`GAME_VERSION` in `data.js`).
 
 ## Owner's rules (apply to all game text, comments shown to players, logs and docs)
 - UK English and metric units.
@@ -25,6 +25,7 @@ Plain JS and CSS, no framework, no npm dependencies. Source files are concatenat
 | `ui5.js` | Records and the Stats screen |
 | `ui4.js` | Menus, sheets, Guide; ends with `boot()` so it must load last |
 | `style.css`, `shell_head.html` | Styles and HTML head |
+| `tools/cdp.js` | Headless browser driver for the tests. No dependencies: Node's `WebSocket` plus the DevTools protocol |
 
 Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 
@@ -35,12 +36,13 @@ Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 - `npm run balance` → campaign, builds, 3v3 and 1v1 simulations; summary in `sim-results/summary.txt`, builds in `sim-results/builds.txt`. `sh tools/balance.sh 0.93` also regenerates `simstats.js` for v0.93
 - `npm run stages` → hero-boss stage check; overrides: `sh tools/stages.sh '{"archive":{"heroAtk":1.0}}'`
 - `npm run check:dupes` → must print nothing (all top-level names are global)
-- `npm run test:smoke` / `npm run test:regression` → Playwright (Python) browser tests against `dist/three-eras.html` (set `TE_HTML` to test another file). Needs `pip install playwright && playwright install chromium`
+- `npm run test:smoke` / `npm run test:regression` → browser tests against `dist/three-eras.html` (set `TE_HTML` to test another build). They need Node 22+ and any installed Chrome, Edge or Chromium, and no npm or Python packages: `tools/cdp.js` drives the browser over the DevTools protocol with Node's built-in `fetch` and `WebSocket`. Set `TE_BROWSER` if the executable is somewhere unusual. Smoke takes about a minute, regression about ten and runs in two halves
+- `npm run test:smoke:py` / `npm run test:regression:py` → the older Playwright versions of the same tests. Same coverage, but they need `pip install playwright && playwright install chromium`
 - `data.js` is too big for `node -e "$(cat data.js)..."`: always concatenate into a file first (the scripts do this)
 
 ## On Windows
 - npm runs scripts through `cmd.exe`, so no POSIX flags in `package.json`. `mkdir -p dist` there creates a folder called `-p` and then fails on every later run, so each build script makes its own output folder instead. Keep new scripts to a bare `sh <script>.sh` call.
-- `npm run test:smoke` and `test:regression` need `python3` on the PATH. Git Bash does not provide it and the Microsoft Store stub is not a working Python, so install Python properly or run those tests elsewhere.
+- The default browser tests are the Node ones, so they work here. The `:py` variants need `python3` on the PATH; Git Bash does not provide it and the Microsoft Store stub is not a working Python.
 - Git here is configured `core.autocrlf=false` for this repo on purpose: the files are committed with CRLF and the build scripts still run under Git Bash and on the Ubuntu runner. Do not "fix" the line endings.
 
 ## Workflow for any change
@@ -49,7 +51,7 @@ Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 3. If numbers or mechanics changed: `npm run balance`, tune, repeat. If a hero who is also a boss changed: `npm run stages`.
 4. Add a `BALANCE` entry (numbers and rules: `{ t, kind, who, what, text, from, to, note }`, `t` is buff, nerf, rework, new, harder, easier or adjust) and an `UPDATES` entry (features) at the top of each list in `data.js`. Bump `GAME_VERSION` (0.1 for major updates, 0.01 for small ones).
 5. `sh tools/balance.sh <version>` to refresh the in-game Stats screen.
-6. `npm run build:all`, then `npm run test:smoke` (or the full regression for big changes).
+6. `npm run build:all`, then `npm run test:smoke` (or `npm run test:regression` for big changes). Both must end with every line PASS and no console output.
 7. Commit and push. GitHub Actions (`.github/workflows/pages.yml`) deploys `dist/app` to GitHub Pages.
 
 ## Balance targets
