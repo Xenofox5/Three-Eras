@@ -1,0 +1,17 @@
+{
+  "name": "three-eras",
+  "version": "0.92.0",
+  "private": true,
+  "description": "Three Eras: a turn-based team battler in a single HTML file.",
+  "scripts": {
+    "build": "mkdir -p dist && sh build.sh dist/three-eras.html",
+    "build:offline": "mkdir -p dist && sh build_offline.sh dist/three-eras-offline.html",
+    "build:app": "sh build_app.sh dist/app",
+    "build:all": "npm run build && npm run build:offline && npm run build:app",
+    "balance": "sh tools/balance.sh",
+    "stages": "sh tools/stages.sh",
+    "test:smoke": "python3 tools/browser_smoke.py",
+    "test:regression": "python3 tools/browser_regression.py 0 && python3 tools/browser_regression.py 1",
+    "check:dupes": "grep -ohE \"^(async )?function [A-Za-z_$][A-Za-z0-9_$]*|^(const|let) [A-Za-z_$][A-Za-z0-9_$]*\" data.js engine.js art.js ui*.js | awk '{print $NF}' | sort | uniq -d"
+  }
+}

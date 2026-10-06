@@ -1,0 +1,6 @@
+dist/
+sim-results/
+node_modules/
+__pycache__/
+*.log
+.DS_Store
