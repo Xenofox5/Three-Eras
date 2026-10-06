@@ -36,8 +36,11 @@ function reducedNow() { return SAVE.motion === 'reduced' || (SAVE.motion === 'au
 function applyMotion() { REDUCED = reducedNow(); if (document.body) document.body.classList.toggle('reduced', REDUCED); }
 applyMotion();
 if (MOTION_MQ && MOTION_MQ.addEventListener) MOTION_MQ.addEventListener('change', applyMotion);
-const isUnlocked = id => STARTERS.includes(id) || (SAVE.stars[UNLOCK_FROM[id]] || 0) > 0;
-const stageOpen = i => i === 0 || (SAVE.stars[STAGES[i - 1].id] || 0) > 0 || (SAVE.stars[STAGES[i].id] || 0) > 0;
+/* Dev mode opens every hero and stage so a change can be tested without replaying the
+   campaign. It only lifts the locks: stars, records and the Gauntlet best are untouched. */
+if (new URLSearchParams(location.search).has('dev')) SAVE.dev = true;
+const isUnlocked = id => !!SAVE.dev || STARTERS.includes(id) || (SAVE.stars[UNLOCK_FROM[id]] || 0) > 0;
+const stageOpen = i => !!SAVE.dev || i === 0 || (SAVE.stars[STAGES[i - 1].id] || 0) > 0 || (SAVE.stars[STAGES[i].id] || 0) > 0;
 const totalStars = () => STAGES.reduce((a, s) => a + (SAVE.stars[s.id] || 0), 0);
 /* ---------- saving: device storage plus a private copy on the player's Claude account ---------- */
 const CLOUD = { ref: null, status: 'local', writing: false, dirty: false, timer: null };

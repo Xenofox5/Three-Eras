@@ -100,9 +100,17 @@ function fitBattle() {
   const cs = getComputedStyle(UI.arena);
   const avail = UI.arena.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - exE - exP - 46;
   UI.fitKey = rowE.offsetHeight - pe.offsetHeight + ':' + (rowP.offsetHeight - pp.offsetHeight) + ':' + UI.arena.clientHeight;
-  const w = pp.offsetWidth || 100;
-  const h = Math.max(50, Math.min(Math.floor(avail / 2), Math.round(w * 1.05)));
+  /* Width comes from the row, not from the card. CSS caps the card at --ph to keep portraits
+     square, so measuring the card here would feed that cap back in and shrink it every pass. */
+  const n = Math.max(3, B.players.length);
+  const natural = Math.min(168, (rowP.clientWidth - (n - 1) * 6) / n) || 100;
+  const h = Math.max(50, Math.min(Math.floor(avail / 2), Math.round(natural * 1.05)));
   UI.bt.style.setProperty('--ph', h + 'px');
+  /* The enemy row packs more cards into the same width, so it gets its own square size.
+     Without this, five foes are 72 wide and 128 tall. */
+  const ne = Math.max(1, B.enemies.length);
+  const naturalE = Math.min(168, (rowE.clientWidth - (ne - 1) * 6) / ne) || 100;
+  UI.bt.style.setProperty('--phe', Math.max(50, Math.min(h, Math.round(naturalE))) + 'px');
 }
 window.addEventListener('resize', () => { if (UI.bt) { fitBattle(); } });
 

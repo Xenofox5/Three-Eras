@@ -54,7 +54,10 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--goldhi);ou
 .top .sub{font-size:12.5px;color:var(--tx2);display:block;font-family:var(--fu)}
 
 /* ---------- title ---------- */
-.title{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 18px 28px;gap:20px;text-align:center;position:relative}
+.title{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 18px 28px;gap:20px;text-align:center;position:relative;overflow-y:auto;min-height:0}
+/* safe centring keeps the top of the screen reachable once the content is taller than the
+   window. Browsers that do not know the keyword keep the plain centring above. */
+.title{justify-content:safe center}
 .logo{font-family:var(--fd);font-size:clamp(64px,20vw,104px);line-height:.85;margin:0;font-weight:400;
   background:linear-gradient(100deg,var(--e1) 0 33%,var(--e2) 33% 66%,var(--e3) 66%);-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 3px 0 rgba(0,0,0,.25))}
@@ -629,3 +632,42 @@ body.reduced .card.tgt .por,body.reduced .card.aloft .por::before{animation:none
 .frame{position:absolute;border:3px solid #c8d4ff;border-radius:40%;box-shadow:0 0 14px #9fb8ff,inset 0 0 14px #9fb8ff}
 .hexfx{position:absolute;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);background:radial-gradient(circle,rgba(255,243,160,.15) 30%,rgba(255,224,102,.85) 70%,rgba(255,255,255,.9) 76%,transparent 80%)}
 .hexshard{position:absolute;width:12px;height:12px;background:#ffe066;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 8px #ffe066}
+
+/* ===== Desktop ===== */
+/* The game is built for a tall phone. A desktop window is proportionally much shorter, so the
+   arena's height budget, not the card width, decides how big a portrait can be. Portraits used
+   to take their height from that budget and their width from the card, which stretched them
+   flat: 168x66 on a laptop with a taskbar. Capping the card at the square size fixes the shape,
+   and zooming out is no longer needed to get the proportions back. */
+/* Specificity has to clear `.row.en .card:not(.solo)` and `.row.pl .card`, which both pin
+   max-width to 168px. The solo boss card is deliberately wider and sizes itself from --ph. */
+.scr-battle .row .card:not(.solo){max-width:min(168px,var(--ph,110px))}
+/* The enemy row has its own square size, so four or five foes are not tall and thin. */
+.scr-battle .row.en .card:not(.solo) .por{height:var(--phe,var(--ph,110px))}
+
+/* On a wide, short window the action panel moves beside the arena instead of under it, which
+   hands its whole height back to the cards. Portrait only: a phone must never hit this. */
+@media (min-width:860px) and (min-aspect-ratio:1/1){
+  #app:has(.scr-battle){max-width:1000px}
+  .scr-battle{display:grid;grid-template-columns:1fr minmax(260px,320px);grid-template-rows:auto auto 1fr;
+    grid-template-areas:"top act" "tl act" "arena act";column-gap:10px;padding-right:10px}
+  .scr-battle .bt-top{grid-area:top}
+  .scr-battle .tl{grid-area:tl}
+  .scr-battle .arena{grid-area:arena;min-height:0}
+  .scr-battle .act{grid-area:act;height:auto;align-self:stretch;border-top:0;border-left:1px solid #2c2a58;
+    background:linear-gradient(180deg,rgba(14,12,36,.6),#0c0b20);justify-content:center;padding:14px 12px}
+  .scr-battle .act .waitmsg{flex:none;height:auto;padding:20px 0}
+  .scr-battle .desc{-webkit-line-clamp:8}
+  .scr-battle .descrow{flex-direction:column;flex:none;margin-top:10px}
+  .scr-battle .descrow .use{width:100%}
+  .scr-battle .res .res-in{max-width:620px}
+  /* The result overlay and sheets still read better as a centred column. */
+  .scr-battle .res{z-index:50}
+}
+
+/* A 104px logo is too tall when the window is short. */
+@media (max-height:720px){ .logo{font-size:clamp(44px,14vw,72px)} .title{gap:12px} .tagline{font-size:14px} }
+
+/* The version tag doubles as the dev-mode toggle, so it must not look like a button. */
+.vtag{border:0;background:none;padding:2px 6px;font:inherit;font-size:12px;font-weight:700;color:var(--tx3);letter-spacing:.5px;cursor:pointer}
+.vtag.dev{color:#ffdf8a}

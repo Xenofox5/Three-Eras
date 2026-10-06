@@ -54,7 +54,7 @@ function showTitle() {
   app().innerHTML = `<div class="scr">
 <button class="ib corner" id="tSnd" aria-label="Sound">${SAVE.sound ? '🔊' : '🔇'}</button>
 <div class="title">
-  <h1 class="logo">Three Eras</h1><span class="vtag">v${esc(GAME_VERSION)}${typeof APPMODE !== 'undefined' && APPMODE ? ' app' : typeof OFFLINE !== 'undefined' && OFFLINE ? ' offline' : ''}</span>
+  <h1 class="logo">Three Eras</h1><button class="vtag${SAVE.dev ? ' dev' : ''}" id="vtag" title="Tap five times for dev mode">v${esc(GAME_VERSION)}${typeof APPMODE !== 'undefined' && APPMODE ? ' app' : typeof OFFLINE !== 'undefined' && OFFLINE ? ' offline' : ''}${SAVE.dev ? ' dev' : ''}</button>
   <p class="tagline">Build a team of three from across the ages and fight whatever each era throws at you.</p>
   <div class="lineup">${HERO_ORDER.map(id => `<div class="lp ${isUnlocked(id) ? '' : 'locked'}">${heroPortrait(id)}</div>`).join('')}</div>
   <div class="menu">
@@ -71,6 +71,19 @@ function showTitle() {
   if (SAVE.migrated && !SAVE.migrNote) { SAVE.migrNote = true; store(); }
   updateSaveNote();
   $('#backupBtn').onclick = backupSheet;
+  /* Five taps on the version tag turns dev mode on or off. ?dev in the address does the same. */
+  const vt = $('#vtag');
+  vt.onclick = () => {
+    UI.devTaps = (UI.devTaps || 0) + 1;
+    clearTimeout(UI.devTimer);
+    UI.devTimer = setTimeout(() => { UI.devTaps = 0; }, 1500);
+    if (UI.devTaps < 5) return;
+    UI.devTaps = 0;
+    SAVE.dev = !SAVE.dev;
+    store(); SND.play('gain');
+    toast(SAVE.dev ? 'Dev mode on: every hero and stage is unlocked.' : 'Dev mode off.');
+    showTitle();
+  };
   const fxBtn = $('#fxBtn');
   const drawFx = () => { fxBtn.textContent = 'Effects: ' + MOTION_LABEL[SAVE.motion]; };
   drawFx();

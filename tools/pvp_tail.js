@@ -12,13 +12,21 @@ function team3() { for (;;) { const t = shuffle(IDS).slice(0, 3); if (t.filter(x
 (async () => {
   const out = {};
   if (MODE === 'duel') {
+    /* Each unordered pair is played once, N fights from each side, and the mirror cell is
+       its complement. Looping over ordered pairs instead sampled every matchup twice
+       independently, so M[a][b] and M[b][a] were two different answers to the same question
+       and disagreed by up to 29 points. It also did double the work. */
     const M = {}; IDS.forEach(a => { M[a] = {}; });
-    for (const a of IDS) for (const b of IDS) {
-      if (a === b) continue;
-      let s = 0; for (let i = 0; i < N; i++) { s += await fight([a], [b]); s += 1 - await fight([b], [a]); }
-      M[a][b] = Math.round(s / (2 * N) * 1000) / 10;
+    for (let i = 0; i < IDS.length; i++) for (let j = i + 1; j < IDS.length; j++) {
+      const a = IDS[i], b = IDS[j];
+      let s = 0;
+      for (let k = 0; k < N; k++) { s += await fight([a], [b]); s += 1 - await fight([b], [a]); }
+      const pa = Math.round(s / (2 * N) * 1000) / 10;
+      M[a][b] = pa;
+      M[b][a] = Math.round((100 - pa) * 10) / 10;
     }
     out.matrix = M;
+    out.perPair = 2 * N;
     out.duel = {}; IDS.forEach(a => { const v = IDS.filter(b => b !== a).map(b => M[a][b]); out.duel[a] = Math.round(v.reduce((x, y) => x + y, 0) / v.length * 10) / 10; });
   } else {
     const W = {}, C = {}; IDS.forEach(a => { W[a] = 0; C[a] = 0; });

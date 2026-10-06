@@ -129,6 +129,19 @@ class Session {
     await this.send('Page.reload', {});
     await this.waitForGame();
   }
+  /* Resizes the viewport and re-runs the battle screen's fit pass. */
+  async viewport(width, height) {
+    await this.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 500 });
+    await sleep(250);
+    await this.eval('typeof fitBattle === "function" && UI.bt ? (fitBattle(), true) : true');
+    await sleep(150);
+  }
+  /* Writes a PNG of the current viewport, for looking at layout changes. */
+  async screenshot(file) {
+    const r = await this.send('Page.captureScreenshot', { format: 'png' });
+    fs.writeFileSync(file, Buffer.from(r.data, 'base64'));
+    return file;
+  }
   /* e.g. reducedMotion('reduce') or reducedMotion(null) to clear. */
   reducedMotion(value) {
     return this.send('Emulation.setEmulatedMedia', value ? { features: [{ name: 'prefers-reduced-motion', value }] } : { features: [] });

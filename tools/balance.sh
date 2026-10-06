@@ -12,7 +12,10 @@ IDS=$(node $OUT/ids.js)
 echo "Campaign (heroes)..."; node $OUT/rep.js heroes "$IDS" ${RUNS:-50} > $OUT/heroes.json
 echo "Campaign (builds)..."; node $OUT/rep.js builds "$IDS" ${BUILD_RUNS:-20} > $OUT/builds.json
 echo "3v3..."; node $OUT/pvp.js team ${TEAMS:-10000} > $OUT/team3.json
-echo "1v1..."; node $OUT/pvp.js duel ${DUELS:-12} > $OUT/duel.json
+# Duels are cheap now that each pair is played once instead of twice: 150 per side is
+# about 30 seconds for the whole matrix, and takes the error on a cell from roughly
+# 10 points down to 2.5.
+echo "1v1..."; node $OUT/pvp.js duel ${DUELS:-150} > $OUT/duel.json
 cat data.js tools/combo.js > $OUT/combo.js && node $OUT/combo.js $OUT/heroes.json $OUT/team3.json $OUT/duel.json | tee $OUT/summary.txt
 cat data.js tools/show.js > $OUT/show.js && node $OUT/show.js $OUT/heroes.json $OUT/builds.json > $OUT/builds.txt
 echo "Build win rates written to $OUT/builds.txt"
