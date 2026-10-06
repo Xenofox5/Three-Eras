@@ -543,7 +543,8 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.1';
+const GAME_VERSION = '0.4.2';
+
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
 STAGES.forEach(s => { if (s.reward) UNLOCK_FROM[s.reward] = s.id; });
@@ -616,7 +617,7 @@ const BALANCE = [
     { t: 'rework', kind: 'hero', who: 'vasco', what: 'Mimicry', text: 'What it copies', from: 'a flat 100% / 140% / 180% by slot, effects dropped', to: 'the real strength and effect of the move', note: 'Still capped so a boss move comes back balanced.' },
     { t: 'adjust', kind: 'rule', what: 'End of battle summary', text: 'Damage dealt and soaked by a creature', from: 'lost when it died', to: 'credited to whoever summoned it' }
   ] },
-  { v: '0.92', date: 'Alfred, duels and healers', changes: [
+  { v: '0.3.8', old: '0.92', date: 'Alfred, duels and healers', changes: [
     { t: 'nerf', kind: 'hero', who: 'alfred', text: 'Crit chance', from: '20%', to: '14%' },
     { t: 'nerf', kind: 'hero', who: 'alfred', what: 'Finger Frame', text: 'Framed crit bonus for the whole team', from: '+25%', to: '+15%' },
     { t: 'nerf', kind: 'hero', who: 'alfred', text: 'Odd Cut / Finger Frame / Broken Rhythm', from: '115% / 110% / 6 × 80%', to: '112% / 95% / 6 × 75%' },
@@ -634,7 +635,7 @@ const BALANCE = [
     { t: 'easier', kind: 'stage', who: 'kingtrial', text: 'Boss ATK / HP', from: '1.2× / 3.0×', to: '1.0× / 2.6×' },
     { t: 'easier', kind: 'stage', who: 'archive', text: 'Boss ATK / HP', from: '1.25× / 3.6×', to: '0.95× / 2.7×', note: 'Aamay gains Last Stand once his Ink Wraiths fall.' }
   ] },
-  { v: '0.9', date: 'The court of Ethan', changes: [
+  { v: '0.3.6', old: '0.9', date: 'The court of Ethan', changes: [
     { t: 'new', kind: 'hero', who: 'trigg', text: 'Summoner. Calls up to 2 creatures (imps; a Hellhound from his ultimate) that fight on their own turns and crumble if he falls.' },
     { t: 'new', kind: 'hero', who: 'alfred', text: 'Marksman. Tempo shifts every turn (Allegro 80% and acts sooner, Andante, Grave 140%). Finger Frame makes a target easy to hit and crit for the whole team.' },
     { t: 'new', kind: 'hero', who: 'ethan', text: 'Team buffer. Treasury makes SP, allies deal +8% damage while he stands, Royal Decree buffs the whole team.' },
@@ -650,7 +651,7 @@ const BALANCE = [
     { t: 'new', kind: 'system', who: 'Statuses', text: 'Silenced, Framed, Song, Tempo, the Vessel and the Chronicle.' },
     { t: 'new', kind: 'system', who: 'Sudden death', text: 'From turn 150, all damage rises 5% every 10 turns and healing is halved, so stalemates end. Normal fights finish well before this.' }
   ] },
-  { v: '0.83', date: 'Tightening the field', changes: [
+  { v: '0.3.4', old: '0.83', date: 'Tightening the field', changes: [
     { t: 'nerf', kind: 'hero', who: 'soham', what: 'Hexagon', text: 'Single / team Hex Shield', from: '38% / 13%', to: '32% / 11% of his max HP', note: 'Campaign 70% was the highest of any hero.' },
     { t: 'nerf', kind: 'hero', who: 'soham', what: 'Hexagon Crush', text: 'Team Hex Shield', from: '20%', to: '15%' },
     { t: 'nerf', kind: 'hero', who: 'soham', what: 'Monolith build', text: 'Single / team Hex Shield', from: '55% / 12%', to: '44% / 9%' },
@@ -674,13 +675,13 @@ const BALANCE = [
     { t: 'nerf', kind: 'hero', who: 'angus', what: 'Bulwark build', text: 'Max HP / DEF bonus', from: '+20% / +15%', to: '+12% / +10%', note: 'Bulwark led his builds by 8 points.' },
     { t: 'nerf', kind: 'hero', who: 'malakai', what: 'Apothecary build', text: 'Bargain heal / ATK boost', from: '10% / +25%', to: '5% / +22%', note: 'Apothecary led his builds by 11 points.' }
   ] },
-  { v: '0.82', date: 'Sharper identities', changes: [
+  { v: '0.3.3', old: '0.82', date: 'Sharper identities', changes: [
     { t: 'new', kind: 'hero', who: 'angus', what: 'Unyielding Aura', text: 'Anyone who strikes Angus is Sapped: ATK -6% until the end of their next turn.' },
     { t: 'new', kind: 'hero', who: 'flynn', what: 'Overcharge', text: 'When an enemy Flynn Shocked falls, the Shock arcs to another enemy.' },
     { t: 'rework', kind: 'hero', who: 'elphi', what: 'Passive', text: 'Protector', from: 'allies below 50% HP take 15% less damage', to: 'Last Light: the first time each ally drops below 30% HP, a Shield worth 18% of his max HP' },
     { t: 'adjust', kind: 'system', who: 'Damage modifiers', text: 'Elphi\'s old damage reduction overlapped with Angus. Each defender now protects in a different way: Angus weakens attackers, Elphi saves allies at the brink, David redirects, Danielle and Soham shield.' }
   ] },
-  { v: '0.81', date: 'Vehra takes flight', changes: [
+  { v: '0.3.2', old: '0.81', date: 'Vehra takes flight', changes: [
     { t: 'buff', kind: 'hero', who: 'vehra', text: 'SPD', from: '112', to: '128' },
     { t: 'new', kind: 'hero', who: 'vehra', what: 'Aloft', text: 'After each Rend and after Stonewing Crash she takes to the air: +18% evasion until her next turn. Stone Form grounds her.' },
     { t: 'new', kind: 'hero', who: 'vehra', what: 'Bloodlust', text: 'Damage to enemies below half HP', from: '+0%', to: '+30%', note: 'She also hunts the weakest enemy.' },
@@ -692,7 +693,7 @@ const BALANCE = [
     { t: 'harder', kind: 'stage', who: 'vehra', text: 'Boss ATK / HP', from: '1.15× / 3.2×', to: '1.3× / 3.6×' },
     { t: 'adjust', kind: 'stage', who: 'cinder', text: 'Boss ATK / HP', from: '0.95× / 2.2×', to: '1.0× / 2.3×' }
   ] },
-  { v: '0.8', date: 'Stone, hexagons and halos', changes: [
+  { v: '0.3.1', old: '0.8', date: 'Stone, hexagons and halos', changes: [
     { t: 'rework', kind: 'hero', who: 'vehra', what: 'Role', text: 'Assassin', from: 'evasive double-claw striker', to: 'Stonewing: a sturdy bruiser who turns to stone and heals herself' },
     { t: 'rework', kind: 'hero', who: 'vehra', text: 'Stats', from: 'HP 1150, DEF 62, SPD 136, evasion 14%', to: 'HP 1450, DEF 92, SPD 112, evasion 5%' },
     { t: 'new', kind: 'hero', who: 'vehra', what: 'Stone Form', text: 'Skill: 60% less damage, Taunt, stun immunity and a 12% max HP mend at the start of her next turn. No dodging while stone.' },
@@ -722,7 +723,7 @@ const BALANCE = [
     { t: 'easier', kind: 'stage', who: 'hexwall', text: 'ATK / boss ATK / boss HP', from: '2.4× / 1.3× / 3.4×', to: '2.1× / 1.1× / 3.0×' },
     { t: 'easier', kind: 'stage', who: 'hidden', text: 'Boss ATK / HP', from: '0.9× / 1.9×', to: '0.8× / 1.6×', note: 'Seraphine can no longer be single-targeted while The Chosen stands.' }
   ] },
-  { v: '0.7', date: 'New heroes', changes: [
+  { v: '0.3.0', old: '0.7', date: 'New heroes', changes: [
     { t: 'new', kind: 'hero', who: 'peguicha', text: 'New hero. Cinderbeads: embedded beads deal pain each turn (28% ATK per bead) and lower ATK and DEF by 8% per bead. He heals for 30% of their pain. Hellfire charges 30% slower.' },
     { t: 'new', kind: 'hero', who: 'vehra', text: 'New hero. 14% evasion, +25% damage to enemies below half HP. Wing Dive leaves her Airborne, dodging the next attack.' },
     { t: 'new', kind: 'hero', who: 'soham', text: 'New hero. Hex Wall: starts at 50% of his max HP, soaks 30% of every direct hit on his team until it runs out.' },
@@ -731,7 +732,7 @@ const BALANCE = [
     { t: 'new', kind: 'system', who: 'Rivals', text: 'Harry and Soham are rivals. Seraphine deals +20% damage to Harry.' },
     { t: 'adjust', kind: 'hero', who: 'daniel', text: 'Daniel is now Danielle. Kit unchanged.' }
   ] },
-  { v: '0.63', date: 'Healing cap, Angus and Aegis', changes: [
+  { v: '0.2.7', old: '0.63', date: 'Healing cap, Angus and Aegis', changes: [
     { t: 'new', kind: 'hero', who: 'yousuf', what: 'Healing cap', text: 'Allies he heals become Mended for 2 turns. His heals on a Mended ally are 30% weaker. Regen ticks are unaffected.', note: 'Spreading heals stays fully effective. Simulated team win 73% → 63%.' },
     { t: 'nerf', kind: 'hero', who: 'angus', text: 'Max HP', from: '1750', to: '1620' },
     { t: 'buff', kind: 'hero', who: 'angus', text: 'ATK', from: '98', to: '108' },
@@ -740,7 +741,7 @@ const BALANCE = [
     { t: 'adjust', kind: 'hero', who: 'angus', what: 'Warlord build', text: 'Steadfast Cut', from: '140%', to: '155% ATK', note: 'Keeps Warlord ahead of the new base damage.' },
     { t: 'nerf', kind: 'hero', who: 'lachlan', what: 'Aegis build', text: 'Shield cap / regen per turn', from: '50% / 10%', to: '44% / 8.5% of max HP' }
   ] },
-  { v: '0.62', date: 'David, Gemia and The Chosen', changes: [
+  { v: '0.2.6', old: '0.62', date: 'David, Gemia and The Chosen', changes: [
     { t: 'new', kind: 'hero', who: 'david', what: 'Vengeance', text: 'Every hit he takes stores a stack (max 5). His next Spear Thrust spends them for +12% damage and a 2% max HP heal per stack.' },
     { t: 'buff', kind: 'hero', who: 'david', text: 'ATK', from: '112', to: '116', note: 'Simulated team win 46% → 52%.' },
     { t: 'rework', kind: 'hero', who: 'gemia', what: 'Scarred Resolve', text: 'After the hit', from: 'Resolute: permanent ATK +25% (once)', to: 'Flow for 3 turns, every use: ATK +25%, evasion +15%, Swift Cut strikes twice at 60%', note: 'The first use still breaks her fear for good. Resolute now only means fear immunity.' },
@@ -756,7 +757,7 @@ const BALANCE = [
     { t: 'rework', kind: 'hero', who: 'chosen', what: 'Judgement of Wings', text: 'Heal', from: 'all allies 15%', to: 'herself 20%' },
     { t: 'rework', kind: 'hero', who: 'chosen', what: 'Dancer build', text: 'Downside', from: 'no team ATK buff', to: 'no Shield from Gilded Dance' }
   ] },
-  { v: '0.61', date: 'Leo\'s channelled beam', changes: [
+  { v: '0.2.5', old: '0.61', date: 'Leo\'s channelled beam', changes: [
     { t: 'rework', kind: 'hero', who: 'leo', what: 'Fire Beam', text: 'Start hit', from: '150% target / 60% others', to: '120% target / 50% others, then Channel', note: 'While channelling, the skill becomes Sustain Beam: free, no SP gain, same target, 160%, 200%, then 240% ATK, re-applying Burn each time.' },
     { t: 'new', kind: 'hero', who: 'leo', what: 'Channel', text: 'The beam breaks if Leo takes 30% of his max HP before his next turn or is stunned. Any other action releases it. It ends if the target dies.' },
     { t: 'new', kind: 'hero', who: 'leo', what: 'Heat Haze', text: 'Evasion while channelling', from: '+0%', to: '+12%' },
@@ -764,7 +765,7 @@ const BALANCE = [
     { t: 'rework', kind: 'hero', who: 'leo', what: 'Lancer build', text: 'Trade-off', from: 'Beam 190%, ATK +12%', to: 'Ramp 130% to 290%, breaks at 18%, no ATK bonus' },
     { t: 'new', kind: 'system', who: 'Enemy targeting', text: 'Enemies aim at a channelling hero 25% of the time to try to break the beam.' }
   ] },
-  { v: '0.6', date: 'Research pass', changes: [
+  { v: '0.2.4', old: '0.6', date: 'Research pass', changes: [
     { t: 'nerf', kind: 'hero', who: 'yousuf', text: 'Staff Strike heal', from: '45%', to: '40% of damage', note: 'Teams with Yousuf won 79% of simulated fights, the highest by far.' },
     { t: 'nerf', kind: 'hero', who: 'yousuf', text: 'Mending Light', from: '12% max HP + 120% ATK', to: '10% + 95% ATK' },
     { t: 'nerf', kind: 'hero', who: 'yousuf', text: 'Regen per turn', from: '5%', to: '4% max HP' },
@@ -797,14 +798,14 @@ const BALANCE = [
     { t: 'nerf', kind: 'hero', who: 'lachlan', what: 'Orbcaster build', text: 'ATK / far splash', from: '+10% / 60%', to: '+8% / 50%' },
     { t: 'nerf', kind: 'hero', who: 'elphi', what: 'Sentinel build', text: 'DEF / Sanctum Blade Shields', from: '+15% / +50%', to: '+10% / +25%' }
   ] },
-  { v: '0.5', date: 'Yunze the lone hunter', changes: [
+  { v: '0.2.3', old: '0.5', date: 'Yunze the lone hunter', changes: [
     { t: 'rework', kind: 'hero', who: 'yunze', what: 'Lone Hunter', text: 'Switch Hands SP gain', from: '+1 team SP', to: 'none' },
     { t: 'rework', kind: 'hero', who: 'yunze', what: 'Lone Hunter', text: 'Phantom Switch cost', from: '1 team SP', to: 'free, usable every third turn' },
     { t: 'rework', kind: 'hero', who: 'yunze', what: 'Hunted', text: 'Who gets the bonus', from: 'everyone (+25%)', to: 'only the Yunze who marked it (+25%, Reaper +40%)' },
     { t: 'new', kind: 'system', who: 'Taunt', text: 'Taunt now also forces heroes to target the taunter, for opponents in custom battles.' },
     { t: 'adjust', kind: 'system', who: 'Storm and Flame', text: 'The DoT bonus now belongs to the team that has the bonus, so it works for opponents too. No change for your team.' }
   ] },
-  { v: '0.42', date: 'Tougher Harry, faster Yunze', changes: [
+  { v: '0.2.2', old: '0.42', date: 'Tougher Harry, faster Yunze', changes: [
     { t: 'buff', kind: 'hero', who: 'harry', text: 'DEF', from: '78', to: '105' },
     { t: 'buff', kind: 'hero', who: 'harry', text: 'Max HP', from: '1320', to: '1400' },
     { t: 'nerf', kind: 'hero', who: 'harry', text: 'ATK', from: '140', to: '134' },
@@ -815,7 +816,7 @@ const BALANCE = [
     { t: 'nerf', kind: 'hero', who: 'yunze', text: 'Thousand Afterimages', from: '7 × 50%', to: '7 × 40% ATK' },
     { t: 'nerf', kind: 'hero', who: 'yunze', what: 'Ultimate charge', text: 'Charge per action', from: '100%', to: '70%', note: 'Keeps his extra turns from turning into constant ultimates.' }
   ] },
-  { v: '0.41', date: 'Harry cycles less, Danielle stacks less', changes: [
+  { v: '0.2.1', old: '0.41', date: 'Harry cycles less, Danielle stacks less', changes: [
     { t: 'nerf', kind: 'hero', who: 'harry', what: 'Ultimate charge', text: 'Charge rate', from: '100%', to: '65%', note: 'Applies to actions and hits taken.' },
     { t: 'nerf', kind: 'hero', who: 'harry', what: 'Ultimate charge', text: 'Charge while Unsealed', from: 'normal', to: 'none', note: 'He also starts from 0 after using it instead of 5%. Unsealed now covers about 3 of every 10 of his turns instead of almost all of them.' },
     { t: 'buff', kind: 'hero', who: 'harry', text: 'Unsealed ultimate damage', from: '220%', to: '260% ATK' },
@@ -829,7 +830,7 @@ const BALANCE = [
     { t: 'adjust', kind: 'hero', who: 'daniel', what: 'Bastion build', text: 'Riposte chance / Shield cap', from: '25% / 80%', to: '30% / 45%' },
     { t: 'adjust', kind: 'hero', who: 'daniel', what: 'Duelist build', text: 'Riposte chance / damage / Shield cap', from: '65% / 110% / 80%', to: '75% / 120% / 30%' }
   ] },
-  { v: '0.4', date: 'Harry rework, Danielle buffs', changes: [
+  { v: '0.2.0', old: '0.4', date: 'Harry rework, Danielle buffs', changes: [
     { t: 'rework', kind: 'hero', who: 'harry', what: 'Ultimate', text: 'A Glimpse of Power is now Unsealed. Damage to all enemies', from: '230% + crush below 25% HP', to: '220%, then Unsealed for 3 turns', note: 'Unsealed: +35% damage, +40% crit chance, +35% evasion. His eyes stay green while it lasts.' },
     { t: 'nerf', kind: 'hero', who: 'harry', text: 'ATK', from: '148', to: '140' },
     { t: 'nerf', kind: 'hero', who: 'harry', text: 'Katana Draw', from: '110%', to: '100% ATK' },
@@ -842,7 +843,7 @@ const BALANCE = [
     { t: 'rework', kind: 'hero', who: 'daniel', what: 'Bastion build', text: 'Trade-off', from: 'Shields +30%, ATK -10%', to: 'Shields +25%, Riposte chance 25%' },
     { t: 'adjust', kind: 'hero', who: 'daniel', what: 'Duelist build', text: 'Riposte chance and Shield penalty', from: '55% / Shields -25%', to: '65% / Shields -20%' }
   ] },
-  { v: '0.31', date: 'Builds pass', changes: [
+  { v: '0.1.3', old: '0.31', date: 'Builds pass', changes: [
     { t: 'nerf', kind: 'hero', who: 'chosen', what: 'Dancer build', text: 'Gilded Dance no longer raises allies\' ATK +20% for 2 turns.', note: 'Dancer had no downside before. It still keeps +10% SPD and 4 hits.' },
     { t: 'nerf', kind: 'hero', who: 'flynn', what: 'Overload build', text: 'Spark Jab Shock chance', from: '50%', to: '20%', note: 'Previously had no downside.' },
     { t: 'nerf', kind: 'hero', who: 'leo', what: 'Pyromancer build', text: 'Fire Beam damage', from: '150% / 60%', to: '115% / 40%', note: 'Target / others. Previously had no downside.' },
@@ -851,7 +852,7 @@ const BALANCE = [
     { t: 'nerf', kind: 'hero', who: 'malakai', what: 'Toxicologist build', text: 'Grand Transmutation ally heal', from: '20%', to: '10%', note: 'Previously had no downside.' },
     { t: 'nerf', kind: 'hero', who: 'david', what: 'Phalanx build', text: 'ATK', from: '+0%', to: '-10%', note: 'Previously had no downside.' }
   ] },
-  { v: '0.3', date: 'Enemy counts', changes: [
+  { v: '0.1.2', old: '0.3', date: 'Enemy counts', changes: [
     { t: 'rework', kind: 'stage', who: 'pack', text: 'Enemies 3 → 5. ATK', from: '2.15× / HP 1.25×', to: '1.75× / HP 0.9×' },
     { t: 'rework', kind: 'stage', who: 'king', text: 'Enemies 3 → 4. HP', from: '1.3×', to: '1.25×' },
     { t: 'rework', kind: 'stage', who: 'mire', text: 'Enemies 3 → 2. ATK', from: '2.3× / HP 1.35×', to: '2.9× / HP 1.6×' },
@@ -865,7 +866,7 @@ const BALANCE = [
     { t: 'rework', kind: 'system', who: 'Gauntlet', text: 'Wave size', from: 'always 3', to: '2 to 5', note: 'Per enemy: 2 enemies 130% HP and 115% ATK, 4 enemies 80% and 88%, 5 enemies 68% and 80%.' },
     { t: 'adjust', kind: 'system', who: 'Summons', text: 'Summoners fill the first empty slot in any size of line.' }
   ] },
-  { v: '0.2', date: 'Accuracy and difficulty', changes: [
+  { v: '0.1.1', old: '0.2', date: 'Accuracy and difficulty', changes: [
     { t: 'new', kind: 'system', who: 'Evasion and accuracy', text: 'Hit chance = 100% + attacker ACC - target EVA (minimum 5%). Previews show hit chance below 100%.' },
     { t: 'new', kind: 'system', who: 'Taunt', text: 'Some signature moves ignore Taunt. They are marked 🎯✕ on the intent. Guard still redirects them.' },
     { t: 'rework', kind: 'system', who: 'Enemy targeting', text: 'Random targets', from: '100% random', to: '30% lowest HP, 15% lowest DEF, rest random', note: 'Bosses pick the lowest HP 45% of the time.' },
@@ -895,12 +896,16 @@ const BALANCE = [
     { t: 'harder', kind: 'stage', who: 'yunze', text: 'ATK', from: '1.05×', to: '1.08×' },
     { t: 'easier', kind: 'stage', who: 'harry', text: 'ATK', from: '1.0× / HP 0.9×', to: '0.9× / HP 0.85×', note: 'Offsets the new accuracy rules, which hit this fight hardest.' }
   ] },
-  { v: '0.1', date: 'Launch tuning', changes: [
+  { v: '0.1.0', old: '0.1', date: 'Launch tuning', changes: [
     { t: 'nerf', kind: 'hero', who: 'yousuf', text: 'Mending Light', from: '16% max HP + 160% ATK', to: '13% + 140% ATK' },
     { t: 'new', kind: 'system', who: 'Gauntlet scaling', text: 'Per wave: enemy HP +15% and ATK +8.5%, starting at 150% ATK. Bosses take 72% of the ATK scaling.' }
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.2', items: [
+    'Every past update and balance entry has been renamed onto the new numbering, in the same order, with its old number shown beside it. The old numbering had run out of room at 0.93, and it had already used 0.4, 0.41 and 0.42, which clashed with the new ones.',
+    'The Guide now says exactly what moves each part of the version number, so it is clear why it moves as slowly as it does.'
+  ] },
   { v: '0.4.1', items: [
     'Four fixes to things that were quietly not working. Hold the Line only redirected attacks that went through the ordinary attack path, so fourteen single-target skills, among them Crush, Phantom Switch, Finger Frame and Sanctum Blade, walked straight past the guard. They all respect it now.',
     'What a summoned creature does now counts for whoever summoned it. The imps Trigg calls up were removed from the field when they died and took their damage dealt and damage soaked with them, so none of it reached the end of battle summary.',
@@ -908,32 +913,32 @@ const UPDATES = [
     'Afterimage now shows on the card as well as in the status list. A hero fading out with no explanation read as a glitch; it means the next attack against them misses completely.'
   ] },
   { v: '0.4.0', items: [
-    'Version numbers restart at 0.4. The old 0.9x suggested the game was nearly finished, which it is not. From here, the middle number is a milestone (0.5, 0.6) and the last is fixes and balance (0.4.1). 1.0 means feature complete.',
+    'Version numbers restart at 0.4. The old 0.9x suggested the game was nearly finished, which it is not.',
     'The battle screen now fits a computer. Portraits were taking their height from the space the arena had left and their width from the card, so on a laptop they stretched out flat, as wide as 168 by 66. They are square again, the enemy row sizes itself so four or five foes are not tall and thin, and on a wide window the action panel moves beside the arena instead of under it.',
     'The title screen no longer cuts off its own bottom on a short window, which used to hide Save backup and the Effects setting.',
     'Dev mode: five taps on the version number under the logo, or add ?dev to the address, unlocks every hero and stage for testing. Stars and records are left alone.',
     'The 1v1 research was being sampled twice per matchup and the two answers disagreed by as much as 29 points. Every pair is now played once with 300 fights instead of 24, so the duel grid is both consistent and far steadier. The Stats screen also reports the real number of fights behind it, which it had been overstating.'
   ] },
-  { v: '0.93', items: ['Battle effects no longer vanish on devices that ask for reduced motion. Windows in particular reports this whenever animation effects are switched off, which left attacks, damage numbers and hits invisible.', 'New Effects setting on the title screen: Full, Reduced or Auto. Reduced now drops only screen shake, lunges and flashes, and keeps the damage numbers and hit effects you need to follow a fight.'] },
-  { v: '0.92', items: ['Balance pass: Alfred nerfed, 1v1 duels narrowed with Last Stand, healers heal themselves slightly less. Simulated stats refreshed.'] },
-  { v: '0.91', items: ['New portraits so every hero looks distinct: Ben (spectacles, chain of office, decree scroll), Aamay (hooded scribe with a candle and open book), Trigg (pale, gaunt, long wild hair) and Kingsley (feathered bard\'s cap).'] },
-  { v: '0.9', items: ['Seven new heroes: Trigg, Alfred, Ethan, Ben, Kingsley, Vasco and Aamay, each filling a role the roster lacked. 24 heroes in total.', 'Five new stages where you fight and unlock them: Trigg\'s Menagerie, The Blurred Duel, The King\'s Trial, The Palace Revels and The Basement Archive. 31 stages in total. Some stages now unlock two heroes.', 'Five new team bonuses: Peguicha\'s Court, The Crown\'s Counsel, Royal Hospitality, Borrowed Magic and The Hollow Vessel.', 'Soham\'s Hex Shields now show in gold, separately from blue Shields, on the HP bar and in the numbers.', 'Hex Breaker has a proper exploding-hexagon effect when a Hex Shield bursts.'] },
-  { v: '0.84', items: ['Offline version: a single file you can download and play with no internet. Fonts are built in and progress saves on the device.', 'Save backup on the title screen: copy your save as a code (or download it as a file offline) and load it into the other version. Merge keeps the best of both; Replace overwrites.'] },
-  { v: '0.83', items: ['Balance pass across 13 heroes and 3 builds, guided by campaign, 3v3 and 1v1 results. Composite spread narrowed from 44 to 68 down to 46 to 63.', 'Simulated stats refreshed.'] },
-  { v: '0.82', items: ['Angus, Flynn and Elphi have more distinct passives.', 'A developer handbook and source bundle now exist so development can continue from anywhere.', 'Simulated stats refreshed.'] },
-  { v: '0.81', items: ['Vehra lifts off her card while Aloft, and her Rend previews include Bloodlust against wounded enemies.', 'Simulated stats refreshed.'] },
-  { v: '0.8', items: ['Vehra reworked around Stone Form and self-healing. She now plays nothing like Yunze.', 'Soham reworked: brittle Hex Shields on one ally or the whole team, with gold shield stripes and a hits-left count on the card.', 'Seraphine hides Behind the Scenes (shown as Unseen on her card) and builds Severance for her ultimate.', 'Simulated stats now use three measures: campaign fights, 3v3 hero battles and 1v1 duels, with a 1v1 matchup grid.', 'Fixed a crash when Yousuf fell in the middle of his own attack.'] },
-  { v: '0.7', items: ['Four new heroes: Peguicha, Vehra and Soham from the First Era, and Seraphine from the Second Era. Each has two builds.', 'Four new boss stages, where you fight and unlock them: Vehra\'s Hunt, The Cinderbead, The Hexagon Wall and The Hidden Hand. Campaign now has 26 stages.', 'Bosses can now be heroes, controlled by the game with intents like any enemy.', 'Soham\'s Hex Wall is drawn across his team\'s row with its remaining strength.', 'Daniel is now Danielle, with a new portrait.', 'Versions renumbered: launch is v0.1, major updates step by 0.1, smaller ones by 0.01.'] },
-  { v: '0.63', items: ['Yousuf\'s heal previews show when a target is Mended and the heal will be weaker.', 'Simulated stats refreshed.'] },
-  { v: '0.62', items: ['David stores Vengeance from hits he takes and unleashes it with Spear Thrust.', 'Gemia enters Flow every time she uses Scarred Resolve.', 'The Chosen is now a solo Champion: sturdy, self-sufficient and hard-hitting.', 'Simulated stats refreshed.'] },
-  { v: '0.61', items: ['Leo\'s Fire Beam is now channelled. A glowing beam stays between Leo and his target while he holds it and thickens as it ramps. His skill button turns into Sustain Beam with the next stage shown.', 'Simulated stats refreshed.'] },
-  { v: '0.6', items: ['New Stats screen: your record per hero and per build, a history of your last 50 battles, and the simulated results for every hero and build.', 'Hero details show simulated and personal stats, and each build option shows its simulated win rate and your record with it.', 'Your records are saved with your progress, including to your Claude account.'] },
-  { v: '0.5', items: ['Custom battle: up to 3 of your heroes against up to 5 opponent heroes, with builds and a strength setting. Opponents show intents, use their own SP and get their own team bonuses.', 'The battle summary is now a full table: damage, healing, Shields, damage taken, kills, biggest hit, crits, hit rate, dodges, buffs, debuffs, actions and ultimates. Best is picked by an Impact score built from all of them.'] },
-  { v: '0.4', items: ['Every battle card has an i button. Tap it, or press and hold the card, to see details at any time, even while choosing a target.', 'Turn order icons and the active hero\'s portrait open details too.', 'Harry has a new ultimate, Unsealed, with its own banner and a lasting green glow.'] },
-  { v: '0.31', items: ['Balance changes now have their own list with buff, nerf and rework markers.', 'Hero details show the recent balance changes for that hero.', 'Every build now has a real trade-off.'] },
-  { v: '0.3', items: ['Fights can have 1 to 5 enemies, with a compact card layout for 4 or 5.', 'Progress saves to your Claude account as well as the device.'] },
-  { v: '0.2', items: ['Campaign grows from 10 to 22 stages: 6 new bosses and 4 post-game Echoes.', 'New enemies: Varro the Bandit King, Bog Witch, Mire Lurker, Stormlings, the Tempest Idol, the Hollow Prophet, Mirror Shards, the Mirror Knight, Sellswords, Crossbowmen, Shieldbearers, the Iron Warden and Yunze\'s afterimages.', 'Heroes unlock through the campaign. Angus, Flynn and Leo are the starters.', 'Two builds for every hero.', 'The Guide: rules, stats and formulas, statuses, team bonuses, builds and every enemy.', 'Battle screen sizes itself to the phone so cards and text no longer overlap.'] },
-  { v: '0.1', items: ['First release: 13 heroes, 10 campaign stages and the Gauntlet.'] }
+  { v: '0.3.9', old: '0.93', items: ['Battle effects no longer vanish on devices that ask for reduced motion. Windows in particular reports this whenever animation effects are switched off, which left attacks, damage numbers and hits invisible.', 'New Effects setting on the title screen: Full, Reduced or Auto. Reduced now drops only screen shake, lunges and flashes, and keeps the damage numbers and hit effects you need to follow a fight.'] },
+  { v: '0.3.8', old: '0.92', items: ['Balance pass: Alfred nerfed, 1v1 duels narrowed with Last Stand, healers heal themselves slightly less. Simulated stats refreshed.'] },
+  { v: '0.3.7', old: '0.91', items: ['New portraits so every hero looks distinct: Ben (spectacles, chain of office, decree scroll), Aamay (hooded scribe with a candle and open book), Trigg (pale, gaunt, long wild hair) and Kingsley (feathered bard\'s cap).'] },
+  { v: '0.3.6', old: '0.9', items: ['Seven new heroes: Trigg, Alfred, Ethan, Ben, Kingsley, Vasco and Aamay, each filling a role the roster lacked. 24 heroes in total.', 'Five new stages where you fight and unlock them: Trigg\'s Menagerie, The Blurred Duel, The King\'s Trial, The Palace Revels and The Basement Archive. 31 stages in total. Some stages now unlock two heroes.', 'Five new team bonuses: Peguicha\'s Court, The Crown\'s Counsel, Royal Hospitality, Borrowed Magic and The Hollow Vessel.', 'Soham\'s Hex Shields now show in gold, separately from blue Shields, on the HP bar and in the numbers.', 'Hex Breaker has a proper exploding-hexagon effect when a Hex Shield bursts.'] },
+  { v: '0.3.5', old: '0.84', items: ['Offline version: a single file you can download and play with no internet. Fonts are built in and progress saves on the device.', 'Save backup on the title screen: copy your save as a code (or download it as a file offline) and load it into the other version. Merge keeps the best of both; Replace overwrites.'] },
+  { v: '0.3.4', old: '0.83', items: ['Balance pass across 13 heroes and 3 builds, guided by campaign, 3v3 and 1v1 results. Composite spread narrowed from 44 to 68 down to 46 to 63.', 'Simulated stats refreshed.'] },
+  { v: '0.3.3', old: '0.82', items: ['Angus, Flynn and Elphi have more distinct passives.', 'A developer handbook and source bundle now exist so development can continue from anywhere.', 'Simulated stats refreshed.'] },
+  { v: '0.3.2', old: '0.81', items: ['Vehra lifts off her card while Aloft, and her Rend previews include Bloodlust against wounded enemies.', 'Simulated stats refreshed.'] },
+  { v: '0.3.1', old: '0.8', items: ['Vehra reworked around Stone Form and self-healing. She now plays nothing like Yunze.', 'Soham reworked: brittle Hex Shields on one ally or the whole team, with gold shield stripes and a hits-left count on the card.', 'Seraphine hides Behind the Scenes (shown as Unseen on her card) and builds Severance for her ultimate.', 'Simulated stats now use three measures: campaign fights, 3v3 hero battles and 1v1 duels, with a 1v1 matchup grid.', 'Fixed a crash when Yousuf fell in the middle of his own attack.'] },
+  { v: '0.3.0', old: '0.7', items: ['Four new heroes: Peguicha, Vehra and Soham from the First Era, and Seraphine from the Second Era. Each has two builds.', 'Four new boss stages, where you fight and unlock them: Vehra\'s Hunt, The Cinderbead, The Hexagon Wall and The Hidden Hand. Campaign now has 26 stages.', 'Bosses can now be heroes, controlled by the game with intents like any enemy.', 'Soham\'s Hex Wall is drawn across his team\'s row with its remaining strength.', 'Daniel is now Danielle, with a new portrait.', 'Versions renumbered: launch is v0.1, major updates step by 0.1, smaller ones by 0.01.'] },
+  { v: '0.2.7', old: '0.63', items: ['Yousuf\'s heal previews show when a target is Mended and the heal will be weaker.', 'Simulated stats refreshed.'] },
+  { v: '0.2.6', old: '0.62', items: ['David stores Vengeance from hits he takes and unleashes it with Spear Thrust.', 'Gemia enters Flow every time she uses Scarred Resolve.', 'The Chosen is now a solo Champion: sturdy, self-sufficient and hard-hitting.', 'Simulated stats refreshed.'] },
+  { v: '0.2.5', old: '0.61', items: ['Leo\'s Fire Beam is now channelled. A glowing beam stays between Leo and his target while he holds it and thickens as it ramps. His skill button turns into Sustain Beam with the next stage shown.', 'Simulated stats refreshed.'] },
+  { v: '0.2.4', old: '0.6', items: ['New Stats screen: your record per hero and per build, a history of your last 50 battles, and the simulated results for every hero and build.', 'Hero details show simulated and personal stats, and each build option shows its simulated win rate and your record with it.', 'Your records are saved with your progress, including to your Claude account.'] },
+  { v: '0.2.3', old: '0.5', items: ['Custom battle: up to 3 of your heroes against up to 5 opponent heroes, with builds and a strength setting. Opponents show intents, use their own SP and get their own team bonuses.', 'The battle summary is now a full table: damage, healing, Shields, damage taken, kills, biggest hit, crits, hit rate, dodges, buffs, debuffs, actions and ultimates. Best is picked by an Impact score built from all of them.'] },
+  { v: '0.2.0', old: '0.4', items: ['Every battle card has an i button. Tap it, or press and hold the card, to see details at any time, even while choosing a target.', 'Turn order icons and the active hero\'s portrait open details too.', 'Harry has a new ultimate, Unsealed, with its own banner and a lasting green glow.'] },
+  { v: '0.1.3', old: '0.31', items: ['Balance changes now have their own list with buff, nerf and rework markers.', 'Hero details show the recent balance changes for that hero.', 'Every build now has a real trade-off.'] },
+  { v: '0.1.2', old: '0.3', items: ['Fights can have 1 to 5 enemies, with a compact card layout for 4 or 5.', 'Progress saves to your Claude account as well as the device.'] },
+  { v: '0.1.1', old: '0.2', items: ['Campaign grows from 10 to 22 stages: 6 new bosses and 4 post-game Echoes.', 'New enemies: Varro the Bandit King, Bog Witch, Mire Lurker, Stormlings, the Tempest Idol, the Hollow Prophet, Mirror Shards, the Mirror Knight, Sellswords, Crossbowmen, Shieldbearers, the Iron Warden and Yunze\'s afterimages.', 'Heroes unlock through the campaign. Angus, Flynn and Leo are the starters.', 'Two builds for every hero.', 'The Guide: rules, stats and formulas, statuses, team bonuses, builds and every enemy.', 'Battle screen sizes itself to the phone so cards and text no longer overlap.'] },
+  { v: '0.1.0', old: '0.1', items: ['First release: 13 heroes, 10 campaign stages and the Gauntlet.'] }
 ];
 
 /* Moves that ignore Taunt (signature boss moves and precise shots) */

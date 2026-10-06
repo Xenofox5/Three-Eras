@@ -8,18 +8,18 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [x] **The 1v1 matrix sampled every matchup twice.** `tools/pvp_tail.js` looped over ordered
   pairs, so `M[a][b]` and `M[b][a]` were two independent estimates of the same matchup and
   disagreed by up to 29 points. Each unordered pair is now played once and the mirror cell is
-  its complement, which also halves the duel runtime. (v0.93)
+  its complement, which also halves the duel runtime. (v0.4.0)
 - [x] **`duelN` was hardcoded to 32** in `tools/gen_simstats.js` while `balance.sh` ran 12 per
-  side (24 fights). The Stats screen now reports the real number. (v0.93)
+  side (24 fights). The Stats screen now reports the real number. (v0.4.0)
 - [x] **Desktop layout.** Portraits took their height from the arena's vertical budget and
   their width from the card, so a short desktop window stretched them flat: 168x66 on a laptop
   with a taskbar, 168x50 on a short window. Cards are now capped at the square size, the enemy
   row gets its own size so four or five foes are not tall and thin, and on a wide window the
   action panel sits beside the arena instead of under it. The title screen also clipped its
-  bottom with no way to scroll, which is what forced zooming out. (v0.93)
+  bottom with no way to scroll, which is what forced zooming out. (v0.4.0)
 - [x] **Dev unlock.** Five taps on the version tag under the logo toggles dev mode, or add
   `?dev` to the address. Every hero and stage opens; stars and records are untouched. The tag
-  turns gold and reads "dev" while it is on. (v0.93)
+  turns gold and reads "dev" while it is on. (v0.4.0)
 
 ## B. Bugs (done in v0.4.1)
 
@@ -93,7 +93,7 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [ ] **Danielle.** Riposte chance is too high.
 - [ ] **Alfred.** Verify the tempo multipliers do what the descriptions say, and make the three
   tempos feel more distinct from each other.
-- [ ] **Low win rate heroes.** From the v0.92 table: Ben 35.1, Yousuf 32.5 in 3v3, Alfred 39.5,
+- [ ] **Low win rate heroes.** From the v0.3.8 table: Ben 35.1, Yousuf 32.5 in 3v3, Alfred 39.5,
   Leo 39.8, Aamay 39.8, Flynn 40.4. Buff or rework rather than nudging one number.
 
 ## E. Deferred by the owner
@@ -115,7 +115,7 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 
 ## Notes from checking the owner's tournament
 
-Their 12 first-round duels were compared against the v0.92 matrix: the sim favoured the same
+Their 12 first-round duels were compared against the v0.3.8 matrix: the sim favoured the same
 winner in 10 of 12, with two upsets at 29% and 8.3%. Ben beating Kingsley agreed with the
 matrix, which gives Ben 100% against him. The matrix row is the winner, the column is the
 loser. That cell was right; the sampling bug in group A was the real problem.

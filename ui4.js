@@ -575,7 +575,7 @@ function balanceBody() {
   const groups = BALANCE.map(v => {
     const rows = v.changes.filter(match);
     if (!rows.length) return '';
-    return `<div class="bver"><h4>v${esc(v.v)} <span>${esc(v.date)}</span></h4>${rows.map(c => bcRow(c)).join('')}</div>`;
+    return `<div class="bver"><h4>v${esc(v.v)}${v.old ? ` <em class="wasv">was v${esc(v.old)}</em>` : ''} <span>${esc(v.date)}</span></h4>${rows.map(c => bcRow(c)).join('')}</div>`;
   }).join('');
   return `<p>Only numbers and rules that changed. Features are in Updates. Buff and nerf describe the thing named: a stronger enemy is a buff to that enemy, while stages use Harder and Easier.</p>
 <div class="legend">${legend}</div><div class="bfilters">${chips}</div>${groups || '<p>Nothing matches this filter.</p>'}`;
@@ -626,7 +626,14 @@ ${HERO_ORDER.map(id => `<h4 style="color:${HEROES[id].color}">${esc(HEROES[id].n
     return `<p>Every enemy in the campaign. Tap one for its moves. Stats shown are base values; stages scale them up.</p><div class="bestiary">${ids.map(id => `<button class="be" data-e="${id}"><span class="p">${enemyPortrait(id)}</span><b>${esc(ENEMIES[id].name)}</b></button>`).join('')}</div>`;
   }
   if (tab === 'balance') return balanceBody();
-  if (tab === 'updates') return `<p>New features and content. Number changes are in Balance.</p>` + UPDATES.map(e => `<h4>v${esc(e.v)}</h4><ul class="chg">${e.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`).join('');
+  if (tab === 'updates') return `<p>New features and content. Number changes are in Balance.</p>
+<h4>How version numbers work</h4>
+<p>A version reads <b>0.milestone.patch</b>, so v${esc(GAME_VERSION)} is milestone 0.4, patch ${esc(GAME_VERSION.split('.')[2] || '0')}.</p>
+<p><b>The last number</b> moves for everything routine, and there is no limit to it, so v0.4.17 is an ordinary thing to see. It covers bug fixes of any size, balance changes, whole hero reworks, new wording, new art and animation, and work on the tools behind the game.</p>
+<p><b>The middle number</b> moves only when the game gains something new to play: a new hero, a new stage or a new mode. Fixing, rebalancing or rewriting what is already here never moves it, however much of it there is. That is why it moves rarely.</p>
+<p><b>1.0</b> is not planned yet. It will be decided when the game is close to finished, rather than arrived at by counting.</p>
+<p>Everything was renumbered on 7 October 2026, because the old numbers had reached 0.93 with no room left. Every past update was renamed in the same order, with its old number kept beside it.</p>` +
+    UPDATES.map(e => `<h4>v${esc(e.v)}${e.old ? ` <em class="wasv">was v${esc(e.old)}</em>` : ''}</h4><ul class="chg">${e.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`).join('');
   return '';
 }
 function showGuide(tab = 'basics') {

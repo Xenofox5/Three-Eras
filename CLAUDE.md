@@ -55,17 +55,25 @@ Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 7. Commit and push. GitHub Actions (`.github/workflows/pages.yml`) deploys `dist/app` to GitHub Pages.
 
 ### Versioning
-`0.MILESTONE.PATCH`, renumbered from 0.93 to 0.4.0 on 2026-10-07 because 0.9x implied the game was nearly done.
-- **Patch** (0.4.1, 0.4.2): bug fixes, balance passes, description work. Most releases.
-- **Milestone** (0.5.0, 0.6.0): a batch of features or hero reworks landing together.
-- **1.0.0**: feature complete, declared deliberately. Never reached by arithmetic.
-Entries in `UPDATES` and `BALANCE` before 0.4.0 use the old 0.9x numbers and are history. Do not renumber them.
+`0.MILESTONE.PATCH`. Designed to move slowly. There is no plan for 1.0 yet, so do not work towards one.
+
+**Patch** (0.4.1 → 0.4.2). The default. Almost every release is one, and there is no upper limit, so 0.4.17 is expected and fine:
+- bug fixes of any size
+- balance changes, and whole hero reworks
+- descriptions, wording, UI clarity, new art or animation
+- tools, tests, build and docs
+
+**Milestone** (0.4.x → 0.5.0). Only when the game gains something new to play: **a new hero, a new stage, or a new mode**. Nothing else moves it. Reworking, rebalancing or rewriting what already exists stays a patch no matter how large it is. If you are unsure, it is a patch.
+
+**1.0.0.** Not planned. Decided deliberately when the game is close to finished, never reached by counting.
+
+Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026-10-07 and carries an `old:` field with its original number, which the Guide shows as "was v0.92". The nine old tenths compress into three milestones (old 0.1 to 0.31 are 0.1.x, 0.4 to 0.63 are 0.2.x, 0.7 to 0.93 are 0.3.x), because the old numbering already used 0.4, 0.41 and 0.42 and those collided with the new ones. Keep the `old:` field when editing an entry.
 
 ## Balance targets
 - Composite = average of Campaign and 3v3 team win rate. Aim for 45 to 60 for every hero; Harry may sit slightly above as the legend. Noise is about ±3 points per run.
 - 1v1 shows solo strength only. Supports and healers are meant to be weak in duels; Last Stand (+35% damage, 15% less taken when the last hero standing, supports and defenders only) narrows the gap.
 - Builds of the same hero should sit within about 7 points of each other.
-- v0.92 results are in `sim-results/` once you run `npm run balance`; the last saved table is in the handbook.
+- Results land in `sim-results/` when you run `npm run balance`; the last saved table is in the handbook.
 
 ## Engine essentials
 - Use `u.isHero`, `sideList(u)`, `spOf(u)`, `addSp(u, n)`, `foesOf(u)`, `friendsOf(u)`; never `side === 'player'` for hero logic, because heroes also fight on the enemy side (custom battles, hero bosses `h:<id>` in `STAGES`).
@@ -90,4 +98,4 @@ Entries in `UPDATES` and `BALANCE` before 0.4.0 use the old 0.9x numbers and are
 ## Hosting and saves
 - The original game lives as a claude.ai artifact (https://claude.ai/artifact/SZgnrJX9xe6kCVEApHm5mU) and saves to the player's Claude account there. Claude Code cannot update that artifact; new versions go to GitHub Pages instead.
 - Outside claude.ai the game saves to `localStorage` only (`threeEras.save.v2`). Players move progress with Save backup on the title screen (`TE1:` codes; Merge or Replace).
-- `releases/v0.92/` is the frozen copy of the last version built in the claude.ai chat.
+- `releases/v0.3.8/` (renamed from v0.92) is the frozen copy of the last version built in the claude.ai chat.
