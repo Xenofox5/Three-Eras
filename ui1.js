@@ -2,7 +2,13 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+/* Motion. REDUCED is live, not a load-time constant: the player can override the device
+   preference from the title screen, and 'auto' must react when that preference changes.
+   Reduced drops shake, lunges and full-screen flashes; it keeps damage numbers, slashes,
+   bursts and rings, because those carry the information the battle screen runs on. */
+const MOTION_MODES = ['full', 'reduced', 'auto'];
+const MOTION_MQ = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+let REDUCED = false;
 const NS = 'http://www.w3.org/2000/svg';
 
 const SAVE_KEY = 'threeEras.save.v2';
@@ -20,10 +26,16 @@ function loadSave() {
   } catch (e) { /* storage unavailable */ }
   return {};
 }
-const SAVE = Object.assign({ stars: {}, team: [], best: 0, runs: 0, sound: true, speed: 1, builds: {}, seenUnlock: {} }, loadSave());
+function saveDefaults() { return { stars: {}, team: [], best: 0, runs: 0, sound: true, speed: 1, motion: 'full', builds: {}, seenUnlock: {} }; }
+const SAVE = Object.assign(saveDefaults(), loadSave());
 if (Array.isArray(SAVE.stars) || typeof SAVE.stars !== 'object' || !SAVE.stars) SAVE.stars = {};
 if (!SAVE.builds) SAVE.builds = {};
 if (!SAVE.seenUnlock) SAVE.seenUnlock = {};
+if (!MOTION_MODES.includes(SAVE.motion)) SAVE.motion = 'full';
+function reducedNow() { return SAVE.motion === 'reduced' || (SAVE.motion === 'auto' && !!(MOTION_MQ && MOTION_MQ.matches)); }
+function applyMotion() { REDUCED = reducedNow(); if (document.body) document.body.classList.toggle('reduced', REDUCED); }
+applyMotion();
+if (MOTION_MQ && MOTION_MQ.addEventListener) MOTION_MQ.addEventListener('change', applyMotion);
 const isUnlocked = id => STARTERS.includes(id) || (SAVE.stars[UNLOCK_FROM[id]] || 0) > 0;
 const stageOpen = i => i === 0 || (SAVE.stars[STAGES[i - 1].id] || 0) > 0 || (SAVE.stars[STAGES[i].id] || 0) > 0;
 const totalStars = () => STAGES.reduce((a, s) => a + (SAVE.stars[s.id] || 0), 0);
@@ -63,6 +75,7 @@ function mergeSave(r) {
     SAVE.builds = Object.assign({}, SAVE.builds, r.builds || {});
     if (r.speed) SAVE.speed = r.speed;
     if (typeof r.sound === 'boolean') SAVE.sound = r.sound;
+    if (MOTION_MODES.includes(r.motion)) SAVE.motion = r.motion;
     SAVE.updated = r.updated;
   } else SAVE.builds = Object.assign({}, r.builds || {}, SAVE.builds);
 }
@@ -178,6 +191,7 @@ function anim(el, kf, dur, o = {}) {
   } catch (e) { return new Promise(r => setTimeout(r, d)); }
 }
 const later = (fn, ms) => setTimeout(fn, T(ms));
+const MDUR = ms => REDUCED ? Math.min(ms, 150) : ms;
 function restartClass(el, cls) { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); later(() => el.classList.remove(cls), 500); }
 
 function cardEl(u) { return u && UI.cards[u.uid] && document.contains(UI.cards[u.uid]) ? UI.cards[u.uid] : null; }
@@ -198,14 +212,14 @@ function fxEl(cls, css = {}) {
 
 /* ---------- FX primitives ---------- */
 async function projectile(a, b, { color = '#fff', size = 16, dur = 300, ease = 'ease-in' } = {}) {
-  if (REDUCED) return;
+  dur = MDUR(dur);
   const d = fxEl('pj', { left: a.x + 'px', top: a.y + 'px', width: size + 'px', height: size + 'px',
     background: `radial-gradient(circle,#fff 0 22%,${color} 50%,transparent 72%)`, boxShadow: `0 0 ${size}px ${color}` });
   await anim(d, [{ left: a.x + 'px', top: a.y + 'px', transform: 'translate(-50%,-50%) scale(.6)' }, { left: b.x + 'px', top: b.y + 'px', transform: 'translate(-50%,-50%) scale(1.1)' }], dur, { easing: ease });
   d.remove();
 }
 async function beam(a, b, { color = '#fff', width = 14, dur = 420 } = {}) {
-  if (REDUCED) return;
+  dur = MDUR(dur);
   const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy), ang = Math.atan2(dy, dx) * 180 / Math.PI;
   const d = fxEl('', { left: a.x + 'px', top: (a.y - width / 2) + 'px', width: len + 'px', height: width + 'px', transformOrigin: '0 50%', borderRadius: width + 'px',
     background: `linear-gradient(180deg,transparent,${color} 22%,#fff 50%,${color} 78%,transparent)`, boxShadow: `0 0 22px ${color}` });
@@ -213,7 +227,8 @@ async function beam(a, b, { color = '#fff', width = 14, dur = 420 } = {}) {
   anim(d, [{ opacity: 1, transform: `rotate(${ang}deg) scaleX(1) scaleY(1)` }, { opacity: 0, transform: `rotate(${ang}deg) scaleX(1) scaleY(.15)` }], dur * 0.7).then(() => d.remove());
 }
 function zap(a, b, { color = '#9fe6ff', dur = 280, jag = 14 } = {}) {
-  if (REDUCED || !UI.fx) return;
+  if (!UI.fx) return;
+  dur = MDUR(dur);
   const svg = document.createElementNS(NS, 'svg');
   const n = 9, pts = [];
   const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
@@ -227,13 +242,11 @@ function zap(a, b, { color = '#9fe6ff', dur = 280, jag = 14 } = {}) {
   anim(svg, [{ opacity: 1 }, { opacity: 0.2 }, { opacity: 1 }, { opacity: 0 }], dur, { easing: 'linear' }).then(() => svg.remove());
 }
 function slashAt(p, { color = '#fff', angle = -32, len = 90, off = 0, dur = 260, thick = 5 } = {}) {
-  if (REDUCED) return;
   const d = fxEl('slashfx', { left: (p.x - len / 2) + 'px', top: (p.y - thick / 2 + off) + 'px', width: len + 'px', height: thick + 'px' });
   d.style.setProperty('--c', color);
   anim(d, [{ transform: `rotate(${angle}deg) scaleX(0)`, opacity: 1 }, { transform: `rotate(${angle}deg) scaleX(1.1)`, opacity: 1, offset: 0.45 }, { transform: `rotate(${angle}deg) scaleX(1.2) scaleY(.3)`, opacity: 0 }], dur).then(() => d.remove());
 }
 function burst(p, { color = '#fff', n = 10, spread = 55, dur = 520, size = 7, up = 0 } = {}) {
-  if (REDUCED) return;
   for (let i = 0; i < n; i++) {
     const ang = Math.random() * Math.PI * 2, r = spread * (0.45 + Math.random() * 0.7), s = size * (0.6 + Math.random() * 0.8);
     const d = fxEl('part', { left: p.x + 'px', top: p.y + 'px', width: s + 'px', height: s + 'px' });
@@ -242,13 +255,11 @@ function burst(p, { color = '#fff', n = 10, spread = 55, dur = 520, size = 7, up
   }
 }
 function ring(p, { color = '#fff', size = 90, dur = 460, from = 0.2, to = 1, width = 3 } = {}) {
-  if (REDUCED) return Promise.resolve();
   const d = fxEl('ring', { left: p.x + 'px', top: p.y + 'px', width: size + 'px', height: size + 'px', borderWidth: width + 'px', boxShadow: `0 0 14px ${color}, inset 0 0 10px ${color}` });
   d.style.setProperty('--c', color);
   return anim(d, [{ transform: `translate(-50%,-50%) scale(${from})`, opacity: 1 }, { transform: `translate(-50%,-50%) scale(${to})`, opacity: 0 }], dur).then(() => d.remove());
 }
 async function column(p, { color = '#fff', width = 44, dur = 420 } = {}) {
-  if (REDUCED) return;
   const d = fxEl('colfx', { left: p.x + 'px', width: width + 'px', height: (p.y + 40 + p.h * 0.3) + 'px', transformOrigin: '50% 0' });
   d.style.setProperty('--c', color);
   await anim(d, [{ transform: 'translateX(-50%) scaleY(0)', opacity: 1 }, { transform: 'translateX(-50%) scaleY(1)', opacity: 1 }], dur * 0.45, { easing: 'ease-in' });

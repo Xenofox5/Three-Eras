@@ -22,6 +22,12 @@ const BIO = {
   david: 'A spear user and one of Yousuf\'s guards. Killed when Yunze massacred the escort.'
 };
 
+const MOTION_LABEL = { full: 'Full', reduced: 'Reduced', auto: 'Auto' };
+const MOTION_NOTE = {
+  full: 'Every battle effect plays.',
+  reduced: 'No screen shake, lunges or flashes. Damage numbers and hits still show.',
+  auto: 'Follows the reduce motion setting on your device.'
+};
 function toast(msg) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   document.body.appendChild(t);
@@ -59,12 +65,20 @@ function showTitle() {
     <button class="btn" data-go="stats">Stats <small>Your record and research</small></button>
     <button class="btn" data-go="guide">Guide <small>Rules, stats, changes</small></button>
   </div>
-  <p class="savenote"><span id="saveNote"></span> <button class="linkbtn" id="backupBtn">Save backup</button></p>
+  <p class="savenote"><span id="saveNote"></span> <button class="linkbtn" id="backupBtn">Save backup</button> <button class="linkbtn" id="fxBtn"></button></p>
   ${SAVE.migrated && !SAVE.migrNote ? '<p class="hint" style="max-width:320px">Your old progress carried over. New stages were added between your cleared ones, and some heroes now unlock from them.</p>' : ''}
 </div></div>`;
   if (SAVE.migrated && !SAVE.migrNote) { SAVE.migrNote = true; store(); }
   updateSaveNote();
   $('#backupBtn').onclick = backupSheet;
+  const fxBtn = $('#fxBtn');
+  const drawFx = () => { fxBtn.textContent = 'Effects: ' + MOTION_LABEL[SAVE.motion]; };
+  drawFx();
+  fxBtn.onclick = () => {
+    SAVE.motion = MOTION_MODES[(MOTION_MODES.indexOf(SAVE.motion) + 1) % MOTION_MODES.length];
+    store(); applyMotion(); drawFx(); SND.play('click');
+    toast(MOTION_NOTE[SAVE.motion]);
+  };
   $('#tSnd').onclick = e => { SAVE.sound = !SAVE.sound; store(); e.currentTarget.textContent = SAVE.sound ? '🔊' : '🔇'; SND.play('click'); };
   $$('[data-go]').forEach(b => b.onclick = () => {
     SND.play('click');
@@ -407,9 +421,11 @@ ${offline ? '<p class="hint">Or load a backup file: <input type="file" id="impor
     const apply = mode => {
       let o;
       try { o = readCode($('#importCode', bg).value); } catch (e) { $('#importMsg', bg).textContent = e.message; return; }
-      if (mode === 'replace') { for (const k of Object.keys(SAVE)) delete SAVE[k]; Object.assign(SAVE, { stars: {}, team: [], best: 0, runs: 0, sound: true, speed: 1, builds: {}, seenUnlock: {} }, o); }
+      if (mode === 'replace') { for (const k of Object.keys(SAVE)) delete SAVE[k]; Object.assign(SAVE, saveDefaults(), o); }
       else { mergeSave(o); SAVE.builds = Object.assign({}, o.builds || {}, SAVE.builds); }
       if (!SAVE.stars || typeof SAVE.stars !== 'object') SAVE.stars = {};
+      if (!MOTION_MODES.includes(SAVE.motion)) SAVE.motion = 'full';
+      applyMotion();
       store(); closeSheet(); showTitle(); toast(mode === 'replace' ? 'Save replaced.' : 'Saves merged.');
     };
     $('#mergeCode', bg).onclick = () => apply('merge');
@@ -565,7 +581,8 @@ function guideBody(tab) {
 <h4>Gauntlet</h4><p>Endless waves with a boss every fifth wave. After each win the team heals 30% of max HP, the fallen return at 25%, and you pick one of three boons. Wounds and ultimate charge carry over. Only unlocked heroes can enter.</p>
 <h4>Battle summary</h4><p>After every fight a table shows each hero's damage, healing, Shields, damage taken, kills, biggest hit, crits, hit rate, dodges, buffs and debuffs landed, actions and ultimates. Gold numbers lead their row. ${IMPACT_NOTE}</p>
 <h4>Custom battle</h4><p>Pick up to 3 of your unlocked heroes and up to 5 opponents from the whole roster, with their builds and a strength setting. Opponents are controlled by the game, show their intents like any enemy, use their own SP pool and get their own team bonuses. Custom battles don't affect your progress.</p>
-<h4>Controls</h4><p>Speed cycles 1×, 2× and 3×. Auto lets the team fight on its own and stays on between waves. On a keyboard, 1, 2 and 3 pick actions and Enter uses an area move.</p>`;
+<h4>Controls</h4><p>Speed cycles 1×, 2× and 3×. Auto lets the team fight on its own and stays on between waves. On a keyboard, 1, 2 and 3 pick actions and Enter uses an area move.</p>
+<h4>Effects</h4><p>Effects on the title screen sets how much motion the battle screen uses. Full plays everything. Reduced drops screen shake, lunges and flashes but keeps damage numbers, slashes and hit effects, so a fight is still easy to read. Auto follows the reduce motion setting on your device.</p>`;
   if (tab === 'stats') return `
 <h4>HP</h4><p>Health. At 0 the unit falls. Shield (blue stripes on the HP bar) absorbs damage before HP.</p>
 <h4>ATK</h4><p>Attack. Every ability is a percentage of ATK. Damage over time (Burn, Shock, Bleed, Poison) is also based on the attacker's ATK when applied.</p>

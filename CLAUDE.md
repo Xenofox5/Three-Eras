@@ -38,6 +38,11 @@ Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 - `npm run test:smoke` / `npm run test:regression` → Playwright (Python) browser tests against `dist/three-eras.html` (set `TE_HTML` to test another file). Needs `pip install playwright && playwright install chromium`
 - `data.js` is too big for `node -e "$(cat data.js)..."`: always concatenate into a file first (the scripts do this)
 
+## On Windows
+- npm runs scripts through `cmd.exe`, so no POSIX flags in `package.json`. `mkdir -p dist` there creates a folder called `-p` and then fails on every later run, so each build script makes its own output folder instead. Keep new scripts to a bare `sh <script>.sh` call.
+- `npm run test:smoke` and `test:regression` need `python3` on the PATH. Git Bash does not provide it and the Microsoft Store stub is not a working Python, so install Python properly or run those tests elsewhere.
+- Git here is configured `core.autocrlf=false` for this repo on purpose: the files are committed with CRLF and the build scripts still run under Git Bash and on the Ubuntu runner. Do not "fix" the line endings.
+
 ## Workflow for any change
 1. Edit source files.
 2. `npm run build` and `npm run check:dupes`.
@@ -69,6 +74,9 @@ Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 - Leaving a battle must not leave `runBattle` running: `B.id` and `B.abort` guard it; hooks check `live()`.
 - Playwright cannot click bobbing (targetable) cards without `force: true`.
 - Animated portraits: the Vessel and Unsealed states drive eye glow through statuses, not `u.flags.glow` alone.
+- Reduced motion is a player setting (`SAVE.motion`: full, reduced or auto), not the raw media query. `REDUCED` is a live `let` in `ui1.js`, so never cache it at load. Windows reports `prefers-reduced-motion: reduce` whenever Settings > Accessibility > Visual effects > Animation effects is off, which is common and not a real request for less motion. Honouring it blindly once hid every attack, number and hit on desktop.
+- Reduced must stay readable: it drops `shakeArena`, `lungeIn`, `ghost`, `flash` and the shake and bob keyframes, and keeps slashes, bursts, rings, projectiles and the `.fl` damage numbers. Gate new motion-heavy FX on `REDUCED`; leave informational FX ungated.
+- Never disable CSS animation globally (`*{animation-duration:.01ms}`). Damage numbers are CSS animations, so a blanket rule silently deletes the battle screen's feedback. Scope motion rules to `body.reduced` and name the keyframes.
 
 ## Hosting and saves
 - The original game lives as a claude.ai artifact (https://claude.ai/artifact/SZgnrJX9xe6kCVEApHm5mU) and saves to the player's Claude account there. Claude Code cannot update that artifact; new versions go to GitHub Pages instead.

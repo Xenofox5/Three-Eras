@@ -4,8 +4,8 @@
   "private": true,
   "description": "Three Eras: a turn-based team battler in a single HTML file.",
   "scripts": {
-    "build": "mkdir -p dist && sh build.sh dist/three-eras.html",
-    "build:offline": "mkdir -p dist && sh build_offline.sh dist/three-eras-offline.html",
+    "build": "sh build.sh dist/three-eras.html",
+    "build:offline": "sh build_offline.sh dist/three-eras-offline.html",
     "build:app": "sh build_app.sh dist/app",
     "build:all": "npm run build && npm run build:offline && npm run build:app",
     "balance": "sh tools/balance.sh",

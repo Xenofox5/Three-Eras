@@ -3,6 +3,7 @@
 set -e
 cd "$(dirname "$0")"
 OUT=${1:-three-eras-offline.html}
+mkdir -p "$(dirname "$OUT")"
 ff() { printf "@font-face{font-family:'%s';font-style:normal;font-weight:%s;font-display:swap;src:url(data:font/woff2;base64,%s) format('woff2')}\n" "$1" "$2" "$(base64 -w0 "fonts/$3")"; }
 {
   sed '/fonts.googleapis.com/d;/fonts.gstatic.com/d' shell_head.html
