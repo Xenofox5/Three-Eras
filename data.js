@@ -543,7 +543,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.93';
+const GAME_VERSION = '0.4.1';
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
 STAGES.forEach(s => { if (s.reward) UNLOCK_FROM[s.reward] = s.id; });
@@ -611,6 +611,11 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.1', date: 'Guard, creatures and mimicry', changes: [
+    { t: 'rework', kind: 'hero', who: 'david', what: 'Hold the Line', text: 'Which attacks the guard catches', from: 'only ordinary attacks', to: 'every single-target attack', note: 'Fourteen skills bypassed it, including Crush, Phantom Switch, Finger Frame and Sanctum Blade. Area attacks still ignore it, as described.' },
+    { t: 'rework', kind: 'hero', who: 'vasco', what: 'Mimicry', text: 'What it copies', from: 'a flat 100% / 140% / 180% by slot, effects dropped', to: 'the real strength and effect of the move', note: 'Still capped so a boss move comes back balanced.' },
+    { t: 'adjust', kind: 'rule', what: 'End of battle summary', text: 'Damage dealt and soaked by a creature', from: 'lost when it died', to: 'credited to whoever summoned it' }
+  ] },
   { v: '0.92', date: 'Alfred, duels and healers', changes: [
     { t: 'nerf', kind: 'hero', who: 'alfred', text: 'Crit chance', from: '20%', to: '14%' },
     { t: 'nerf', kind: 'hero', who: 'alfred', what: 'Finger Frame', text: 'Framed crit bonus for the whole team', from: '+25%', to: '+15%' },
@@ -896,6 +901,19 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.1', items: [
+    'Four fixes to things that were quietly not working. Hold the Line only redirected attacks that went through the ordinary attack path, so fourteen single-target skills, among them Crush, Phantom Switch, Finger Frame and Sanctum Blade, walked straight past the guard. They all respect it now.',
+    'What a summoned creature does now counts for whoever summoned it. The imps Trigg calls up were removed from the field when they died and took their damage dealt and damage soaked with them, so none of it reached the end of battle summary.',
+    'Mimicry copies the move that was actually used. It had been guessing a flat 100%, 140% or 180% from which slot the move came out of, and it dropped any Burn, Shock or Poison the original carried. It now copies the real strength and the real effect, still capped so a boss move comes back at a sane level.',
+    'Afterimage now shows on the card as well as in the status list. A hero fading out with no explanation read as a glitch; it means the next attack against them misses completely.'
+  ] },
+  { v: '0.4.0', items: [
+    'Version numbers restart at 0.4. The old 0.9x suggested the game was nearly finished, which it is not. From here, the middle number is a milestone (0.5, 0.6) and the last is fixes and balance (0.4.1). 1.0 means feature complete.',
+    'The battle screen now fits a computer. Portraits were taking their height from the space the arena had left and their width from the card, so on a laptop they stretched out flat, as wide as 168 by 66. They are square again, the enemy row sizes itself so four or five foes are not tall and thin, and on a wide window the action panel moves beside the arena instead of under it.',
+    'The title screen no longer cuts off its own bottom on a short window, which used to hide Save backup and the Effects setting.',
+    'Dev mode: five taps on the version number under the logo, or add ?dev to the address, unlocks every hero and stage for testing. Stars and records are left alone.',
+    'The 1v1 research was being sampled twice per matchup and the two answers disagreed by as much as 29 points. Every pair is now played once with 300 fights instead of 24, so the duel grid is both consistent and far steadier. The Stats screen also reports the real number of fights behind it, which it had been overstating.'
+  ] },
   { v: '0.93', items: ['Battle effects no longer vanish on devices that ask for reduced motion. Windows in particular reports this whenever animation effects are switched off, which left attacks, damage numbers and hits invisible.', 'New Effects setting on the title screen: Full, Reduced or Auto. Reduced now drops only screen shake, lunges and flashes, and keeps the damage numbers and hit effects you need to follow a fight.'] },
   { v: '0.92', items: ['Balance pass: Alfred nerfed, 1v1 duels narrowed with Last Stand, healers heal themselves slightly less. Simulated stats refreshed.'] },
   { v: '0.91', items: ['New portraits so every hero looks distinct: Ben (spectacles, chain of office, decree scroll), Aamay (hooded scribe with a candle and open book), Trigg (pale, gaunt, long wild hair) and Kingsley (feathered bard\'s cap).'] },

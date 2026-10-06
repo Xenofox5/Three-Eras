@@ -1,6 +1,6 @@
 # Three Eras
 
-A turn-based team battler in one self-contained HTML file. Build a team of 3 from 24 heroes across three eras; fight a 31-stage campaign, an endless Gauntlet, or custom hero-vs-hero battles. Current version: v0.93 (`GAME_VERSION` in `data.js`).
+A turn-based team battler in one self-contained HTML file. Build a team of 3 from 24 heroes across three eras; fight a 31-stage campaign, an endless Gauntlet, or custom hero-vs-hero battles. Current version: v0.4.0 (`GAME_VERSION` in `data.js`).
 
 ## Owner's rules (apply to all game text, comments shown to players, logs and docs)
 - UK English and metric units.
@@ -49,10 +49,17 @@ Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 1. Edit source files.
 2. `npm run build` and `npm run check:dupes`.
 3. If numbers or mechanics changed: `npm run balance`, tune, repeat. If a hero who is also a boss changed: `npm run stages`.
-4. Add a `BALANCE` entry (numbers and rules: `{ t, kind, who, what, text, from, to, note }`, `t` is buff, nerf, rework, new, harder, easier or adjust) and an `UPDATES` entry (features) at the top of each list in `data.js`. Bump `GAME_VERSION` (0.1 for major updates, 0.01 for small ones).
+4. Add a `BALANCE` entry (numbers and rules: `{ t, kind, who, what, text, from, to, note }`, `t` is buff, nerf, rework, new, harder, easier or adjust) and an `UPDATES` entry (features) at the top of each list in `data.js`. Bump `GAME_VERSION`.
 5. `sh tools/balance.sh <version>` to refresh the in-game Stats screen.
 6. `npm run build:all`, then `npm run test:smoke` (or `npm run test:regression` for big changes). Both must end with every line PASS and no console output.
 7. Commit and push. GitHub Actions (`.github/workflows/pages.yml`) deploys `dist/app` to GitHub Pages.
+
+### Versioning
+`0.MILESTONE.PATCH`, renumbered from 0.93 to 0.4.0 on 2026-10-07 because 0.9x implied the game was nearly done.
+- **Patch** (0.4.1, 0.4.2): bug fixes, balance passes, description work. Most releases.
+- **Milestone** (0.5.0, 0.6.0): a batch of features or hero reworks landing together.
+- **1.0.0**: feature complete, declared deliberately. Never reached by arithmetic.
+Entries in `UPDATES` and `BALANCE` before 0.4.0 use the old 0.9x numbers and are history. Do not renumber them.
 
 ## Balance targets
 - Composite = average of Campaign and 3v3 team win rate. Aim for 45 to 60 for every hero; Harry may sit slightly above as the legend. Noise is about ±3 points per run.

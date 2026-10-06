@@ -296,21 +296,42 @@ const SUDDEN_TURN = 150;
 const aloneHero = u => !sideList(u).some(x => x !== u && isUp(x) && x.isHero);
 const suddenDeath = () => (B.turn > SUDDEN_TURN ? 1 + 0.05 * Math.floor((B.turn - SUDDEN_TURN) / 10 + 1) : 1);
 function tally(u, k, n = 1) { const s = u && B.st[u.uid]; if (s) s[k] = (s[k] || 0) + n; }
+/* A creature's work belongs to whoever summoned it. Creatures are removed from their side when
+   they die, so without this the damage Trigg's imps soaked and dealt never reaches the summary.
+   Turn counts are left out: they describe the owner's own turns. */
+const CREDIT = ['dmg', 'heal', 'shield', 'taken', 'kills', 'crits', 'hits', 'misses', 'dodges', 'buffs', 'debuffs', 'absorbed'];
+function creditCreature(c) {
+  const os = c && c.owner && B.st[c.owner.uid], cs = c && B.st[c.uid];
+  if (!cs || !os || cs.credited) return;
+  for (const k of CREDIT) os[k] = (os[k] || 0) + (cs[k] || 0);
+  os.big = Math.max(os.big || 0, cs.big || 0);
+  cs.credited = true;
+}
 function resolveHit(u, t, mult, o = {}) {
   if (!isUp(t)) return null;
+  /* Guard belongs here, not only in strike(). Crush, Phantom Switch, Finger Frame, Seal in Ink
+     and a dozen other single-target skills call resolveHit directly and used to walk straight
+     past David. strike() redirects before it gets here, and a guardian is never itself guarded,
+     so this never fires twice for one hit. */
+  if (!o.aoe && !o.reflected && u.side !== t.side) {
+    const g = guardian(t);
+    if (g && g !== u) { HOOK.float(t, '🛡 GUARDED', 'info'); t = g; if (!isUp(t)) return null; }
+  }
+  /* What Vasco copies: the biggest single multiplier this action actually used. */
+  if (!o.reflected && u.side !== t.side) B.actMult = Math.max(B.actMult || 0, mult);
   if (o.canMiss !== false && !o.sure) {
     if (has(t, 'afterimage') || has(t, 'airborne')) {
       removeStatus(t, has(t, 'afterimage') ? 'afterimage' : 'airborne');
       HOOK.float(t, 'DODGE', 'miss'); HOOK.fx('dodge', { tgt: t }); HOOK.sfx('miss');
       tally(u, 'misses'); tally(t, 'dodges');
-      return { miss: true };
+      return { miss: true, target: t };
     }
-    if (rnd() >= hitChance(u, t, o)) { HOOK.float(t, 'MISS', 'miss'); HOOK.fx('dodge', { tgt: t }); HOOK.sfx('miss'); tally(u, 'misses'); tally(t, 'dodges'); return { miss: true }; }
+    if (rnd() >= hitChance(u, t, o)) { HOOK.float(t, 'MISS', 'miss'); HOOK.fx('dodge', { tgt: t }); HOOK.sfx('miss'); tally(u, 'misses'); tally(t, 'dodges'); return { miss: true, target: t }; }
   }
   if (has(t, 'crystal')) {
     removeStatus(t, 'crystal');
     HOOK.float(t, '💎 BLOCKED', 'shield'); HOOK.fx('crystalblock', { tgt: t }); HOOK.sfx('shield');
-    return { blocked: true };
+    return { blocked: true, target: t };
   }
   const r = calcDmg(u, t, mult, o);
   tally(u, 'hits'); if (r.crit) tally(u, 'crits');
@@ -326,7 +347,7 @@ function resolveHit(u, t, mult, o = {}) {
       HOOK.log(`${t.name}'s plates shatter. It is Exposed.`, 'i');
     }
   }
-  return Object.assign(res, { crit: r.crit });
+  return Object.assign(res, { crit: r.crit, target: t });
 }
 function applyDamage(t, dmg, o = {}) {
   if (!isUp(t)) return { dmg: 0 };
@@ -448,6 +469,7 @@ async function strike(u, t, mult, o = {}) {
     if (g && g !== u) { HOOK.float(t, '🛡 GUARDED', 'info'); t = g; }
   }
   await HOOK.fx(o.fx || 'slash', { src: u, tgt: t, color: o.color || u.color, i: o.i || 0 });
+  if (o.status) B.actStatus = o.status;
   const r = resolveHit(u, t, mult, o);
   if (r && !r.miss && !r.blocked && o.status) applyOnHit(u, t, o.status);
   const foeHit = r && t.isHero && t.side !== u.side && isUp(t) && isUp(u) && !o.noCounter;
@@ -630,6 +652,7 @@ async function processDeaths() {
         if (u.creature) {
           const ow = u.owner;
           if (ow && isUp(ow) && bt(ow, 'deathBurst')) { await HOOK.fx('hellgate', { src: u, tgts: foesOf(ow) }); for (const e of foesOf(ow)) resolveHit(ow, e, bt(ow, 'deathBurst'), { aoe: true, sure: true }); }
+          creditCreature(u);
           const L = sideList(u), ix = L.indexOf(u); if (ix >= 0) L.splice(ix, 1);
           B.units = [...B.players, ...B.enemies]; HOOK.rebuild();
         }
@@ -1290,8 +1313,12 @@ async function heroAct(u, ch) {
   if (kind === 'ult') { u.ult = 0; HOOK.update(); await HOOK.ult(u, a); }
   else { HOOK.actName(u, sustaining ? 'Sustain Beam' : a.name, kind); HOOK.update(); }
   bumpPages();
-  if (h[kind].target === 'enemy' || h[kind].target === 'allEnemies') { B.lastHit = B.lastHit || {}; B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: kind === 'basic' ? 1.0 : kind === 'skill' ? 1.4 : 1.8, name: h[kind].name }; }
+  B.actMult = 0; B.actStatus = null;
   await KIT[u.id][kind](u, t);
+  if (h[kind].target === 'enemy' || h[kind].target === 'allEnemies') {
+    B.lastHit = B.lastHit || {};
+    B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: B.actMult || 1, name: h[kind].name, status: B.actStatus };
+  }
   if (u.isHero && u.id === 'alfred' && isUp(u)) { const t0 = tempoOf(u); u.flags.advance = t0 === 'allegro' ? 0.5 : 0; shiftTempo(u); }
   if (u.isHero && u.id === 'seraphine' && isUp(u)) {
     for (let i = 0; i < 2; i++) {
@@ -1625,7 +1652,7 @@ async function runBattle() {
     await processDeaths();
     if (gone()) return 'abort';
     const end = checkEnd();
-    if (end) { B.over = true; B.result = end; B.actor = null; HOOK.update(); return end; }
+    if (end) { B.units.forEach(x => { if (x.creature) creditCreature(x); }); B.over = true; B.result = end; B.actor = null; HOOK.update(); return end; }
     if (gone()) return 'abort';
     if (B.turn === SUDDEN_TURN && !B.sudden) { B.sudden = true; HOOK.log('Sudden death: damage rises every 10 turns and healing is halved.', 'i'); await HOOK.banner('Sudden death', 'Damage rises every 10 turns. Healing is halved.', '#ff6a2a'); }
     const a = nextActor();

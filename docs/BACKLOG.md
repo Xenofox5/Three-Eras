@@ -21,18 +21,27 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   `?dev` to the address. Every hero and stage opens; stars and records are untouched. The tag
   turns gold and reads "dev" while it is on. (v0.93)
 
-## B. Bugs
+## B. Bugs (done in v0.4.1)
 
-- [ ] **Vasco's mimicry is glitchy and sometimes does nothing.** `B.lastHit` is only set when
-  the copied side has already used a damaging move, so the first use improvises silently.
-- [ ] **David's Guard does not always work.** Check `guardian()`, the `guarded`/`guarding`
-  pair, and that area hits correctly bypass it.
-- [ ] **End-of-battle stats are incomplete.** Creatures (Trigg's imps, the Hellhound) are
-  dropped from `B.units` when they die, so the damage they soaked never reaches the summary.
-- [ ] **Yunze "goes semi-invisible" often.** Decide whether this is Afterimage, the `unseen`
-  class, or a real bug, then either explain it on screen or fix it.
-- [ ] **Verify Soham's yellow shield is visually separate from a normal blue shield** in the HP
-  bar. The bar already draws `.s` and `.hx` segments, so this may only need more contrast.
+- [x] **Vasco's mimicry.** It guessed a flat 100/140/180% from which slot the move came out of
+  rather than reading the real multiplier, and it threw away any status the original carried.
+  It now records the largest multiplier the action actually used and the effect it applied.
+  Still improvises if nothing has been seen yet, which is by design. (v0.4.1)
+- [x] **David's Guard.** The redirect lived only in `strike()`, so the fourteen single-target
+  skills that call `resolveHit` directly walked past it: Crush, Phantom Switch, Finger Frame,
+  Sanctum Blade, Judgement of Wings, Seal in Ink, Cinderbead, Orbit, Mimicry, Fire Beam and
+  more. The redirect moved into `resolveHit`, so every single-target hit respects it and area
+  hits still ignore it. Covered by `npm run test:engine`. (v0.4.1)
+- [x] **End-of-battle stats.** A creature is spliced out of its side when it dies, taking its
+  damage dealt and soaked with it. Its contribution is now credited to whoever summoned it, on
+  death and again at the end of the battle for survivors. Turn counts stay out, since those
+  describe the owner's own turns. (v0.4.1)
+- [x] **Yunze going semi-invisible** is the Afterimage buff, which makes the next attack on him
+  miss completely. It was a status badge and nothing else, so it read as a glitch. The card now
+  fades and takes a dashed border, the same language as the Afterimage enemies in the Shadows
+  stage, which are the same idea. (v0.4.1)
+- [x] **Soham's yellow shield** was already separate, and it is confirmed on screen: gold diagonal
+  stripes with a `+388⬡` readout, against blue stripes and `+205🛡` for an ordinary shield. No change needed.
 
 ## C. Clarity (no balance impact, safe to do in one pass)
 

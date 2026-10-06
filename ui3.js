@@ -151,6 +151,7 @@ function updateUnit(u) {
   c.classList.toggle('crys', up && has(u, 'crystal'));
   c.classList.toggle('stone', up && has(u, 'stone'));
   c.classList.toggle('aloft', up && has(u, 'aloft'));
+  c.classList.toggle('afterimg', up && has(u, 'afterimage'));
   c.classList.toggle('vessel', up && has(u, 'vessel'));
   c.classList.toggle('silenced', up && has(u, 'silenced'));
   c.classList.toggle('hexed', up && has(u, 'hexshield'));
