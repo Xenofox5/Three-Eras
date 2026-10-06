@@ -45,6 +45,9 @@ Build order (fixed): data, engine, simstats, art, ui1, ui2, ui3, ui5, ui4.
 - The default browser tests are the Node ones, so they work here. The `:py` variants need `python3` on the PATH; Git Bash does not provide it and the Microsoft Store stub is not a working Python.
 - Git here is configured `core.autocrlf=false` for this repo on purpose: the files are committed with CRLF and the build scripts still run under Git Bash and on the Ubuntu runner. Do not "fix" the line endings.
 
+## What to work on next
+`docs/BACKLOG.md` is the live to-do list, written from the owner notes and ticked off as things ship. Read it at the start of a session before picking up work.
+
 ## Workflow for any change
 1. Edit source files.
 2. `npm run build` and `npm run check:dupes`.

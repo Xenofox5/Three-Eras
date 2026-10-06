@@ -90,6 +90,11 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [ ] **The Chosen.** Slightly too tanky.
 - [ ] **Angus.** Cycling Unbreakable makes him effectively immortal (seen in a 5v1). Nerf the
   cycle, buff his offence slightly to compensate.
+- [ ] **David. Buff him.** Asked for directly by the owner on 2026-10-07, and the v0.4.1 Guard fix
+  argues for it: his guard now catches fourteen single-target skills that used to walk past it, so
+  he soaks far more than he did while his composite barely moved (48.7). He is doing more work for
+  the same result. Buff his own survivability or his payoff for guarding, not his damage, since the
+  guard is the point of him.
 - [ ] **Danielle.** Riposte chance is too high.
 - [ ] **Alfred.** Verify the tempo multipliers do what the descriptions say, and make the three
   tempos feel more distinct from each other.
