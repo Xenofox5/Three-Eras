@@ -116,7 +116,7 @@ const HEROES = {
     id: 'daniel', name: 'Danielle', title: 'The Crystal Duelist', eras: ['second'], role: 'Warden', color: '#ffe066',
     stats: { hp: 1320, atk: 116, def: 124, spd: 108, crit: 0.1, cdmg: 0.5 },
     look: { skin: '#ecc8a6', hair: '#6b4426', hairStyle: 'long', eye: '#5a3a20', body: 'coat', bodyColor: '#3c3550', trim: '#ffe066', bg: '#4d4212', weapon: 'crystal', lashes: true },
-    passive: { name: 'Riposte', desc: 'When struck by a single-target attack, 45% chance to riposte with her rapier for 95% ATK. Ripostes cannot miss and have +25% crit chance. If a Crystal Sphere blocks the hit, she always ripostes.' },
+    passive: { name: 'Riposte', desc: 'When a single-target attack hits her, 45% chance to answer with her rapier for 95% ATK. Ripostes cannot miss and have +25% crit chance. Evading an attack leaves nothing to answer, so evasion and riposte never both happen. If a Crystal Sphere blocks the hit she always ripostes. One riposte per attack, and area attacks never trigger it.' },
     basic: { name: 'Rapier Lunge', icon: '🤺', target: 'enemy', desc: 'Deal 110% ATK to one enemy with +20% crit chance.' },
     skill: { name: 'Crystal Ward', icon: '🔮', cost: 1, target: 'ally', desc: 'Give an ally a Shield worth 14% of Danielle\'s max HP and DEF +15% for 2 turns. Crystal Ward can\'t raise an ally\'s Shield above 35% of their max HP, so recasting tops it up rather than stacking.' },
     ult:   { name: 'Unbreakable Sphere', icon: '💎', target: 'enemy', desc: 'Every ally gains a Crystal Sphere that blocks the next hit within 2 turns. Then smash one enemy for 180% ATK and Stun it.' }
@@ -543,7 +543,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.2';
+const GAME_VERSION = '0.4.3';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -902,6 +902,11 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.3', items: [
+    'Builds now show what they change as numbers, not only prose. The stat block in a hero sheet is drawn with the equipped build applied and marks what moved, and every build lists its stat changes as chips.',
+    'The 1v1 grid can no longer be read the wrong way round. The corner names both axes, each cell says in words who beat whom and out of how many duels, and the text explains that anything near 50 is a close matchup rather than a precise number.',
+    'Descriptions fixed where they left something out. Trigg now names the Pit Imp and gives its claw and its 40% Burn chance. Kingsley says a second Song refreshes the first rather than adding another. Danielle explains that evading an attack means there is nothing to riposte, so evasion and riposte never both happen. Seraphine says that Severance marks do nothing until Halo Storm detonates them, and that they stop at 5.'
+  ] },
   { v: '0.4.2', items: [
     'Every past update and balance entry has been renamed onto the new numbering, in the same order, with its old number shown beside it. The old numbering had run out of room at 0.93, and it had already used 0.4, 0.41 and 0.42, which clashed with the new ones.',
     'The Guide now says exactly what moves each part of the version number, so it is clear why it moves as slowly as it does.'
@@ -955,7 +960,7 @@ Object.assign(STATUS, {
   stone:     { name: 'Stone Form', icon: '🗿', type: 'buff', mods: { eva: -0.6 }, color: '#a8a29a', desc: 'Turned to stone: takes 50% less damage, cannot be stunned, cannot dodge, and mends 9% max HP at the start of her next turn.' },
   aloft:     { name: 'Aloft', icon: '🦇', type: 'buff', mods: { eva: 0.18 }, color: '#c0507a', desc: 'In the air on demonic wings: +18% evasion until her next turn.' },
   hexshield: { name: 'Hex Shield', icon: '⬡', type: 'buff', fixed: true, color: '#ffe066', desc: 'A strong but brittle Shield from Soham. It shatters after a set number of hits however much is left. While it holds, this unit cannot be stunned.' },
-  sever:     { name: 'Severance', icon: '✂', type: 'debuff', fixed: true, max: 5, color: '#e8dcff', desc: 'Marks left by Seraphine\'s halos. Halo Storm detonates them for 30% ATK per stack.' },
+  sever:     { name: 'Severance', icon: '✂', type: 'debuff', fixed: true, max: 5, color: '#e8dcff', desc: 'Marks left by the halos, up to 5 on one enemy. They do nothing until Halo Storm detonates them for 30% ATK each.' },
   hexwall:   { name: 'Hex Wall', icon: '⬡', type: 'buff', fixed: true, color: '#ffe066', desc: 'Soham\'s wall of yellow light stands in front of his team. It soaks 30% of every direct hit on his allies until its strength runs out.' },
   encircled: { name: 'Encircled', icon: '⭕', type: 'debuff', dot: true, mods: { spd: -0.15 }, color: '#f0e6ff', desc: 'Seraphine\'s halos circle it, cutting for 60% of her ATK at the start of each of its turns. SPD -15%.' }
 });
@@ -992,10 +997,10 @@ Object.assign(HEROES, {
     id: 'seraphine', name: 'Seraphine', title: 'The Hand Behind the Myth', eras: ['second'], role: 'Bladecaller', color: '#f0e6ff',
     stats: { hp: 1400, atk: 136, def: 80, spd: 120, crit: 0.14, cdmg: 0.55, eva: 0.12, acc: 0.05 },
     look: { skin: '#f0d6c8', hair: '#2a1a3a', hairStyle: 'long', eye: '#f0e6ff', body: 'robe', bodyColor: '#e8e2f2', trim: '#b89cff', bg: '#241a38', weapon: 'halos', helm: 'mask' },
-    passive: { name: 'Behind the Scenes', desc: 'While any ally stands, enemies cannot target her with single-target attacks. After each of her actions, both halos keep cutting: 2 strikes of 35% ATK on random enemies. Her cuts leave Severance marks. The Chosen secretly obeys her.' },
-    basic: { name: 'Halo Cut', icon: '⭕', target: 'enemy', desc: 'Send a halo through one enemy for 110% ATK, leaving a Severance mark.' },
+    passive: { name: 'Behind the Scenes', desc: 'While any ally still stands, enemies cannot aim single-target attacks at her. After each of her actions both halos keep cutting on their own: 2 strikes of 35% ATK on random enemies. Every cut leaves a Severance mark, which does nothing on its own and only pays off when Halo Storm detonates it. The Chosen secretly obeys her.' },
+    basic: { name: 'Halo Cut', icon: '⭕', target: 'enemy', desc: 'Send a halo through one enemy for 110% ATK, leaving a Severance mark. Marks stack up to 5 on the same enemy.' },
     skill: { name: 'Orbiting Blades', icon: '🌀', cost: 1, target: 'enemy', desc: 'Both halos circle an enemy: 80% ATK and 2 Severance marks now, then it is Encircled for 2 turns (60% ATK cut at the start of each of its turns, SPD -15%).' },
-    ult:   { name: 'Halo Storm', icon: '💫', target: 'allEnemies', desc: '8 cuts of 45% ATK across all enemies, favouring Encircled ones. Then every Severance mark detonates for 30% ATK per stack. If The Chosen fights beside her, The Chosen takes her turn immediately.' }
+    ult:   { name: 'Halo Storm', icon: '💫', target: 'allEnemies', desc: '8 cuts of 45% ATK across all enemies, favouring Encircled ones. Then every Severance mark on every enemy detonates at once for 30% ATK per mark, and the marks are spent. If The Chosen fights beside her, The Chosen takes her turn immediately.' }
   }
 });
 HERO_ORDER.splice(0, HERO_ORDER.length, 'angus', 'flynn', 'leo', 'harry', 'peguicha', 'vehra', 'soham', 'chosen', 'elphi', 'daniel', 'yunze', 'malakai', 'seraphine', 'lachlan', 'yousuf', 'gemia', 'david');
@@ -1077,9 +1082,9 @@ Object.assign(HEROES, {
   trigg: { id: 'trigg', name: 'Trigg', title: 'Right Hand of the Pit', eras: ['first'], role: 'Summoner', color: '#e0502a',
     stats: { hp: 1280, atk: 120, def: 76, spd: 106, crit: 0.08, cdmg: 0.5, eva: 0.06 },
     look: { skin: '#dccbc2', hair: '#0e0c10', hairStyle: 'wild', eye: '#e0102a', body: 'robe', bodyColor: '#2a1210', trim: '#e0502a', bg: '#2a0e08', weapon: 'chains', gaunt: true },
-    passive: { name: 'Hellish Retinue', desc: 'Commands up to 2 creatures at a time. They fight on their own turns and crumble if he falls.' },
+    passive: { name: 'Hellish Retinue', desc: 'Commands up to 2 creatures at a time, Pit Imps and the Hellhound. They act on their own turns and crumble if he falls.' },
     basic: { name: 'Cinder Lash', icon: '⛓️', target: 'enemy', desc: 'Lash one enemy with burning chains for 95% ATK.' },
-    skill: { name: 'Summon Imp', icon: '👹', cost: 1, target: 'self', desc: 'Call an imp from the pit with 32% of his HP and 75% of his ATK. Imps claw and Burn. If he already commands his limit, his creatures are mended for 25% HP instead.' },
+    skill: { name: 'Summon Imp', icon: '👹', cost: 1, target: 'self', desc: 'Call a Pit Imp with 32% of his HP and 75% of his ATK. It acts on its own turns, clawing one enemy for 100% of its own ATK with a 40% chance to Burn for 2 turns. At his limit, his creatures are mended for 25% of their max HP instead.' },
     ult: { name: 'Hellgate', icon: '🔥', target: 'allEnemies', desc: 'Every creature he commands bursts in hellfire for 110% of his ATK to all enemies. Then a Hellhound answers the call: 70% of his HP, 90% of his ATK, and it Taunts.' } },
   alfred: { id: 'alfred', name: 'Alfred', title: 'The Blurred Blade', eras: ['second'], role: 'Marksman', color: '#9fb8ff',
     stats: { hp: 1560, atk: 138, def: 95, spd: 118, crit: 0.14, cdmg: 0.6, eva: 0.16, acc: 0.1 },
@@ -1106,7 +1111,7 @@ Object.assign(HEROES, {
     stats: { hp: 1200, atk: 110, def: 74, spd: 112, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#f0d0b4', hair: '#d8642a', hairStyle: 'messy', eye: '#3aa060', body: 'coat', bodyColor: '#2a4a2a', trim: '#f0c040', bg: '#183018', weapon: 'lute', hat: 'bard', smile: true },
     passive: { name: 'Encore', desc: 'Allies with a Song heal 6% of their max HP and lose one debuff at the start of each of their turns. His heals on himself are 10% weaker. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
-    basic: { name: 'Jaunty Tune', icon: '🎵', target: 'enemy', desc: 'Play at one enemy for 80% ATK. The ally with the lowest HP gains a Song for 2 turns.' },
+    basic: { name: 'Jaunty Tune', icon: '🎵', target: 'enemy', desc: 'Play at one enemy for 80% ATK. The ally with the lowest HP gains a Song for 2 turns. Playing again on an ally who already has one refreshes it back to 2 turns rather than adding a second.' },
     skill: { name: 'Borrowed Trinket', icon: '🎁', cost: 1, target: 'self', desc: 'Pull one of Vasco\'s magic items at random: Lantern (heal all allies 14%), Mirror Charm (Shield the lowest ally for 22% of his max HP), Jester\'s Bell (Blind every enemy and a 50% chance to Stun one) or Spark Box (75% ATK to every enemy).' },
     ult: { name: 'Grand Finale', icon: '🎶', target: 'allAllies', desc: 'Every ally gains a Song for 3 turns and SPD +15% for 2 turns, and is cleansed.' } },
   vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',

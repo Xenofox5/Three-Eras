@@ -181,7 +181,7 @@ function buildSheet(id, inTeam) {
   const h = HEROES[id];
   const cur = buildOf(id, SAVE.builds[id]).id;
   sheet(`<div class="head" style="--hc:${h.color}"><div class="p">${heroPortrait(id)}</div><div><h3>${esc(h.name)}</h3><p>Choose a build. It applies everywhere you use ${esc(h.name)}.</p></div></div>
-<div class="builds">${BUILDS[id].map(b => `<button class="bopt ${b.id === cur ? 'on' : ''}" data-b="${b.id}" style="--hc:${h.color}"><span class="i">${b.icon}</span><span><b>${esc(b.name)}</b><p>${esc(b.desc)}</p>${buildStatLine(id, b.id)}</span></button>`).join('')}</div>
+<div class="builds">${BUILDS[id].map(b => `<button class="bopt ${b.id === cur ? 'on' : ''}" data-b="${b.id}" style="--hc:${h.color}"><span class="i">${b.icon}</span><span><b>${esc(b.name)}</b>${buildMods(b)}<p>${esc(b.desc)}</p>${buildStatLine(id, b.id)}</span></button>`).join('')}</div>
 <div class="resbtns" style="max-width:none;margin-top:12px"><button class="btn" id="bsInfo">Hero details</button>${inTeam ? '<button class="btn" id="bsRm">Remove from team</button>' : ''}</div>`, bg => {
     $$('.bopt', bg).forEach(o => o.onclick = () => { SAVE.builds[id] = o.dataset.b; store(); SND.play('select'); closeSheet(); if (UI.tctx && $('#fight')) renderTeam(); else if ($('.roster')) showHeroes(); });
     $('#bsInfo', bg).onclick = () => heroSheet(id);
@@ -273,9 +273,32 @@ function abilHTML(ic, name, kind, desc) {
   return `<div class="abil"><div class="ic">${ic}</div><div><b>${esc(name)}</b><span class="k">${kind}</span><p>${esc(desc)}</p></div></div>`;
 }
 const pctTxt = v => Math.round(v * 100) + '%';
-function statRows(s, hc) {
-  const row = (l, v, m, t) => `<div class="statrow"><span>${l}</span><div class="bar"><i style="width:${Math.min(100, v / m * 100)}%"></i></div><span>${t || v}</span></div>`;
-  return `<div style="--hc:${hc}">${row('HP', s.hp, 1750)}${row('ATK', s.atk, 148)}${row('DEF', s.def, 130)}${row('SPD', s.spd, 146)}${row('Crit', s.crit || 0.08, 0.2, pctTxt(s.crit || 0.08))}${row('EVA', s.eva || 0, 0.25, pctTxt(s.eva || 0))}${s.acc ? row('ACC', s.acc, 0.15, '+' + pctTxt(s.acc)) : ''}</div>`;
+/* What each build mod means, and whether it scales a stat or is added to a chance. */
+const MODINFO = {
+  hp: { label: 'Max HP', mul: true }, atk: { label: 'ATK', mul: true }, def: { label: 'DEF', mul: true },
+  spd: { label: 'SPD', mul: true }, crit: { label: 'Crit chance' }, cdmg: { label: 'Crit damage' },
+  eva: { label: 'Evasion' }, dot: { label: 'Burn, Shock, Bleed and Poison' }, heal: { label: 'Healing' },
+  shield: { label: 'Shields' }, lifesteal: { label: 'Lifesteal' }, ultGain: { label: 'Ultimate charge' },
+  dmg: { label: 'Damage dealt' }, exec: { label: 'Damage below 30% HP' }, acc: { label: 'Accuracy' }
+};
+const modPct = v => (v > 0 ? '+' : '') + Math.round(v * 100) + '%';
+/* The stat changes a build makes, as chips, so a build is never only prose. */
+function buildMods(b) {
+  const m = (b && b.mods) || {};
+  const keys = Object.keys(m).filter(k => m[k] && MODINFO[k]);
+  if (!keys.length) return '';
+  return `<span class="bmods">${keys.map(k => `<i class="${m[k] > 0 ? 'up' : 'dn'}">${esc(MODINFO[k].label)} ${modPct(m[k])}</i>`).join('')}</span>`;
+}
+function statRows(s, hc, b) {
+  const m = (b && b.mods) || {};
+  const row = (l, v, mx, t, was) => `<div class="statrow"><span>${l}</span><div class="bar"><i style="width:${Math.min(100, v / mx * 100)}%"></i></div><span>${t || Math.round(v)}${was ? ` <em class="mchg ${v > was ? 'up' : 'dn'}">was ${was}</em>` : ''}</span></div>`;
+  // hp, atk, def and spd scale the base; crit, cdmg and eva are added to it.
+  const sc = (v, k) => v * (1 + (m[k] || 0));
+  const ad = (v, k) => (v || 0) + (m[k] || 0);
+  const chg = (nv, ov, fmt) => (Math.round(nv) !== Math.round(ov) ? (fmt ? fmt(ov) : Math.round(ov)) : 0);
+  const hp = sc(s.hp, 'hp'), atk = sc(s.atk, 'atk'), def = sc(s.def, 'def'), spd = sc(s.spd, 'spd');
+  const cr = ad(s.crit || 0.08, 'crit'), ev = ad(s.eva || 0, 'eva');
+  return `<div style="--hc:${hc}">${row('HP', hp, 1750, null, chg(hp, s.hp))}${row('ATK', atk, 148, null, chg(atk, s.atk))}${row('DEF', def, 130, null, chg(def, s.def))}${row('SPD', spd, 146, null, chg(spd, s.spd))}${row('Crit', cr, 0.2, pctTxt(cr), chg(cr * 100, (s.crit || 0.08) * 100, v => pctTxt(v / 100)))}${row('EVA', ev, 0.25, pctTxt(ev), chg(ev * 100, (s.eva || 0) * 100, v => pctTxt(v / 100)))}${s.acc ? row('ACC', s.acc, 0.15, '+' + pctTxt(s.acc)) : ''}</div>`;
 }
 function heroSheet(id) {
   const h = HEROES[id];
@@ -287,8 +310,8 @@ function heroSheet(id) {
   sheet(`<div class="head" style="--hc:${h.color}"><div class="p">${heroPortrait(id, { glow: id === 'harry' })}</div><div><h3>${esc(h.name)}</h3><p>${esc(h.title)}</p><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${h.eras.map(e => `<span class="chip" style="border-color:${ERA[e].color}">${ERA[e].name}</span>`).join('')}<span class="chip">${esc(h.role)}</span></div></div></div>
 <p class="bio" style="--hc:${h.color};margin-top:12px">${esc(BIO[id])}</p>
 ${heroStatsHTML(id)}
-<h4>Base stats <button class="qbtn" data-guide="stats">What do these mean?</button></h4>
-${statRows(h.stats, h.color)}
+<h4>Stats with ${esc(buildOf(id, SAVE.builds[id]).name)} <button class="qbtn" data-guide="stats">What do these mean?</button></h4>
+${statRows(h.stats, h.color, buildOf(id, SAVE.builds[id]))}
 <h4>Abilities</h4>
 ${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}
 ${abilHTML(h.basic.icon, h.basic.name, 'Basic, +1 SP', h.basic.desc)}
@@ -296,7 +319,7 @@ ${abilHTML(h.skill.icon, h.skill.name, 'Skill, 1 SP', h.skill.desc)}
 ${abilHTML(h.ult.icon, h.ult.name, 'Ultimate', h.ult.desc)}
 ${(() => { const hist = BALANCE.flatMap(v => v.changes.filter(c => c.kind === 'hero' && c.who === id).map(c => Object.assign({ v: v.v }, c))); return hist.length ? `<h4>Balance history <button class="qbtn" data-guide="balance">All changes</button></h4>${hist.map(c => bcRow(c, false).replace('<div class="btx">', `<div class="btx"><span class="bv">v${esc(c.v)}</span> `)).join('')}` : ''; })()}
 <h4>Builds</h4>
-<div class="builds">${BUILDS[id].map(b => `<button class="bopt ${b.id === cur ? 'on' : ''}" data-b="${b.id}" style="--hc:${h.color}" ${unlocked ? '' : 'disabled'}><span class="i">${b.icon}</span><span><b>${esc(b.name)}${b.id === cur ? ' <em>Equipped</em>' : ''}</b><p>${esc(b.desc)}</p>${buildStatLine(id, b.id)}</span></button>`).join('')}</div>
+<div class="builds">${BUILDS[id].map(b => `<button class="bopt ${b.id === cur ? 'on' : ''}" data-b="${b.id}" style="--hc:${h.color}" ${unlocked ? '' : 'disabled'}><span class="i">${b.icon}</span><span><b>${esc(b.name)}${b.id === cur ? ' <em>Equipped</em>' : ''}</b>${buildMods(b)}<p>${esc(b.desc)}</p>${buildStatLine(id, b.id)}</span></button>`).join('')}</div>
 ${rivals.length || huntedBy.length ? `<h4>Rivals</h4>${rivals.length ? `<p>Deals 20% more damage to ${esc(rivals.join(', '))}.</p>` : ''}${huntedBy.length ? `<p>${esc(huntedBy.join(', '))} ${huntedBy.length > 1 ? 'deal' : 'deals'} 20% more damage to ${esc(h.name)}.</p>` : ''}` : ''}
 ${syns.length ? `<h4>Team bonuses</h4>${syns.map(sy => `<p><b style="color:var(--tx)">${sy.icon} ${esc(sy.name)}.</b> ${esc(sy.desc)}</p>`).join('')}` : ''}`, bg => {
     $$('.bopt', bg).forEach(o => o.onclick = () => { SAVE.builds[id] = o.dataset.b; store(); SND.play('select'); heroSheet(id); if (UI.tctx && $('#fight')) renderTeam(); });

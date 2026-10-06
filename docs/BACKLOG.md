@@ -43,21 +43,21 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [x] **Soham's yellow shield** was already separate, and it is confirmed on screen: gold diagonal
   stripes with a `+388⬡` readout, against blue stripes and `+205🛡` for an ordinary shield. No change needed.
 
-## C. Clarity (no balance impact, safe to do in one pass)
+## C. Clarity (mostly done in v0.4.3)
 
-- [ ] **Description audit.** Concision and precision across abilities, passives, builds and
+- [x] **Description audit.** (partly, v0.4.3) Concision and precision across abilities, passives, builds and
   statuses. Stop merging separate effects into one sentence. Keep flavour, never at the cost
   of the reader knowing the numbers.
-- [ ] **Every effect must be stated.** Example found: Trigg's basic applies Burn through its
+- [x] **Every effect must be stated.** Now enforced by `npm run check:desc`, which reads the KIT source and each summoned creature and fails if a status is applied that no description names. 45/45 clean. (v0.4.3) Example found: Trigg's basic applies Burn through its
   imps but no description says so.
-- [ ] **Builds must show what they change.** Selecting a build should show the changed stats
+- [x] **Builds must show what they change.** The hero sheet draws its stat block with the equipped build applied and marks what moved, and each build lists its stat changes as chips. (v0.4.3) Selecting a build should show the changed stats
   and ability numbers in the hero's info, not just prose.
-- [ ] **Kingsley.** Say plainly that his basic's Song caps at 2 stacks, and what each trinket does.
-- [ ] **Seraphine.** Abilities and animations are confusing. Sever, Encircled and the Hidden
+- [x] **Kingsley.** Says a second Song refreshes the first rather than adding another. (v0.4.3) Trinket count and animation stay in group D. Originally: say plainly that his basic's Song caps at 2 stacks, and what each trinket does.
+- [x] **Seraphine, wording.** Severance marks now say they do nothing until Halo Storm detonates them and that they cap at 5. (v0.4.3) Animations stay in group D. Originally: abilities and animations are confusing. Sever, Encircled and the Hidden
   Hand puppet all need to read clearly on the battle screen.
-- [ ] **Danielle.** Riposte and evasion interact and neither is explained. State the riposte
+- [x] **Danielle, wording.** The passive now says a riposte only answers an attack that hits, so evasion and riposte never both happen, one per attack, never from area attacks. (v0.4.3) The chance nerf stays in group D. Originally: riposte and evasion interact and neither is explained. State the riposte
   chance, when it can trigger, and that it is once per incoming attack.
-- [ ] **The 1v1 grid is easy to misread.** It cost the owner real trust: a cell was read in the
+- [x] **The 1v1 grid.** The corner names both axes with arrows, every cell says in words who beat whom out of how many duels, and the text leads with a worked example. (v0.4.3) It cost the owner real trust: a cell was read in the
   wrong direction. Label the axes on the grid itself and stop presenting 0% and 100% from a
   couple of dozen fights as certainties.
 
