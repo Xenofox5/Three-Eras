@@ -716,3 +716,7 @@ body.reduced .card.tgt .por,body.reduced .card.aloft .por::before{animation:none
   .sheet-bg{align-items:center}
   .sheet{border-radius:18px;max-height:82%;animation:fadeIn .18s}
 }
+
+/* The toggle for bonuses the team has not reached yet. */
+.synmore{align-self:flex-start;border:1px dashed var(--line);background:none;color:var(--tx2);font:inherit;font-size:12px;font-weight:700;border-radius:999px;padding:4px 10px;cursor:pointer}
+@media (min-width:760px){ .syn.off small{display:block} }

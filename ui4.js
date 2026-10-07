@@ -150,14 +150,17 @@ function showCampaign() {
 function synergyInfo(team) {
   const act = SYNERGIES.filter(s => s.test(team));
   const near = [];
-  if (team.length < 3) {
-    for (const s of SYNERGIES) {
-      if (act.includes(s)) continue;
-      const adds = HERO_ORDER.filter(id => isUnlocked(id) && !team.includes(id) && s.test([...team, id]));
-      if (!adds.length) continue;
-      const need = (s.id === 'first' || s.id === 'second' || s.id === 'current') ? `1 more ${ERA[s.id].name} hero` : adds.map(id => HEROES[id].name).join(' or ');
-      near.push({ s, need });
-    }
+  const pool = HERO_ORDER.filter(id => isUnlocked(id) && !team.includes(id));
+  for (const s of SYNERGIES) {
+    if (act.includes(s)) continue;
+    // Which heroes would switch this on, either by filling a free slot or by replacing someone.
+    const adds = pool.filter(id => team.length < 3
+      ? s.test([...team, id])
+      : team.some((_, i) => s.test(team.map((h, j) => (j === i ? id : h)))));
+    if (!adds.length) continue;
+    const era = s.id === 'first' || s.id === 'second' || s.id === 'current';
+    const need = era ? `one more ${ERA[s.id].name} hero` : adds.slice(0, 3).map(id => HEROES[id].name).join(' or ') + (adds.length > 3 ? ' or others' : '');
+    near.push({ s, need, swap: team.length >= 3 });
   }
   return { act, near };
 }
@@ -214,7 +217,8 @@ function renderTeam() {
     return `<div class="slot full" style="--hc:${h.color}"><button class="sl-main" data-slot="${id}" aria-label="${esc(h.name)} build"><div class="p">${heroPortrait(id)}</div><div class="lbl">${esc(h.name)}<small>${b.icon} ${esc(b.name)}</small></div></button><button class="x" data-rm="${id}" aria-label="Remove ${esc(h.name)}">✕</button></div>`;
   }).join('');
   const syns = act.map(s => `<button class="syn" data-syn="${s.id}" style="--sc:${s.color}">${s.icon} ${esc(s.name)}<small>${esc(s.desc)}</small></button>`).join('') +
-    near.map(n => `<button class="syn off" data-syn="${n.s.id}" style="--sc:${n.s.color}">${n.s.icon} ${esc(n.s.name)}: add ${esc(n.need)}</button>`).join('');
+    (near.length ? `<button class="synmore" id="synMore">${UI.showNear ? 'Hide' : 'Show'} the ${near.length} you could reach</button>` : '') +
+    (UI.showNear ? near.map(n => `<button class="syn off" data-syn="${n.s.id}" style="--sc:${n.s.color}">${n.s.icon} ${esc(n.s.name)}<small>${n.swap ? 'Swap in' : 'Add'} ${esc(n.need)}. ${esc(n.s.desc)}</small></button>`).join('') : '');
   const hasLeg = team.some(id => HEROES[id].legend);
   const ordered = HERO_ORDER.filter(isUnlocked).concat(HERO_ORDER.filter(id => !isUnlocked(id)));
   app().innerHTML = `<div class="scr">
@@ -232,7 +236,9 @@ ${info}
   $$('[data-rm]').forEach(b => b.onclick = e => { e.stopPropagation(); UI.team = UI.team.filter(x => x !== b.dataset.rm); SND.play('click'); renderTeam(); });
   $$('[data-slot]').forEach(b => b.onclick = () => buildSheet(b.dataset.slot, true));
   $$('[data-foe]').forEach(b => b.onclick = () => (isHeroFoe(b.dataset.foe) ? heroSheet(foeId(b.dataset.foe)) : enemyInfoSheet(b.dataset.foe, ctx.mode === 'campaign' ? STAGES[ctx.idx] : null)));
-  $$('[data-syn]').forEach(b => b.onclick = () => { const s = SYNERGIES.find(x => x.id === b.dataset.syn); sheet(`<h3>${s.icon} ${esc(s.name)}</h3><p style="margin-top:10px">${esc(s.desc)}</p>`); });
+  $('[data-syn]').forEach(b => b.onclick = () => { const s = SYNERGIES.find(x => x.id === b.dataset.syn); sheet(`<h3>${s.icon} ${esc(s.name)}</h3><p style="margin-top:10px">${esc(s.desc)}</p>`); });
+  const sm = $('#synMore');
+  if (sm) sm.onclick = () => { UI.showNear = !UI.showNear; SND.play('click'); const sc = $('.scroll').scrollTop; renderTeam(); $('.scroll').scrollTop = sc; };
   $$('.rc').forEach(c => {
     const toggle = () => {
       const id = c.dataset.id, t = UI.team;
@@ -426,8 +432,12 @@ function unitSheet(u) {
   } else {
     const h = HEROES[u.id];
     if (en && u.intents.length) body += `<h4>Next turn</h4>${u.intents.map(it => `<p><b style="color:var(--tx)">${it.move.icon} ${esc(it.move.name)}</b>${it.target && it.move.target === 'single' ? ` on ${esc(it.target.name)}` : ''}</p>`).join('')}`;
-    const ab = k => abil(u, k);
-    body += `<h4>Abilities${h.alt && has(u, h.altWhen) ? ' <span class="chip">' + esc(STATUS[h.altWhen].name) + '</span>' : ''}</h4>${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}${abilHTML(ab('basic').icon, ab('basic').name, 'Basic', ab('basic').desc)}${abilHTML(ab('skill').icon, ab('skill').name, 'Skill', ab('skill').desc)}${abilHTML(ab('ult').icon, ab('ult').name, 'Ultimate', ab('ult').desc)}`;
+    const holding = h.alt && has(u, h.altWhen);
+    const set = (src, label, now) => `<h4>${label}${now ? ' <span class="chip">holding this</span>' : ''}</h4>${abilHTML(src.basic.icon, src.basic.name, 'Basic', src.basic.desc)}${abilHTML(src.skill.icon, src.skill.name, 'Skill', src.skill.desc)}${abilHTML(src.ult.icon, src.ult.name, 'Ultimate', src.ult.desc)}`;
+    body += `<h4>Passive</h4>${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}`;
+    body += h.alt
+      ? set(h, 'His own three', !holding) + set(h.alt, `With ${esc(STATUS[h.altWhen].name)}`, holding)
+      : set(h, 'Abilities', false);
     if (u.build && u.build.id !== 'balanced') body += `<h4>Build</h4>${abilHTML(u.build.icon, u.build.name, 'Build', u.build.desc)}`;
   }
   sheet(body);

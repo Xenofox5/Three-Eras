@@ -196,6 +196,27 @@ const took = u => B.st[u.uid].taken;
   setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }] });
   ok("and he starts masked without either", !has(B.players[0], "vessel"));
 
+  // ---- 10. Mimicry copies a wide move as a wide move ----
+  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "bandit" }, { id: "archer" }, { id: "brute" }] });
+  const vm = B.players[0];
+  const volley = ENEMIES.archer.moves.find(m => m.target === "all");
+  await execMove(B.enemies[1], volley, null);
+  const rec = B.lastHit && B.lastHit.player;
+  ok("an area move is recorded as one", !!(rec && rec.aoe), rec && rec.name);
+  const hpBeforeCopy = B.enemies.filter(isUp).map(e => e.hp);
+  await KIT.vasco.skill(vm, B.enemies[0]);
+  const hurt = B.enemies.filter(isUp).filter((e, k) => e.hp < hpBeforeCopy[k]).length;
+  ok("copying it hits every enemy", hurt >= 2, `${hurt} of ${hpBeforeCopy.length} were hit`);
+
+  // A single-target move still comes back single-target.
+  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "bandit" }, { id: "archer" }, { id: "brute" }] });
+  const vm2 = B.players[0];
+  await execMove(B.enemies[0], ENEMIES.bandit.moves[0], B.players[1]);
+  const hpBeforeSingle = B.enemies.filter(isUp).map(e => e.hp);
+  await KIT.vasco.skill(vm2, B.enemies[0]);
+  const hurt2 = B.enemies.filter(isUp).filter((e, k) => e.hp < hpBeforeSingle[k]).length;
+  ok("copying a single hit stays single", hurt2 === 1, `${hurt2} were hit`);
+
   console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
 })();

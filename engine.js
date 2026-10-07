@@ -406,7 +406,7 @@ function applyDamage(t, dmg, o = {}) {
     if (t.hp <= 0) ss.kills++;
   }
   if (absorbed > 0) tally(t, 'absorbed', absorbed);
-  if (o.src && has(o.src, 'vessel') && !o.dot && total > 0 && isUp(o.src)) heal(o.src, o.src, total * (bt(o.src, 'vesselSteal') || 0.3), { tick: true, noCrit: true });
+  if (o.src && has(o.src, 'vessel') && !o.dot && total > 0 && isUp(o.src)) heal(o.src, o.src, total * (bt(o.src, 'vesselSteal') || 0.2), { tick: true, noCrit: true });
   if (t.isHero && t.id === 'angus' && o.src && o.src.side !== t.side && !o.dot && isUp(o.src) && total > 0) addStatus(o.src, 'sapped', 1, { silent: true, src: t });
   if (t.isHero && t.hp > 0 && hpPct(t) < 0.3 && !t.flags.vowed) {
     const el = sideList(t).find(p => isUp(p) && p.isHero && p.id === 'elphi');
@@ -512,6 +512,14 @@ async function strike(u, t, mult, o = {}) {
   return r;
 }
 const hitOK = r => r && !r.miss && !r.blocked;
+/* What Vasco gets for copying. A wide move comes back wide but weaker per enemy, and anything
+   borrowed from a boss is pulled down to something a hero could reasonably throw. */
+function mimicMult(u) {
+  const lh = B.lastHit && B.lastHit[u.side];
+  if (!lh) return 1.6;
+  const cap = lh.aoe ? (bt(u, 'mimicCapAoe') || 1.15) : (bt(u, 'mimicCap') || 2.0);
+  return Math.max(0.8, Math.min(cap, lh.mult * (lh.aoe ? 0.7 : 1)));
+}
 
 /* ---------- battle setup ---------- */
 function activeSynergies(team) { return SYNERGIES.filter(s => s.test(team)); }
@@ -831,25 +839,32 @@ const KIT = {
   },
   vasco: {
     async basic(u, t) {
-      if (has(u, 'vessel')) { await strike(u, t, 1.5, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
-      const r = await strike(u, t, 0.95, { fx: 'cards' });
-      const n = bt(u, 'noTrick') ? 0 : (bt(u, 'doubleTrick') ? 2 : 1);
-      if (hitOK(r) && isUp(t) && n) for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 2, { value: 0.2 });
+      if (has(u, 'vessel')) { await strike(u, t, 1.2, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
+      const r = await strike(u, t, 1.2, { fx: 'cards' });
+      const n = bt(u, 'noTrick') ? 0 : (bt(u, 'doubleTrick') ? 3 : 2);
+      if (hitOK(r) && isUp(t) && n) for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 3, { value: 0.25 });
     },
     async skill(u, t) {
       if (has(u, 'vessel')) {
         const f = foesOf(u);
         await HOOK.fx('curtain', { src: u, tgts: f });
         for (const e of f) {
-          const r = resolveHit(u, e, 1.3, { aoe: true, acc: 0.05 });
-          if (hitOK(r) && isUp(e)) { stripBuffs(e); if (e.shield > 0) { HOOK.float(e, 'SHIELD TORN', 'debuff'); e.shield = 0; removeStatus(e, 'hexshield'); } }
+          const r = resolveHit(u, e, 0.9, { aoe: true, acc: 0.05 });
+          if (hitOK(r) && isUp(e)) stripBuffs(e);
         }
         return;
       }
       const lh = B.lastHit && B.lastHit[u.side];
       HOOK.float(u, `🎭 ${lh ? lh.name.toUpperCase() : 'IMPROVISED'}`, 'special');
+      const mult = mimicMult(u);
+      if (lh && lh.aoe) {
+        const f = foesOf(u);
+        await HOOK.fx('mimic', { src: u, tgt: t, tgts: f });
+        for (const e of f) { const r = resolveHit(u, e, mult, { aoe: true, acc: 0.05 }); if (hitOK(r) && lh.status && isUp(e)) applyOnHit(u, e, lh.status); }
+        return;
+      }
       await HOOK.fx('mimic', { src: u, tgt: t });
-      const r = resolveHit(u, t, lh ? Math.max(0.8, Math.min(1.8, lh.mult)) : 1.2, { acc: 0.05 });
+      const r = resolveHit(u, t, mult, { acc: 0.05 });
       if (hitOK(r) && lh && lh.status && isUp(t)) applyOnHit(u, t, lh.status);
     },
     async ult(u) {
@@ -1281,8 +1296,8 @@ function previewFor(u, kind, t) {
     case 'kingsley.basic': return D(u, t, 0.8);
     case 'kingsley.skill': return { txt: '🎁 Random trinket' };
     case 'kingsley.ult': return { txt: '🎶 Song' };
-    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.5 : 0.95, { note: has(u, 'vessel') ? '+Burn' : '+ a random trick' });
-    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.3, { note: 'every enemy, strips buffs and Shield' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, lh ? Math.max(0.8, Math.min(1.8, lh.mult)) : 1.2, { acc: 0.05, note: lh ? 'copies ' + lh.name : 'improvised' }); }
+    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.2 : 1.2, { note: has(u, 'vessel') ? '+Burn' : '+ 2 random tricks' });
+    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 0.9, { note: 'every enemy, strips buffs' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, mimicMult(u), { acc: 0.05, note: lh ? (lh.aoe ? 'copies ' + lh.name + ', every enemy' : 'copies ' + lh.name) : 'improvised' }); }
     case 'vasco.ult': return { txt: has(u, 'vessel') ? '🃏 Back to the jester' : '😈 Let it out' };
     case 'aamay.basic': return D(u, t, 0.85);
     case 'aamay.skill': return D(u, t, 0.55, { acc: 0.1, note: 'Silence, SPD and ATK down' });
@@ -1371,7 +1386,7 @@ async function heroAct(u, ch) {
   await KIT[u.id][kind](u, t);
   if (a.target === 'enemy' || a.target === 'allEnemies') {
     B.lastHit = B.lastHit || {};
-    B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: B.actMult || 1, name: a.name, status: B.actStatus };
+    B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: B.actMult || 1, name: a.name, status: B.actStatus, aoe: a.target === 'allEnemies' };
   }
   if (u.isHero && u.id === 'alfred' && isUp(u)) { const t0 = tempoOf(u); u.flags.advance = t0 === 'allegro' ? 0.5 : 0; shiftTempo(u); }
   if (u.isHero && u.id === 'seraphine' && isUp(u)) {
@@ -1625,7 +1640,7 @@ const SPECIAL = {
   }
 };
 async function execMove(e, m, t) {
-  if (m.mult) { B.lastHit = B.lastHit || {}; B.lastHit[e.side === 'player' ? 'enemy' : 'player'] = { mult: m.mult * (m.hits || 1), name: m.name, status: m.status && m.status.key !== 'alch' ? m.status : null }; }
+  if (m.mult) { B.lastHit = B.lastHit || {}; B.lastHit[e.side === 'player' ? 'enemy' : 'player'] = { mult: m.mult * (m.hits || 1), name: m.name, status: m.status && m.status.key !== 'alch' ? m.status : null, aoe: m.target === 'all' }; }
   if (m.mult && !m.run) {
     if (m.target === 'all') {
       const ts = foesOf(e);
