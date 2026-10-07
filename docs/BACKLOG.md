@@ -168,6 +168,14 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   Give the Order also took the nerf the owner originally asked for.
 - [x] **Alfred left alone** on the owner's call. His composite reads low at 40.6 but his duel rate is
   81, near the top, so he is a duellist rather than an underpowered hero.
+
+### Skill Point costs, v0.4.14
+
+- [x] **Skills can cost 2 SP.** Two do: Harry Crush and Vasco Wild Card. Kept deliberately small.
+- [x] **Everything reads the real cost** rather than assuming one, in the action bar and both sheets.
+- [ ] **More 2 SP candidates, if wanted.** Seraphine Orbiting Blades and Elphi Radiant Arc are the
+  next most plausible. Aamay was tried and reverted: his skill is the whole of what he does and he
+  makes no points of his own, so the price took him from 60.0 to 39.8.
 ## F. New heroes (this is what makes it v0.5.0)
 
 Three new heroes, from the owner on 2026-10-07. Under the versioning rule this is the only kind

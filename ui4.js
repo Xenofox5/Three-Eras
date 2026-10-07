@@ -328,9 +328,9 @@ ${statRows(h.stats, h.color, buildOf(id, SAVE.builds[id]))}
 <h4>Abilities</h4>
 ${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}
 ${abilHTML(h.basic.icon, h.basic.name, 'Basic, +1 SP', h.basic.desc)}
-${abilHTML(h.skill.icon, h.skill.name, 'Skill, 1 SP', h.skill.desc)}
+${abilHTML(h.skill.icon, h.skill.name, `Skill, ${h.skill.cost || 1} SP`, h.skill.desc)}
 ${abilHTML(h.ult.icon, h.ult.name, 'Ultimate', h.ult.desc)}
-${h.alt ? `<h4>His other set, while ${esc(STATUS[h.altWhen].name)} holds him</h4>${abilHTML(h.alt.basic.icon, h.alt.basic.name, 'Basic, +1 SP', h.alt.basic.desc)}${abilHTML(h.alt.skill.icon, h.alt.skill.name, 'Skill, 1 SP', h.alt.skill.desc)}${abilHTML(h.alt.ult.icon, h.alt.ult.name, 'Ultimate', h.alt.ult.desc)}` : ''}
+${h.alt ? `<h4>His other set, while ${esc(STATUS[h.altWhen].name)} holds him</h4>${abilHTML(h.alt.basic.icon, h.alt.basic.name, 'Basic, +1 SP', h.alt.basic.desc)}${abilHTML(h.alt.skill.icon, h.alt.skill.name, `Skill, ${h.alt.skill.cost || 1} SP`, h.alt.skill.desc)}${abilHTML(h.alt.ult.icon, h.alt.ult.name, 'Ultimate', h.alt.ult.desc)}` : ''}
 ${(() => { const hist = BALANCE.flatMap(v => v.changes.filter(c => c.kind === 'hero' && c.who === id).map(c => Object.assign({ v: v.v }, c))); return hist.length ? `<h4>Balance history <button class="qbtn" data-guide="balance">All changes</button></h4>${hist.map(c => bcRow(c, false).replace('<div class="btx">', `<div class="btx"><span class="bv">v${esc(c.v)}</span> `)).join('')}` : ''; })()}
 <h4>Builds</h4>
 <div class="builds">${BUILDS[id].map(b => `<button class="bopt ${b.id === cur ? 'on' : ''}" data-b="${b.id}" style="--hc:${h.color}" ${unlocked ? '' : 'disabled'}><span class="i">${b.icon}</span><span><b>${esc(b.name)}${b.id === cur ? ' <em>Equipped</em>' : ''}</b>${buildMods(b)}<p>${esc(b.desc)}</p>${buildStatLine(id, b.id)}</span></button>`).join('')}</div>
@@ -626,7 +626,7 @@ function guideBody(tab) {
   if (tab === 'basics') return `
 <h4>Turn order</h4><p>Faster units act more often. Each unit waits 10000 ÷ SPD time units between turns, so 150 SPD acts 50% more often than 100 SPD. The strip under the top bar shows the next eight turns, with the current unit enlarged.</p>
 <h4>Your turn</h4><p>Pick Basic, Skill or Ultimate, then tap a highlighted target. Every valid target shows a preview: damage, healing or Shield it would receive, its hit chance when below 100%, and KO if the hit should finish it.</p>
-<p>Basics give the team 1 skill point (SP). Skills cost 1 SP. The team shares up to 5 SP, shown as blue diamonds. A good rhythm is to alternate basics and skills.</p>
+<p>Basics give the team 1 skill point (SP). Most skills cost 1 SP, and a few of the strongest cost 2; the action bar always says which. The team shares up to 5 SP, shown as blue diamonds. A good rhythm is to alternate basics and skills, and to save when a skill is worth two.</p>
 <p>Ultimates charge as a hero acts: +20% for a basic, +30% for a skill and +6% when hit. At 100% the hero glows gold and the button lights up. Using one is the hero's whole turn.</p>
 <h4>Reading the enemy</h4><p>Every enemy shows its next move and target above its portrait. Your heroes show ⚠ with the total damage heading their way. Lethal means it will knock them out unless you act: heal, Shield, guard or kill the attacker first.</p>
 <p>🎯✕ on an intent means the move ignores Taunt. David's Guard still redirects it.</p>

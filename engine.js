@@ -176,6 +176,10 @@ function takenMult(t, u) {
   if (has(t, 'guarding')) m *= 1 - (bt(t, 'guardDr') || 0.5);
   if (t.isHero && t.id === 'chosen') { const g = getSt(t, 'grace'); if (g) m *= 1 - 0.03 * g.stacks; }
   if (has(t, 'stone')) m *= 1 - (bt(t, 'stoneDr') || 0.5);
+  /* The thing wearing him is harder to put down than he is. Locked into it the Vessel fell in
+     75% of fights against the jester 50%, and the owner asked for its damage cut, not its
+     survival, so the gap closes here. */
+  if (has(t, 'vessel')) m *= 0.85;
   if (has(t, 'plated')) m *= 0.5;
   if (has(t, 'exposed')) m *= 1.5;
   if (has(t, 'warded')) m *= 0.5;
@@ -853,16 +857,16 @@ const KIT = {
         return;
       }
       const joker = rnd() < (bt(u, 'jokerCh') || 0.1);
+      const f = joker ? 0.45 : 1;
       const card = joker ? 'joker' : pick(['hearts', 'spades', 'clubs', 'diamonds']);
       const mates = friendsOf(u);
       HOOK.float(u, WILDCARD[card].face, 'special');
       HOOK.log(`${u.name} deals ${WILDCARD[card].face.toLowerCase()}: ${WILDCARD[card].what}.`, 'p');
       await HOOK.fx('wildcard', { src: u, card, tgts: mates });
-      const f = joker ? 0.5 : 1;
-      if (card === 'hearts' || joker) { for (const a of mates) heal(u, a, a.maxHp * 0.11 * f); HOOK.sfx('heal'); }
-      if (card === 'spades' || joker) for (const a of mates) addStatus(a, 'atkUp', 2, { value: 0.2 * f });
-      if (card === 'clubs' || joker) for (const a of mates) addShield(u, a, u.maxHp * 0.12 * f);
-      if (card === 'diamonds' || joker) { addSp(u, 1); gainUlt(u, 35); HOOK.float(u, '🔷 +1 SP', 'buff'); }
+      if (card === 'hearts' || joker) { for (const a of mates) heal(u, a, a.maxHp * 0.13 * f); HOOK.sfx('heal'); }
+      if (card === 'spades' || joker) for (const a of mates) addStatus(a, 'atkUp', 2, { value: 0.22 * f });
+      if (card === 'clubs' || joker) for (const a of mates) addShield(u, a, u.maxHp * 0.14 * f);
+      if (card === 'diamonds' || joker) { addSp(u, 2); gainUlt(u, 35); HOOK.float(u, '🔷 +2 SP', 'buff'); }
     },
     async ult(u) {
       await HOOK.fx('curtain', { src: u, tgts: foesOf(u) });
@@ -1351,6 +1355,9 @@ function validTargets(u, kind) {
   if (tt === 'self') return [u];
   return [];
 }
+const skillCost = u => (abil(u, 'skill') || {}).cost || 1;
+/* Whether a basic earns the team a point. The Vessel fights for itself and pays nothing in. */
+const basicPays = u => !(u.id === 'yunze') && !(u.id === 'vasco' && has(u, 'vessel'));
 function canUse(u, kind) {
   if ((kind === 'skill' || kind === 'ult') && has(u, 'silenced')) return false;
   if (kind === 'skill' && u.id === 'leo' && chanOf(u) && isUp(chanOf(u).target)) return true;
@@ -1373,7 +1380,7 @@ async function heroAct(u, ch) {
   const sustaining = u.id === 'leo' && kind === 'skill' && chanOf(u) && isUp(chanOf(u).target);
   if (u.id === 'leo' && kind !== 'skill' && chanOf(u)) endChannel(u, 'release');
   if (kind === 'skill' && !sustaining) { if (lone) u.flags.skillCd = 3; else if (u.id === 'ben') u.flags.skillCd = 3; else addSp(u, -(a.cost || 1)); if (u.id === 'soham') u.flags.skillCd = 2; }
-  if (kind === 'basic' && !lone && !(u.id === 'vasco' && has(u, 'vessel'))) addSp(u, 1);
+  if (kind === 'basic' && basicPays(u)) addSp(u, 1);
   tally(u, 'acts'); if (kind === 'ult') tally(u, 'ults');
   HOOK.log(`${u.name} uses ${sustaining ? 'Sustain Beam' : a.name}.`, 'p');
   if (kind === 'ult') { u.ult = 0; HOOK.update(); await HOOK.ult(u, a); }
@@ -1447,13 +1454,13 @@ function aiChoose(u) {
       case 'ben': { const others = mine.filter(a => isUp(a) && a !== u && a.isHero); if (!(u.flags.skillCd > 0) && others.length) return { kind: 'skill', target: others.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a)) }; break; }
       case 'kingsley': if (sp >= 1 && hpPct(lowA) < 0.65) return { kind: 'skill', target: u }; break;
       case 'vasco': {
-        if (sp < 1) break;
+        if (sp < skillCost(u)) break;
         if (has(u, 'vessel')) return { kind: 'skill', target: tgtFor('skill') };
         // A card is worth drawing when somebody could use any of the four.
         if (hpPct(lowA) < 0.8 || sp >= 3 || al.some(x => !has(x, 'atkUp'))) return { kind: 'skill', target: u };
         break;
       }
-      case 'aamay': { const t2 = en.filter(e => !has(e, 'silenced')); if (sp >= 1 && t2.length) return { kind: 'skill', target: taunter || (t2.includes(boss) ? boss : t2.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a))) }; break; }
+      case 'aamay': { const t2 = en.filter(e => !has(e, 'silenced')); if (sp >= skillCost(u) && t2.length) return { kind: 'skill', target: taunter || (t2.includes(boss) ? boss : t2.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a))) }; break; }
       case 'peguicha': {
         if (sp >= 1 && u.flags.beads > 0) { const cap = bt(u, 'beadMax') || 3; const c = en.filter(e => { const x = getSt(e, 'cinder'); return !x || x.stacks < cap; }); if (c.length) { const pickT = taunter || (c.includes(boss) ? boss : c.reduce((a, b) => (b.hp > a.hp ? b : a))); return { kind: 'skill', target: pickT }; } }
         break;
@@ -1474,14 +1481,14 @@ function aiChoose(u) {
         if (bare.length === mine.filter(isUp).length && sp >= 2) return { kind: 'skill', target: u };
         break;
       }
-      case 'seraphine': { const free = en.filter(e => !has(e, 'encircled')); if (sp >= 1 && free.length) return { kind: 'skill', target: taunter || (free.includes(boss) ? boss : free.reduce((a, b) => (b.hp > a.hp ? b : a))) }; break; }
+      case 'seraphine': { const free = en.filter(e => !has(e, 'encircled')); if (sp >= skillCost(u) && free.length) return { kind: 'skill', target: taunter || (free.includes(boss) ? boss : free.reduce((a, b) => (b.hp > a.hp ? b : a))) }; break; }
       case 'leo': {
         const c = chanOf(u);
         if (c && isUp(c.target)) { const risk = (c.taken || 0) > u.maxHp * beamBreak(u) * 0.5 && hpPct(u) < 0.4; if (!risk) return { kind: 'skill', target: c.target }; break; }
         if (sp >= 1) { const sturdy = en.reduce((a, b) => ((b.hp + b.shield) > (a.hp + a.shield) ? b : a)); return { kind: 'skill', target: taunter || boss || sturdy }; }
         break;
       }
-      default: if (sp >= 2 || (sp >= 1 && boss)) return { kind: 'skill', target: tgtFor('skill') };
+      default: { const c = skillCost(u); if (sp >= c + 1 || (sp >= c && boss)) return { kind: 'skill', target: tgtFor('skill') }; }
     }
   }
   return { kind: 'basic', target: taunter || focus };

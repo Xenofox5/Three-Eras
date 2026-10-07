@@ -280,7 +280,8 @@ function showActions() {
     const lone = u.id === 'yunze';
     const noBeads = k === 'skill' && u.id === 'peguicha' && !(u.flags.beads > 0);
     const hexCd = k === 'skill' && u.id === 'soham' && u.flags.skillCd > 0;
-    const sub = hexCd ? `Ready in ${u.flags.skillCd}` : noBeads ? 'No beads' : k === 'skill' && chan ? `Free, ×${Math.min(beamRamp(u).length, chan.value + 1)}` : k === 'basic' ? (lone ? 'No SP' : '+1 SP') : k === 'skill' ? (lone ? (ok ? 'Free, ready' : `Ready in ${u.flags.skillCd}`) : (ok ? 'Costs 1 SP' : 'Need 1 SP')) : (u.ult >= 100 ? 'Ready' : Math.floor(u.ult) + '%');
+    const cost = skillCost(u);
+    const sub = hexCd ? `Ready in ${u.flags.skillCd}` : noBeads ? 'No beads' : k === 'skill' && chan ? `Free, ×${Math.min(beamRamp(u).length, chan.value + 1)}` : k === 'basic' ? (basicPays(u) ? '+1 SP' : 'No SP') : k === 'skill' ? (lone ? (ok ? 'Free, ready' : `Ready in ${u.flags.skillCd}`) : (ok ? `Costs ${cost} SP` : `Need ${cost} SP`)) : (u.ult >= 100 ? 'Ready' : Math.floor(u.ult) + '%');
     return `<button class="ab ${k === 'ult' ? 'ul' : ''} ${k === 'ult' && ok ? 'rdy' : ''} ${k === 'skill' && chan ? 'sustain' : ''} ${p.kind === k ? 'sel' : ''}" data-k="${k}" ${ok ? '' : 'disabled'} style="--c:${u.color}"><span class="i">${ab.icon}</span><b>${esc(ab.name)}</b><small>${sub}</small></button>`;
   }).join('');
   const bd = u.build && u.build.id !== 'balanced' ? u.build.name : HEROES[u.id].role;

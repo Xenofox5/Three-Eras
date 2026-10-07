@@ -211,6 +211,30 @@ const took = u => B.st[u.uid].taken;
   const foeHp = B.enemies.map(e => e.hp);
   await KIT.vasco.skill(vc2, vc2);
   ok("it never touches the enemy", B.enemies.every((e, k) => e.hp === foeHp[k]));
+  // ---- 11. Skills that cost two Skill Points ----
+  setupBattle({ team: ["harry", "angus", "flynn"], enemies: [{ id: "brute" }] });
+  const hh = B.players[0];
+  ok("Crush is priced at two", skillCost(hh) === 2, `cost ${skillCost(hh)}`);
+  B.sp = 1;
+  ok("one point is not enough", !canUse(hh, "skill"));
+  B.sp = 2;
+  ok("two points is", canUse(hh, "skill"));
+  await heroAct(hh, { kind: "skill", target: B.enemies[0] });
+  ok("and using it spends both", B.sp === 0, `sp left ${B.sp}`);
+
+  // A basic pays one back, unless the hero is one that does not fund the team.
+  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }] });
+  const vv = B.players[0];
+  ok("the jester funds the team", basicPays(vv));
+  await KIT.vasco.ult(vv);
+  ok("the Vessel does not", !basicPays(vv));
+
+  // Nothing should be free by accident: every hero skill has a price the engine agrees with.
+  setupBattle({ team: ["vasco", "seraphine", "flynn"], enemies: [{ id: "brute" }] });
+  ok("Wild Card is priced at two", skillCost(B.players[0]) === 2, `cost ${skillCost(B.players[0])}`);
+  const twos = HERO_ORDER.filter(id => (HEROES[id].skill.cost || 1) === 2);
+  ok("only a few skills cost two", twos.length === 2, twos.join(","));
+
 console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
 })();

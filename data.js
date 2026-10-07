@@ -93,7 +93,7 @@ const HEROES = {
     look: { skin: '#e8c8a8', hair: '#0e0e12', hairStyle: 'messy', eye: '#121214', glowEye: '#3dff9a', body: 'coat', bodyColor: '#22262e', trim: '#4a5260', bg: '#13261d', weapon: 'katana' },
     passive: { name: 'Close to Immortal', desc: '15% chance to evade attacks. Cannot be stunned. Once per battle, survives a lethal blow with 1 HP. Present in all three eras.' },
     basic: { name: 'Katana Draw', icon: '🗡️', target: 'enemy', desc: 'Deal 92% ATK to one enemy, ignoring 30% of its DEF.' },
-    skill: { name: 'Crush', icon: '✊', cost: 1, target: 'enemy', desc: 'His eyes glow green. The target jerks and spits blood: 135% ATK that ignores DEF and cannot miss. Bleeds for 2 turns.' },
+    skill: { name: 'Crush', icon: '✊', cost: 2, target: 'enemy', desc: 'His eyes glow green. The target jerks and spits blood: 135% ATK that ignores DEF and cannot miss. Bleeds for 2 turns.' },
     ult:   { name: 'Unsealed', icon: '🔓', target: 'allEnemies', desc: 'Crush every enemy for 260% ATK, ignoring DEF. Then he is Unsealed for 3 turns: +35% damage, +50% crit chance, +30% crit damage, +35% evasion, and attackers risk Backlash (40% chance to be crushed for 140% ATK). His ultimate charges 45% slower than other heroes and not at all while Unsealed.' }
   },
   chosen: {
@@ -545,7 +545,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.13';
+const GAME_VERSION = '0.4.14';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -614,6 +614,12 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.14', d: '2026-10-07', date: 'Skills that cost two Skill Points', changes: [
+    { t: 'nerf', kind: 'hero', who: 'harry', what: 'Crush', text: 'Price', from: '1 SP', to: '2 SP', note: 'No change to the damage. He was the strongest hero on the table and this is the lever that costs him tempo rather than power. Composite 60 to 55.4.' },
+    { t: 'adjust', kind: 'hero', who: 'vasco', what: 'Wild Card', text: 'Price, and what the cards are worth', from: '1 SP', to: '2 SP, with every card stronger', note: 'The jester earns a point on every basic, so the card is his own loop: earn two, spend two. Diamonds hands both back.' },
+    { t: 'buff', kind: 'hero', who: 'vasco', what: 'The Vessel', text: 'Damage taken', from: 'normal', to: '15% less', note: 'Locked into one face it fell in 75% of fights against the jester 50%. Its damage was cut on purpose, so the gap closes on survival instead: 67% now.' },
+    { t: 'adjust', kind: 'system', who: 'Skill Points', text: 'The action bar and hero pages read the real price of a skill instead of assuming one', from: 'always said 1 SP', to: 'says what it costs', note: 'Aamay was tried at 2 SP and reverted: Seal in Ink is the whole of what he does and he makes no points of his own, so the price took him from 60.0 to 39.8 in a single step.' }
+  ] },
   { v: '0.4.13', d: '2026-10-07', date: 'Wild Card, Vessel cut, Yousuf and Ben', changes: [
     { t: 'rework', kind: 'hero', who: 'vasco', what: 'Mimicry becomes Wild Card', text: 'What the jester skill does', from: 'repeats the last attack an enemy used', to: 'deals one of five cards for the whole team', note: 'Copying was unreadable in play: you could not tell what you were about to get, and often the answer was nothing useful. Hearts heals, Spades sharpens, Clubs shields, Diamonds pays, and the Joker does all four at 40%.' },
     { t: 'nerf', kind: 'hero', who: 'vasco', what: 'Hellmark / Gift of the Pit', text: 'Vessel damage, cut hard as asked', from: '150% / 130% to all', to: '115% / 82% to all' },
@@ -978,6 +984,12 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.14', d: '2026-10-07', items: [
+    'A skill can now cost two Skill Points instead of one, and two of them do. Crush is one: Harry loses no damage, he simply cannot throw it every turn. Wild Card is the other, and the cards are worth more for it, which makes the jester earning a point on every basic the point of him rather than a footnote.',
+    'This gives the heroes who make Skill Points something real to make them for. Ethan, the jester and Malakai all matter more when the best skills cost more than a turn of attacking.',
+    'The action bar and the hero pages now say what a skill actually costs. They had always said 1 SP, which was true until today.',
+    'The Vessel takes 15% less damage. Its damage was cut on purpose in the last update, so it gets to be harder to kill instead of harder to survive.'
+  ] },
   { v: '0.4.13', d: '2026-10-07', items: [
     'Mimicry is gone and the jester deals a Wild Card instead. Copying whatever an enemy last did never read well: there was no way to know what you were about to get, and often it was nothing worth having. He now turns over one of five cards for the whole team. Hearts heals, Spades sharpens, Clubs shields, Diamonds pays, and about one draw in ten is the Joker, which does all four at 40% strength. The card turns over on screen so you can see which one it was.',
     'The Vessel hits far less hard. Hellmark drops from 150% to 115% ATK, Gift of the Pit from 130% to 82% against every enemy, and its ATK bonus from +35% to +15%. It gets that back as survival instead: its hits now heal him for 35% of the damage. Played on their own the two faces win 47.3% and 40.0% of fights, where the jester used to win a third and the Vessel over half.',
@@ -1197,7 +1209,7 @@ Object.assign(STATUS, {
   framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +15% crit chance.' },
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 6% max HP and removes a debuff at the start of each of its turns.' },
-  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
+  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, it takes 15% less damage, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
   pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
 });
 Object.assign(ENEMIES, {
@@ -1252,9 +1264,9 @@ Object.assign(HEROES, {
   vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',
     stats: { hp: 1360, atk: 124, def: 82, spd: 116, crit: 0.12, cdmg: 0.55, eva: 0.1 },
     look: { skin: '#e6c2a2', hair: '#6b4426', hairStyle: 'short', eye: '#141016', glowEye: '#ff2a3a', body: 'coat', bodyColor: '#5a1a6a', trim: '#f0c040', bg: '#24102e', weapon: 'cards', helm: 'jester' },
-    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, a card dealt for the whole team, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +15%, its hits heal him for 35% of the damage and tear through Shields at double rate, and it earns the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
+    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, a card dealt for the whole team, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +15%, it takes 15% less damage, its hits heal him for 35% of the damage and tear through Shields at double rate, and it earns the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
     basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 155% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
-    skill: { name: 'Wild Card', icon: '🃏', cost: 1, target: 'allAllies', desc: 'He deals one card for the whole team and nobody knows which until it turns over. Hearts heals every ally 11% of their max HP. Spades gives every ally ATK +20% for 2 turns. Clubs gives every ally a Shield worth 12% of his max HP. Diamonds hands the team a Skill Point and charges his own switch by 35%. Roughly one draw in ten is the Joker, which does all four at 40% strength.' },
+    skill: { name: 'Wild Card', icon: '🃏', cost: 2, target: 'allAllies', desc: 'He deals one card for the whole team and nobody knows which until it turns over. It costs two Skill Points, and the jester is the one who earns them, a point at a time on every basic. Hearts heals every ally 13% of their max HP. Spades gives every ally ATK +22% for 2 turns. Clubs gives every ally a Shield worth 14% of his max HP. Diamonds hands both points straight back and charges his own switch by 35%. Roughly one draw in ten is the Joker, which does all four at 45% strength.' },
     ult:   { name: 'Curtain Call', icon: '🎪', target: 'self', desc: 'He takes the mask off. The thing behind him comes out and brings its own three moves, and he acts again at once with the new kit in hand, so changing face costs him nothing but the charge. It charges 80% faster than other ultimates, so he is meant to keep swapping.' },
     /* The second kit. Everything that reads an ability off a unit goes through abil(), which
        swaps to this while the Vessel status is on him. */
