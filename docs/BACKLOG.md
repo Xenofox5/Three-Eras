@@ -98,8 +98,48 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [ ] **Danielle.** Riposte chance is too high.
 - [ ] **Alfred.** Verify the tempo multipliers do what the descriptions say, and make the three
   tempos feel more distinct from each other.
+- [ ] **Lachlan.** Nerf his max HP. He also sits top of the duel table at 93, which the owner
+  wants Peguicha, Yunze and Harry to hold, so this and group E point the same way.
+- [ ] **Malakai.** Buff Living Bargain, rework the skill, and rework the passive so he plays less
+  monotonously. Composite 46.1, near the bottom.
+- [ ] **Harry.** Nerf slightly: Crush damage. Composite 63.6, the only hero above the band.
 - [ ] **Low win rate heroes.** From the v0.3.8 table: Ben 35.1, Yousuf 32.5 in 3v3, Alfred 39.5,
   Leo 39.8, Aamay 39.8, Flynn 40.4. Buff or rework rather than nudging one number.
+
+## F. New heroes (this is what makes it v0.5.0)
+
+Three new heroes, from the owner on 2026-10-07. Under the versioning rule this is the only kind
+of work that moves the middle number, so these ship together as **v0.5.0**.
+
+- [ ] **H. Benjamin** (pre-first era). An ancient skeletal wizard with necromancy, skulls floating
+  around his hands. He predates every other figure in the record, and whatever he did to sustain
+  himself is where the near-immortality of Harry and Yunze comes from.
+- [ ] **Ephraim** (first era). A short berserker brawler: tough knuckles, high endurance, fights
+  like a pitbull. Black hair, black eyes.
+- [ ] **Isaac** (third era, which is `current` in the code). An invisibility user. A fast observer
+  and messenger, and the source behind Aamay: Isaac watches, Aamay writes it down in the basement.
+  Wild black hair, black eyes.
+
+### Decisions these need before any code
+
+- [ ] **Does "pre-first era" become a fourth era?** `ERA` has first, second, current and echo. A new
+  era is not a small change: it feeds the era synergies (Old Blood wants three First Era heroes),
+  the Heroes gallery grouping, the campaign headings, and the game is called Three Eras. The
+  alternative is that H. Benjamin sits in the First Era as its oldest figure, with the lore doing
+  the work instead of a new category. Owner decides.
+- [ ] **Three hiding mechanics would now overlap.** Seraphine cannot be targeted while an ally
+  stands, Aamay is due a passive that makes him harder to target while allies live, and Isaac is an
+  invisibility user. They need to be clearly different from each other or two of them will feel the
+  same. Worth settling alongside the Seraphine nerf already in group D.
+
+### What each new hero needs (so this is not underestimated)
+
+Per hero: `HEROES` entry with stats, `look` and four descriptions; a `KIT` entry for basic, skill
+and ult; `previewFor` cases for all three; an `aiChoose` case if the skill needs judgement; `FX`
+entries and `HOOK` bindings for the animations; two builds; a portrait that reads as distinct from
+the other 24; a campaign stage to unlock from, with `reward` wired into `UNLOCK_FROM`; a hero-boss
+version if they appear as one; entries in `BIO`, and a balance pass afterwards. `npm run check:desc`
+and `npm run check:dupes` must stay clean.
 
 ## E. Deferred by the owner
 
