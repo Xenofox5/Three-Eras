@@ -22,6 +22,13 @@ const BIO = {
   david: 'A spear user and one of Yousuf\'s guards. Killed when Yunze massacred the escort.'
 };
 
+/* When an update shipped. The oldest predate the repository and are marked as estimates. */
+function verDate(e) {
+  if (!e || !e.d) return '';
+  const dt = new Date(e.d + 'T12:00:00');
+  const txt = dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return ` <em class="vdate">${e.about ? 'about ' : ''}${esc(txt)}</em>`;
+}
 const MOTION_LABEL = { full: 'Full', reduced: 'Reduced', auto: 'Auto' };
 const MOTION_NOTE = {
   full: 'Every battle effect plays.',
@@ -206,7 +213,7 @@ function renderTeam() {
     const h = HEROES[id], b = buildOf(id, SAVE.builds[id]);
     return `<div class="slot full" style="--hc:${h.color}"><button class="sl-main" data-slot="${id}" aria-label="${esc(h.name)} build"><div class="p">${heroPortrait(id)}</div><div class="lbl">${esc(h.name)}<small>${b.icon} ${esc(b.name)}</small></div></button><button class="x" data-rm="${id}" aria-label="Remove ${esc(h.name)}">✕</button></div>`;
   }).join('');
-  const syns = act.map(s => `<button class="syn" data-syn="${s.id}" style="--sc:${s.color}">${s.icon} ${esc(s.name)}</button>`).join('') +
+  const syns = act.map(s => `<button class="syn" data-syn="${s.id}" style="--sc:${s.color}">${s.icon} ${esc(s.name)}<small>${esc(s.desc)}</small></button>`).join('') +
     near.map(n => `<button class="syn off" data-syn="${n.s.id}" style="--sc:${n.s.color}">${n.s.icon} ${esc(n.s.name)}: add ${esc(n.need)}</button>`).join('');
   const hasLeg = team.some(id => HEROES[id].legend);
   const ordered = HERO_ORDER.filter(isUnlocked).concat(HERO_ORDER.filter(id => !isUnlocked(id)));
@@ -600,7 +607,7 @@ function balanceBody() {
   const groups = BALANCE.map(v => {
     const rows = v.changes.filter(match);
     if (!rows.length) return '';
-    return `<div class="bver"><h4>v${esc(v.v)}${v.old ? ` <em class="wasv">was v${esc(v.old)}</em>` : ''} <span>${esc(v.date)}</span></h4>${rows.map(c => bcRow(c)).join('')}</div>`;
+    return `<div class="bver"><h4>v${esc(v.v)}${verDate(v)}${v.old ? ` <em class="wasv">was v${esc(v.old)}</em>` : ''} <span>${esc(v.date)}</span></h4>${rows.map(c => bcRow(c)).join('')}</div>`;
   }).join('');
   return `<p>Only numbers and rules that changed. Features are in Updates. Buff and nerf describe the thing named: a stronger enemy is a buff to that enemy, while stages use Harder and Easier.</p>
 <div class="legend">${legend}</div><div class="bfilters">${chips}</div>${groups || '<p>Nothing matches this filter.</p>'}`;
@@ -658,7 +665,7 @@ ${HERO_ORDER.map(id => `<h4 style="color:${HEROES[id].color}">${esc(HEROES[id].n
 <p><b>The middle number</b> moves only when the game gains something new to play: a new hero, a new stage or a new mode. Fixing, rebalancing or rewriting what is already here never moves it, however much of it there is. That is why it moves rarely.</p>
 <p><b>1.0</b> is not planned yet. It will be decided when the game is close to finished, rather than arrived at by counting.</p>
 <p>Everything was renumbered on 7 October 2026, because the old numbers had reached 0.93 with no room left. Every past update was renamed in the same order, with its old number kept beside it.</p>` +
-    UPDATES.map(e => `<h4>v${esc(e.v)}${e.old ? ` <em class="wasv">was v${esc(e.old)}</em>` : ''}</h4><ul class="chg">${e.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`).join('');
+    UPDATES.map(e => `<h4>v${esc(e.v)}${verDate(e)}${e.old ? ` <em class="wasv">was v${esc(e.old)}</em>` : ''}</h4><ul class="chg">${e.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul>`).join('');
   return '';
 }
 function showGuide(tab = 'basics') {

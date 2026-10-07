@@ -160,6 +160,42 @@ const took = u => B.st[u.uid].taken;
   await processDeaths();
   ok("only once per battle", !el.alive);
 
+  // ---- 9. Vasco changes face because he chooses to ----
+  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }] });
+  const vs = B.players[0];
+  ok("starts as the jester", !has(vs, "vessel") && abil(vs, "basic").name === "Prank");
+  await KIT.vasco.ult(vs);
+  ok("the ultimate hands it over", has(vs, "vessel") && abil(vs, "basic").name === "Hellmark");
+  ok("and he acts again at once", vs.flags.advance === 1, `advance ${vs.flags.advance}`);
+  await KIT.vasco.ult(vs);
+  ok("and hands it back again", !has(vs, "vessel") && abil(vs, "basic").name === "Prank");
+
+  // Losing health no longer changes anything on its own.
+  vs.hp = Math.round(vs.maxHp * 0.1);
+  applyDamage(vs, 1, { src: B.enemies[0] });
+  await turnStart(vs);
+  ok("being hurt does not change his face", !has(vs, "vessel"), `hp ${Math.round(hpPct(vs) * 100)}%`);
+
+  // The jester funds the team, the Vessel does not.
+  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }] });
+  const v2 = B.players[0];
+  B.sp = 0;
+  await heroAct(v2, { kind: "basic", target: B.enemies[0] });
+  ok("the jester earns the team a Skill Point", B.sp === 1, `sp ${B.sp}`);
+  await KIT.vasco.ult(v2);
+  B.sp = 0;
+  await heroAct(v2, { kind: "basic", target: B.enemies[0] });
+  ok("the Vessel earns none", B.sp === 0, `sp ${B.sp}`);
+
+  // A rework has to leave the team bonuses that mention the hero still meaning something.
+  setupBattle({ team: ["vasco", "peguicha", "flynn"], enemies: [{ id: "brute" }] });
+  ok("the Peguicha pairing starts him unmasked", has(B.players[0], "vessel"));
+  setupBattle({ team: ["vasco", "kingsley", "flynn"], enemies: [{ id: "brute" }] });
+  ok("the Kingsley pairing still sharpens him", stat(B.players[0], "crit") > HEROES.vasco.stats.crit,
+     `crit ${stat(B.players[0], "crit").toFixed(2)}`);
+  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }] });
+  ok("and he starts masked without either", !has(B.players[0], "vessel"));
+
   console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
 })();

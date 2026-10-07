@@ -79,11 +79,14 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   Lightblade 100% to 120% ATK; the Sanctum Blade shield 15% to 11% of his max HP and the Last
   Light shield 15% to 10%. Composite 55.4 to 56.0, so the shield cuts paid for the rest, and his
   duel rate went 34 to 50. He leans on the sword now instead of shielding everyone.
-- [x] **Vasco reworked** in v0.4.8. Two separate sets of three moves, not the same buttons behaving
-  differently: the jester keeps Prank, Mimicry and Curtain Call, and the Vessel brings Hellmark,
-  Gift of the Pit and Nothing Left to Laugh At. The mask changes hands both ways now, taking over
-  below 40% HP and handing back above 60%, so both sets matter in one fight. Mimicry is capped at
-  180% instead of 220%. Composite 52.7 to 52.1, so the shape changed and the power did not.
+- [x] **Vasco reworked** in v0.4.8 and again in v0.4.9 after the owner said the first version was
+  not what they meant. He has two kits, and **he** chooses which one by using Curtain Call, which
+  is the switch and nothing else: he acts again at once, so it costs only the charge. HP decides
+  nothing. The jester funds the team a Skill Point per basic; the Vessel hits far harder, drinks
+  30% of its damage and earns the team nothing, so running dry is what sends him back.
+  **This took seven balance runs.** Removing a 190% area ultimate and replacing it with a toggle
+  cost him about 16 points, and getting it back needed the switch made free in tempo, the width
+  moved into Gift of the Pit, and both kits raised. He ends at 46.2 against a starting 52.1.
 - [x] **Aamay reworked** in v0.4.5. Everything asked for: Pages only come from enemy actions, which
   kills the Yunze pairing; the Chronicle holds 20 instead of 12 and gains 2 per fallen hero; each
   Page is worth 15% instead of 30%; the ultimate charges 40% slower; Seal in Ink drops to 55% ATK
@@ -135,6 +138,22 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [x] **Hiding swapped between Aamay and Seraphine**, since Aamay is the more obscure of the two.
   He cannot be aimed at while another hero stands; she slips out of view one round in three.
 - [x] **Elphi rose too easily.** Down to 30% max HP and ATK +30%, from 45% and +40%.
+
+### Owner feedback handled in v0.4.9 and v0.4.10
+
+- [x] **Vasco was not what was asked for.** Redone: the ultimate is the switch and nothing else,
+  it costs no tempo, and the two kits want different things. Seven balance runs to land at 46.2.
+- [x] **Out of Sight lasted far too long.** A status granted on a unit own turn survives that turn
+  and only expires at the end of the next one, so Seraphine was untargetable for about two thirds
+  of a fight instead of a third. Measured: 65% of turns before, 35% after.
+- [x] **Out of Sight looked wrong**: near greyscale, which read as dead, under a tag saying Unseen.
+  She now keeps her colour behind a pale veil and the tag says what the state is.
+- [x] **Team bonuses are readable on a computer.** The active ones show what they do without being
+  tapped, and sheets open centred instead of clinging to the bottom edge where they were cut off.
+- [x] **Dates on every update**, exact from the repository where it exists and marked as estimates
+  for the days before it. Development is taken to have started about 2 October 2026.
+- [x] **A rework must check everything that names the hero.** Written into CLAUDE.md after the
+  Vasco rework touched two team bonuses. `npm run test:engine` asserts both Vasco pairings.
 ## F. New heroes (this is what makes it v0.5.0)
 
 Three new heroes, from the owner on 2026-10-07. Under the versioning rule this is the only kind

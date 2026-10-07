@@ -29,7 +29,9 @@ let problems = 0, checked = 0;
 function textFor(id) {
   const h = HEROES[id];
   const build = (BUILDS[id] || []).map(b => b.desc || '').join(' ');
-  return [h.passive.desc, h.basic.desc, h.skill.desc, h.ult.desc, build].join(' ').toLowerCase();
+  // A hero with a second kit describes it there, so it counts too.
+  const alt = h.alt ? [h.alt.basic, h.alt.skill, h.alt.ult].map(a => a.desc).join(' ') : '';
+  return [h.passive.desc, h.basic.desc, h.skill.desc, h.ult.desc, alt, build].join(' ').toLowerCase();
 }
 
 /* Pulls out each hero's slice of the KIT object so statuses are attributed to the right hero. */

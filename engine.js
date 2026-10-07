@@ -406,8 +406,7 @@ function applyDamage(t, dmg, o = {}) {
     if (t.hp <= 0) ss.kills++;
   }
   if (absorbed > 0) tally(t, 'absorbed', absorbed);
-  if (o.src && has(o.src, 'vessel') && !o.dot && total > 0 && isUp(o.src)) heal(o.src, o.src, total * (bt(o.src, 'vesselSteal') || 0.25), { tick: true, noCrit: true });
-  if (t.isHero && t.id === 'vasco' && !t.flags.vessel && t.hp > 0 && hpPct(t) < (bt(t, 'wakeAt') || (t.flags.wakeEarly ? 0.55 : 0.4))) wakeVessel(t);
+  if (o.src && has(o.src, 'vessel') && !o.dot && total > 0 && isUp(o.src)) heal(o.src, o.src, total * (bt(o.src, 'vesselSteal') || 0.3), { tick: true, noCrit: true });
   if (t.isHero && t.id === 'angus' && o.src && o.src.side !== t.side && !o.dot && isUp(o.src) && total > 0) addStatus(o.src, 'sapped', 1, { silent: true, src: t });
   if (t.isHero && t.hp > 0 && hpPct(t) < 0.3 && !t.flags.vowed) {
     const el = sideList(t).find(p => isUp(p) && p.isHero && p.id === 'elphi');
@@ -464,6 +463,7 @@ function gainUlt(u, amt) {
   if (u.id === 'yunze') amt *= 0.7;
   if (u.id === 'peguicha' && !bt(u, 'hellRate')) amt *= 0.7;
   if (u.id === 'aamay') amt *= 0.6;
+  if (u.id === 'vasco') amt *= 1.8;
   u.ult = Math.min(100, u.ult + amt);
 }
 function addShield(src, t, amt, cap = 0.8) {
@@ -553,6 +553,7 @@ function battleStart(u) {
     if (u.id === 'alfred') shiftTempo(u, true);
     if (u.id === 'peguicha') { u.flags.beadMax = bt(u, 'beads') || 5; u.flags.beads = u.flags.beadMax; syncBeads(u); }
     if (u.id === 'gemia' && B.units.some(x => x !== u && x.heroId === 'yunze')) addStatus(u, 'terrified', 99, { silent: true });
+    if (u.id === 'vasco' && u.flags.startVessel) { u.flags.vessel = true; addStatus(u, 'vessel', 99, { silent: true }); }
     if (u.flags.wallShield) u.shield += Math.round(u.maxHp * 0.1);
   } else {
     if (u.id === 'elphiBoss' && B.enemies.some(x => x.id === 'wisp')) addStatus(u, 'warded', 99, { silent: true });
@@ -610,8 +611,8 @@ async function turnStart(u) {
     }
   }
   if (!isUp(u)) return;
-  if (u.isHero && u.id === 'vasco' && has(u, 'vessel') && hpPct(u) >= (bt(u, 'sleepAt') || 0.6)) await sleepVessel(u);
   if (u.isHero && u.id === 'seraphine' && !has(u, 'taunt')) {
+    removeStatus(u, 'hidden');
     u.flags.veilTurn = (u.flags.veilTurn || 0) + 1;
     const every = bt(u, 'hideEvery') || 3;
     if (u.flags.veilTurn % every === 0 && sideList(u).some(x => x !== u && isUp(x) && x.isHero)) {
@@ -830,15 +831,19 @@ const KIT = {
   },
   vasco: {
     async basic(u, t) {
-      if (has(u, 'vessel')) { await strike(u, t, 1.2, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
-      const r = await strike(u, t, 0.85, { fx: 'cards' });
-      if (hitOK(r) && isUp(t)) { const n = bt(u, 'doubleTrick') ? 2 : 1; for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 2, { value: 0.2 }); }
+      if (has(u, 'vessel')) { await strike(u, t, 1.5, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
+      const r = await strike(u, t, 0.95, { fx: 'cards' });
+      const n = bt(u, 'noTrick') ? 0 : (bt(u, 'doubleTrick') ? 2 : 1);
+      if (hitOK(r) && isUp(t) && n) for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 2, { value: 0.2 });
     },
     async skill(u, t) {
       if (has(u, 'vessel')) {
-        await HOOK.fx('gift', { src: u, tgt: t });
-        const r = resolveHit(u, t, 1.5, { acc: 0.05 });
-        if (hitOK(r) && isUp(t)) { stripBuffs(t); if (t.shield > 0) { HOOK.float(t, 'SHIELD TORN', 'debuff'); t.shield = 0; removeStatus(t, 'hexshield'); } }
+        const f = foesOf(u);
+        await HOOK.fx('curtain', { src: u, tgts: f });
+        for (const e of f) {
+          const r = resolveHit(u, e, 1.3, { aoe: true, acc: 0.05 });
+          if (hitOK(r) && isUp(e)) { stripBuffs(e); if (e.shield > 0) { HOOK.float(e, 'SHIELD TORN', 'debuff'); e.shield = 0; removeStatus(e, 'hexshield'); } }
+        }
         return;
       }
       const lh = B.lastHit && B.lastHit[u.side];
@@ -848,17 +853,14 @@ const KIT = {
       if (hitOK(r) && lh && lh.status && isUp(t)) applyOnHit(u, t, lh.status);
     },
     async ult(u) {
-      const vessel = has(u, 'vessel');
-      if (!vessel) await wakeVessel(u);
-      const f = foesOf(u);
-      await HOOK.fx('curtain', { src: u, tgts: f });
-      let dealt = 0;
-      for (const e of f) {
-        const r = resolveHit(u, e, vessel ? 2.15 : 1.9, { aoe: true, sure: true });
-        if (hitOK(r)) { dealt += r.dmg || 0; addStatus(e, 'burn', 2, { stacks: 1, dot: 0.3 * stat(u, 'atk'), src: u }); }
-      }
-      // Only the thing behind him drinks from it.
-      if (vessel && dealt > 0 && isUp(u)) heal(u, u, dealt * 0.3, { noCrit: true, tick: true });
+      await HOOK.fx('curtain', { src: u, tgts: foesOf(u) });
+      if (has(u, 'vessel')) await sleepVessel(u); else await wakeVessel(u);
+      /* A full turn that deals nothing cannot compete with the 200% to 300% ultimate every other
+         hero fires, so changing face does not really cost him a turn: he acts again at once with
+         the kit he has just picked up. */
+      u.flags.advance = 1;
+      HOOK.float(u, '⏩ HE ACTS AGAIN AT ONCE', 'buff');
+      HOOK.update();
     }
   },
   aamay: {
@@ -1279,9 +1281,9 @@ function previewFor(u, kind, t) {
     case 'kingsley.basic': return D(u, t, 0.8);
     case 'kingsley.skill': return { txt: '🎁 Random trinket' };
     case 'kingsley.ult': return { txt: '🎶 Song' };
-    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.2 : 0.85, { note: has(u, 'vessel') ? '+Burn' : '+ a random trick' });
-    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.5, { note: 'strips buffs and Shield' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, lh ? Math.max(0.8, Math.min(1.8, lh.mult)) : 1.2, { acc: 0.05, note: lh ? 'copies ' + lh.name : 'improvised' }); }
-    case 'vasco.ult': return D(u, t, has(u, 'vessel') ? 2.15 : 1.9, { sure: true, note: has(u, 'vessel') ? 'and he drinks' : 'the mask comes off' });
+    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.5 : 0.95, { note: has(u, 'vessel') ? '+Burn' : '+ a random trick' });
+    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.3, { note: 'every enemy, strips buffs and Shield' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, lh ? Math.max(0.8, Math.min(1.8, lh.mult)) : 1.2, { acc: 0.05, note: lh ? 'copies ' + lh.name : 'improvised' }); }
+    case 'vasco.ult': return { txt: has(u, 'vessel') ? '🃏 Back to the jester' : '😈 Let it out' };
     case 'aamay.basic': return D(u, t, 0.85);
     case 'aamay.skill': return D(u, t, 0.55, { acc: 0.1, note: 'Silence, SPD and ATK down' });
     case 'aamay.ult': { const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0; return D(u, t, Math.max(0.4, (bt(u, 'pageMult') || 0.15) * n), { sure: true, note: `${n} of ${pageCap(u)} pages` }); }
@@ -1359,7 +1361,7 @@ async function heroAct(u, ch) {
   const sustaining = u.id === 'leo' && kind === 'skill' && chanOf(u) && isUp(chanOf(u).target);
   if (u.id === 'leo' && kind !== 'skill' && chanOf(u)) endChannel(u, 'release');
   if (kind === 'skill' && !sustaining) { if (lone) u.flags.skillCd = 3; else if (u.id === 'ben') u.flags.skillCd = 2; else addSp(u, -(a.cost || 1)); if (u.id === 'soham') u.flags.skillCd = 2; }
-  if (kind === 'basic' && !lone) addSp(u, 1);
+  if (kind === 'basic' && !lone && !(u.id === 'vasco' && has(u, 'vessel'))) addSp(u, 1);
   tally(u, 'acts'); if (kind === 'ult') tally(u, 'ults');
   HOOK.log(`${u.name} uses ${sustaining ? 'Sustain Beam' : a.name}.`, 'p');
   if (kind === 'ult') { u.ult = 0; HOOK.update(); await HOOK.ult(u, a); }
@@ -1410,6 +1412,11 @@ function aiChoose(u) {
   const sp = spOf(u), mine = sideList(u);
   if (u.ult >= 100) {
     if (u.id === 'yousuf') { if (hpPct(lowA) < 0.65 || mine.some(p => !p.alive)) return { kind: 'ult', target: u }; }
+    else if (u.id === 'vasco') {
+      const vessel = has(u, 'vessel');
+      if (!vessel) return { kind: 'ult', target: u };
+      if (spOf(u) < 2) return { kind: 'ult', target: u };
+    }
     else return { kind: 'ult', target: tgtFor('ult') };
   }
   if (canUse(u, 'skill')) {
