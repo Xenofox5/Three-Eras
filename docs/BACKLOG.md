@@ -64,11 +64,11 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 ## D. Balance and reworks (each needs a `npm run balance` pass)
 
 ### Last Stand
-- [ ] **Remove Last Stand from hero passives.** It exists to prop up supports in 1v1 and it
-  confuses everyone. Decide what replaces it, if anything.
-- [ ] **Remove it from Ethan** specifically.
-- [ ] **Decide what it means for bosses.** Currently `LAST_STAND` only lists hero ids, so a
-  boss never gets it, but nothing says so.
+- [x] **Last Stand removed entirely** in v0.4.4, status and all. It gave +35% damage and 15% less
+  taken to the last hero standing and was pasted into ten passives, Ethan among them. Nothing
+  replaces it: duel numbers get fixed per hero from now on.
+- [x] **The boss question is answered by removing it.** It never reached monster bosses, but it did
+  quietly apply to a hero boss fighting alone, which nothing in the game said. Gone with the rest.
 
 ### Named heroes
 - [ ] **Ben.** Give the Order is abusable (a free extra turn plus ATK up plus ult charge).
@@ -84,13 +84,16 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   Chronicle stack. Seal in Ink: less damage, stronger debuffs. Passive: harder to target while
   allies are alive (he hides in his basement) and slightly lower HP. Gains something, for
   example a higher Chronicle cap, when a unit falls for good. Keep the Yunze pairing in check.
-- [ ] **Seraphine.** Her version of "stays out of the fight and survives longer" (`unseen`) is
-  a bit too strong. Keep most of it, tune it down, and make it not overlap with Aamay's new passive.
+- [x] **Seraphine narrowed** in v0.4.4, keeping the idea and cutting two ways: a summoned creature
+  no longer counts as cover, so only a living hero hides her, and a boss sees her regardless. Still
+  needs to not overlap with the Aamay passive, which is still open below.
 - [ ] **Kingsley.** Slight buff. One more random trinket, so five.
 - [ ] **The Chosen.** Slightly too tanky.
 - [ ] **Angus.** Cycling Unbreakable makes him effectively immortal (seen in a 5v1). Nerf the
   cycle, buff his offence slightly to compensate.
-- [ ] **David. Buff him.** Asked for directly by the owner on 2026-10-07, and the v0.4.1 Guard fix
+- [x] **David buffed** in v0.4.4: guarding cuts 50% of damage instead of 40%, and every hit he
+  intercepts heals him 3% of his max HP, so the reward grows with how much he now catches.
+  Originally: asked for directly on 2026-10-07, and the v0.4.1 Guard fix
   argues for it: his guard now catches fourteen single-target skills that used to walk past it, so
   he soaks far more than he did while his composite barely moved (48.7). He is doing more work for
   the same result. Buff his own survivability or his payoff for guarding, not his damage, since the

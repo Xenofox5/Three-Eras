@@ -93,6 +93,33 @@ const took = u => B.st[u.uid].taken;
   await KIT.vasco.skill(vasco, leo);
   ok('Mimic applies the copied status', !hadBurn && has(leo, 'burn'));
 
+  // ---- 4. Last Stand is gone ----
+  setupBattle({ team: ["david", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  B.players[1].hp = 0; B.players[2].hp = 0;
+  await processDeaths();
+  ok("no Last Stand when alone", !has(B.players[0], "laststand") && !STATUS.laststand);
+
+  // ---- 5. Seraphine is hidden only by a living hero, and never from a boss ----
+  setupBattle({ team: ["seraphine", "trigg", "flynn"], enemies: [{ id: "brute" }, { id: "wyvern", boss: true }] });
+  const ser = B.players[0], trig = B.players[1], fly = B.players[2];
+  const brute2 = B.enemies[0], boss2 = B.enemies[1];
+  ok("hidden from an ordinary enemy while heroes stand", !seenOnly(foesOf(brute2), brute2).includes(ser));
+  ok("a boss sees her anyway", seenOnly(foesOf(boss2), boss2).includes(ser));
+  await KIT.trigg.skill(trig);
+  trig.hp = 0; fly.hp = 0;
+  await processDeaths();
+  ok("a summoned creature is not cover", seenOnly(foesOf(brute2), brute2).includes(ser),
+     `units left on her side: ${sideList(ser).filter(isUp).length}`);
+
+  // ---- 6. David is paid for intercepting ----
+  setupBattle({ team: ["david", "flynn", "leo"], enemies: [{ id: "harry", hero: true }] });
+  const dv = B.players[0], ally2 = B.players[1], foe2 = B.enemies[0];
+  await KIT.david.skill(dv, ally2);
+  dv.hp = Math.round(dv.maxHp * 0.5);
+  const hpBefore = dv.hp;
+  resolveHit(foe2, ally2, 0.01, { sure: true, noCrit: true });
+  ok("intercepting heals David", dv.hp > hpBefore, `hp ${hpBefore} -> ${dv.hp}`);
+
   console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
 })();

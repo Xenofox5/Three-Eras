@@ -141,6 +141,16 @@ function applyOnHit(u, t, s) {
 
 /* ---------- damage ---------- */
 function isRival(a, t) { const r = RIVALS[a.heroId]; return !!(r && t.heroId && r.includes(t.heroId)); }
+/* Sends a single-target hit to the guardian, and pays David for taking it. Both strike() and
+   resolveHit() route through here; whoever gets there first wins, because a guardian is never
+   itself guarded, so the second call finds nothing to redirect. */
+function interceptFor(t, u) {
+  const g = guardian(t);
+  if (!g || g === u) return t;
+  HOOK.float(t, '🛡 GUARDED', 'info');
+  if (g.isHero && g.id === 'david' && isUp(g)) heal(g, g, g.maxHp * (bt(g, 'guardHeal') || 0.03), { noCrit: true, tick: true });
+  return g;
+}
 function guardian(t) {
   const s = getSt(t, 'guarded');
   if (s && s.src && isUp(s.src) && s.src !== t && s.src.side === t.side) return s.src;
@@ -153,7 +163,6 @@ function dmgBonus(u, t) {
   if (u.isHero && u.id === 'vehra' && hpPct(t) < 0.5) m += bt(u, 'bloodlust') || 0.3;
   if (u.side && u.id !== 'ethan' && sideList(u).some(p => isUp(p) && p.isHero && p.id === 'ethan')) m += 0.08;
   if (u.isHero && u.id === 'ben' && (t.flags.delayed || has(t, 'stun'))) m += 0.4;
-  if (has(u, 'laststand')) m += 0.35;
   if (u.flags && u.flags.pact && t.statuses.some(x => STATUS[x.key].type === 'debuff')) m += 0.15;
   if (u.isHero && u.id === 'yunze') {
     const f = foesOf(u);
@@ -164,10 +173,9 @@ function dmgBonus(u, t) {
 }
 function takenMult(t, u) {
   let m = 1 - (t.dr || 0);
-  if (has(t, 'guarding')) m *= 1 - (bt(t, 'guardDr') || 0.4);
+  if (has(t, 'guarding')) m *= 1 - (bt(t, 'guardDr') || 0.5);
   if (t.isHero && t.id === 'chosen') { const g = getSt(t, 'grace'); if (g) m *= 1 - 0.03 * g.stacks; }
   if (has(t, 'stone')) m *= 1 - (bt(t, 'stoneDr') || 0.5);
-  if (has(t, 'laststand')) m *= 0.85;
   if (has(t, 'plated')) m *= 0.5;
   if (has(t, 'exposed')) m *= 1.5;
   if (has(t, 'warded')) m *= 0.5;
@@ -225,8 +233,12 @@ function shatterHex(t, why) {
   const so = h.src;
   if (so && isUp(so) && bt(so, 'hexBlast')) { HOOK.float(t, '💥 HEX BURST', 'special'); HOOK.fx('hexburst', { src: t, owner: so, tgts: foesOf(so) }); for (const e of foesOf(so)) resolveHit(so, e, bt(so, 'hexBlast'), { aoe: true, sure: true }); }
 }
-const unseen = p => p.isHero && p.id === 'seraphine' && sideList(p).some(x => x !== p && isUp(x));
-const seenOnly = list => { const v = list.filter(p => !unseen(p)); return v.length ? v : list; };
+/* Seraphine stays out of reach only while another hero is still standing to hold the eye: a
+   summoned creature is not cover, and a boss sees her regardless. */
+const unseen = (p, by) => p.isHero && p.id === 'seraphine'
+  && !(by && by.def && by.def.boss)
+  && sideList(p).some(x => x !== p && isUp(x) && x.isHero);
+const seenOnly = (list, by) => { const v = list.filter(p => !unseen(p, by)); return v.length ? v : list; };
 function wallFor(t) { return sideList(t).find(p => isUp(p) && p.isHero && p.id === 'soham' && has(p, 'hexwall')); }
 function raiseWall(u, amt) {
   const w = getSt(u, 'hexwall');
@@ -283,15 +295,6 @@ function endChannel(u, why) {
   else if (why === 'release') { HOOK.float(u, 'Beam released', 'info'); }
   HOOK.update();
 }
-const LAST_STAND = ['ethan', 'ben', 'yousuf', 'kingsley', 'david', 'soham', 'aamay', 'angus', 'elphi', 'malakai'];
-function checkLastStand() {
-  for (const u of B.units) {
-    if (!u.isHero || !LAST_STAND.includes(u.id)) continue;
-    const alone = isUp(u) && !sideList(u).some(p => p !== u && isUp(p) && p.isHero);
-    if (alone && !has(u, 'laststand')) { addStatus(u, 'laststand', 99, { silent: true }); HOOK.float(u, '🏳 LAST STAND', 'special'); }
-    else if (!alone && has(u, 'laststand')) removeStatus(u, 'laststand');
-  }
-}
 const SUDDEN_TURN = 150;
 const aloneHero = u => !sideList(u).some(x => x !== u && isUp(x) && x.isHero);
 const suddenDeath = () => (B.turn > SUDDEN_TURN ? 1 + 0.05 * Math.floor((B.turn - SUDDEN_TURN) / 10 + 1) : 1);
@@ -313,10 +316,7 @@ function resolveHit(u, t, mult, o = {}) {
      and a dozen other single-target skills call resolveHit directly and used to walk straight
      past David. strike() redirects before it gets here, and a guardian is never itself guarded,
      so this never fires twice for one hit. */
-  if (!o.aoe && !o.reflected && u.side !== t.side) {
-    const g = guardian(t);
-    if (g && g !== u) { HOOK.float(t, '🛡 GUARDED', 'info'); t = g; if (!isUp(t)) return null; }
-  }
+  if (!o.aoe && !o.reflected && u.side !== t.side) { t = interceptFor(t, u); if (!isUp(t)) return null; }
   /* What Vasco copies: the biggest single multiplier this action actually used. */
   if (!o.reflected && u.side !== t.side) B.actMult = Math.max(B.actMult || 0, mult);
   if (o.canMiss !== false && !o.sure) {
@@ -464,10 +464,7 @@ function revive(u, pct) {
 /* ---------- attack helper with fx + guard + counters ---------- */
 async function strike(u, t, mult, o = {}) {
   if (!isUp(t) || !isUp(u)) return null;
-  if (t.side !== u.side && !o.aoe) {
-    const g = guardian(t);
-    if (g && g !== u) { HOOK.float(t, '🛡 GUARDED', 'info'); t = g; }
-  }
+  if (t.side !== u.side && !o.aoe) t = interceptFor(t, u);
   await HOOK.fx(o.fx || 'slash', { src: u, tgt: t, color: o.color || u.color, i: o.i || 0 });
   if (o.status) B.actStatus = o.status;
   const r = resolveHit(u, t, mult, o);
@@ -614,7 +611,6 @@ function turnEnd(u) {
 
 /* ---------- deaths and phases ---------- */
 async function processDeaths() {
-  checkLastStand();
   let changed = true, guard = 0;
   while (changed && guard++ < 12) {
     changed = false;
@@ -990,7 +986,7 @@ const KIT = {
     async skill(u, t) {
       u.flags.glow = true; HOOK.update();
       await HOOK.fx('crush', { src: u, tgt: t });
-      const r = resolveHit(u, t, bt(u, 'crushMult') || 1.5, { pierce: 1, sure: true });
+      const r = resolveHit(u, t, bt(u, 'crushMult') || 1.35, { pierce: 1, sure: true });
       if (hitOK(r)) applyOnHit(u, t, { key: 'bleed', turns: 2, dot: 0.3 });
       await wait(250);
       u.flags.glow = false;
@@ -1243,7 +1239,7 @@ function previewFor(u, kind, t) {
     case 'leo.skill': { const c = chanOf(u), ramp = beamRamp(u); if (c && isUp(c.target)) { const st = Math.min(ramp.length, c.value + 1); return D(u, t, ramp[st - 1], { acc: 0.1, note: 'Beam ×' + st }); } return D(u, t, ramp[0], { acc: 0.1, note: 'starts beam' }); }
     case 'leo.ult': return D(u, t, 1.9, { sure: true });
     case 'harry.basic': return D(u, t, 0.92, { pierce: 0.3 });
-    case 'harry.skill': return D(u, t, bt(u, 'crushMult') || 1.5, { pierce: 1, sure: true });
+    case 'harry.skill': return D(u, t, bt(u, 'crushMult') || 1.35, { pierce: 1, sure: true });
     case 'harry.ult': return D(u, t, 2.6, { pierce: 1, sure: true });
     case 'chosen.basic': return D(u, t, 1.05);
     case 'chosen.skill': return D(u, t, 0.55, { hits: bt(u, 'danceHits') || 3, note: bt(u, 'noDanceShield') ? '' : '+Shield' });
@@ -1279,7 +1275,7 @@ function validTargets(u, kind) {
   if (kind === 'skill' && u.id === 'ben' && u.isHero) return friendsOf(u).filter(x => x !== u);
   if (kind === 'skill' && u.id === 'leo' && chanOf(u) && isUp(chanOf(u).target)) return [chanOf(u).target];
   const tt = HEROES[u.id][kind].target;
-  if (tt === 'enemy') { const f = seenOnly(foesOf(u)), tn = f.filter(x => has(x, 'taunt')); return tn.length ? tn : f; }
+  if (tt === 'enemy') { const f = seenOnly(foesOf(u), u), tn = f.filter(x => has(x, 'taunt')); return tn.length ? tn : f; }
   if (tt === 'allEnemies') return foesOf(u);
   if (tt === 'ally' || tt === 'allAllies') return friendsOf(u);
   if (tt === 'self') return [u];
@@ -1348,7 +1344,7 @@ function pickFocus(u, en) {
   return pool.reduce((a, b) => ((b.hp + b.shield) < (a.hp + a.shield) ? b : a));
 }
 function aiChoose(u) {
-  const h = HEROES[u.id]; const enAll = foesOf(u); const en = seenOnly(enAll); const al = friendsOf(u);
+  const h = HEROES[u.id]; const enAll = foesOf(u); const en = seenOnly(enAll, u); const al = friendsOf(u);
   if (!en.length) return { kind: 'basic', target: null };
   const lowA = lowest(al);
   const focus = pickFocus(u, en);
@@ -1425,7 +1421,7 @@ function pickTarget(e, m) {
     if (m.tp === 'boss') { const b = fr.find(x => x.def.boss); if (b) return b; }
     return fr.length ? lowest(fr) : e;
   }
-  const ps = seenOnly(foesOf(e));
+  const ps = seenOnly(foesOf(e), e);
   if (!ps.length) return null;
   const taunt = ps.find(p => has(p, 'taunt'));
   let t;
@@ -1484,7 +1480,7 @@ function refreshIntents() {
         const ps = foesOf(e);
         const taunt = ps.find(p => has(p, 'taunt'));
         if (taunt && it.target !== taunt && !m.pierceTaunt) it.target = taunt;
-        else if (!isUp(it.target) || unseen(it.target)) it.target = pickTarget(e, m);
+        else if (!isUp(it.target) || unseen(it.target, e)) it.target = pickTarget(e, m);
         if (it.target) { const g = guardian(it.target); if (g) it.target = g; }
       } else if (m.target === 'ally' && !isUp(it.target)) it.target = pickTarget(e, m);
     }
@@ -1625,7 +1621,7 @@ async function enemyAct(e) {
     if (m.cond && !m.cond(e)) m = movesFor(e).find(x => !x.cond && !x.cd) || m;
     let t = it.target;
     if ((m.target === 'single' || m.target === 'ally') && !isUp(t)) t = pickTarget(e, m);
-    if (m.target === 'single') { const ps = seenOnly(foesOf(e)); const tn = ps.find(p => has(p, 'taunt')); if (tn && !m.pierceTaunt) t = tn; }
+    if (m.target === 'single') { const ps = seenOnly(foesOf(e), e); const tn = ps.find(p => has(p, 'taunt')); if (tn && !m.pierceTaunt) t = tn; }
     HOOK.actName(e, m.name, 'enemy');
     HOOK.log(`${e.name} uses ${m.name}${t && m.target === 'single' ? ' on ' + t.name : ''}.`, 'e');
     await execMove(e, m, t);
@@ -1644,7 +1640,6 @@ async function enemyAct(e) {
 async function runBattle() {
   const myId = B.id;
   const gone = () => B.abort || B.id !== myId;
-  checkLastStand();
   refreshIntents();
   HOOK.update();
   let safety = 0;

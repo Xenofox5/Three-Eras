@@ -91,7 +91,7 @@ const HEROES = {
     look: { skin: '#e8c8a8', hair: '#0e0e12', hairStyle: 'messy', eye: '#121214', glowEye: '#3dff9a', body: 'coat', bodyColor: '#22262e', trim: '#4a5260', bg: '#13261d', weapon: 'katana' },
     passive: { name: 'Close to Immortal', desc: '15% chance to evade attacks. Cannot be stunned. Once per battle, survives a lethal blow with 1 HP. Present in all three eras.' },
     basic: { name: 'Katana Draw', icon: '🗡️', target: 'enemy', desc: 'Deal 92% ATK to one enemy, ignoring 30% of its DEF.' },
-    skill: { name: 'Crush', icon: '✊', cost: 1, target: 'enemy', desc: 'His eyes glow green. The target jerks and spits blood: 150% ATK that ignores DEF and cannot miss. Bleeds for 2 turns.' },
+    skill: { name: 'Crush', icon: '✊', cost: 1, target: 'enemy', desc: 'His eyes glow green. The target jerks and spits blood: 135% ATK that ignores DEF and cannot miss. Bleeds for 2 turns.' },
     ult:   { name: 'Unsealed', icon: '🔓', target: 'allEnemies', desc: 'Crush every enemy for 260% ATK, ignoring DEF. Then he is Unsealed for 3 turns: +35% damage, +50% crit chance, +30% crit damage, +35% evasion, and attackers risk Backlash (40% chance to be crushed for 140% ATK). His ultimate charges 45% slower than other heroes and not at all while Unsealed.' }
   },
   chosen: {
@@ -141,7 +141,7 @@ const HEROES = {
   },
   lachlan: {
     id: 'lachlan', name: 'Lachlan', title: 'Icon of the People', eras: ['current'], role: 'Versatile', color: '#4f8dff',
-    stats: { hp: 1400, atk: 134, def: 90, spd: 110, crit: 0.12, cdmg: 0.5 },
+    stats: { hp: 1290, atk: 134, def: 90, spd: 110, crit: 0.12, cdmg: 0.5 },
     look: { skin: '#f0d2b6', hair: '#eef2ff', hairStyle: 'swept', eye: '#3a7dff', body: 'armour', bodyColor: '#2a3f7a', trim: '#7fb0ff', bg: '#132a66', weapon: 'orb' },
     passive: { name: 'Azure Shield', desc: 'Starts battle with a Shield worth 30% max HP. Regenerates 6% max HP of Shield each turn, up to 30%. Swaps stance after each basic attack or skill.' },
     basic: { name: 'Close / Far', icon: '👊', target: 'enemy', desc: 'Close stance: 2 hits of 65% ATK. Far stance: an energy orb for 85% ATK that splashes 35% ATK onto every other enemy.' },
@@ -152,7 +152,7 @@ const HEROES = {
     id: 'yousuf', name: 'Yousuf', title: 'The Prodigy', eras: ['current'], role: 'Healer', color: '#5dff8f',
     stats: { hp: 1060, atk: 92, def: 68, spd: 116, crit: 0.12, cdmg: 0.5 },
     look: { skin: '#d9a77c', hair: '#8a6a3a', hairStyle: 'short', eye: '#3fbf6a', body: 'robe', bodyColor: '#e9e4d2', trim: '#5dff8f', bg: '#14452a', weapon: 'staff', young: true },
-    passive: { name: 'Prodigy', desc: 'Healing cap: allies he heals are Mended for 2 turns, and his heals on a Mended ally are 25% weaker. ' + 'His heals can crit for 50% extra healing. Heals on himself are 10% weaker. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
+    passive: { name: 'Prodigy', desc: 'Healing cap: allies he heals are Mended for 2 turns, and his heals on a Mended ally are 25% weaker. ' + 'His heals can crit for 50% extra healing. Heals on himself are 10% weaker.' },
     basic: { name: 'Staff Strike', icon: '🪄', target: 'enemy', desc: 'Deal 100% ATK to one enemy. The ally with the lowest HP heals for 45% of the damage.' },
     skill: { name: 'Mending Light', icon: '✚', cost: 1, target: 'ally', desc: 'Heal an ally for 11% of their max HP + 100% ATK, cleanse 1 debuff and grant Regen for 2 turns.' },
     ult:   { name: 'Prodigy\'s Blessing', icon: '🌿', target: 'allAllies', desc: 'Revive one fallen ally at 25% HP. Heal all allies 18% max HP, cleanse all debuffs and grant Regen for 2 turns.' }
@@ -170,7 +170,7 @@ const HEROES = {
     id: 'david', name: 'David', title: 'The Spear of the Guard', eras: ['current'], role: 'Defender', color: '#c9d2e6',
     stats: { hp: 1620, atk: 122, def: 112, spd: 98, crit: 0.1, cdmg: 0.5 },
     look: { skin: '#e2bc98', hair: '#9a9ea8', hairStyle: 'short', eye: '#8a8f99', body: 'armour', bodyColor: '#7c828e', trim: '#c9d2e6', bg: '#2c3240', weapon: 'spear', brow: 'firm' },
-    passive: { name: 'Sworn Guard', desc: 'While guarding an ally he takes 40% less damage. Vengeance: every hit he takes stores a stack (max 5). His next Spear Thrust spends them for +16% damage and a 2% max HP heal per stack. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
+    passive: { name: 'Sworn Guard', desc: 'While guarding an ally he takes 50% less damage, and every hit he intercepts for them heals him 3% of his max HP. Vengeance: every hit he takes stores a stack, up to 5. His next Spear Thrust spends them all for +16% damage and a 2% max HP heal per stack.' },
     basic: { name: 'Spear Thrust', icon: '🔱', target: 'enemy', desc: 'Deal 115% ATK to one enemy and lower its DEF by 15% for 2 turns. Spends Vengeance for +16% damage and a 2% heal per stack.' },
     skill: { name: 'Hold the Line', icon: '🛡️', cost: 1, target: 'ally', desc: 'Guard an ally for 2 turns: single-target attacks on them hit David instead. Gains DEF +25%. On himself, he Taunts instead.' },
     ult:   { name: 'Phalanx Sweep', icon: '🌀', target: 'allEnemies', desc: 'Deal 170% ATK to all enemies. All allies gain DEF +30% for 2 turns and David Taunts for 1 turn.' }
@@ -543,7 +543,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.3';
+const GAME_VERSION = '0.4.4';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -566,7 +566,7 @@ const BUILDS = {
   ],
   harry: [
     { id: 'stillwater', name: 'Still Water', icon: '🌊', desc: 'Backlash: when an enemy attacks him with a single-target move, 30% chance to crush them back for 140% ATK, ignoring DEF. Always triggers if he dodges. Once per enemy action. ATK -10%.', mods: { atk: -0.1 }, tags: { backlash: 0.3 } },
-    { id: 'force', name: 'Force', icon: '✊', desc: 'Crush deals 220% ATK instead of 175%. SPD -8%.', mods: { spd: -0.08 }, tags: { crushMult: 2.2 } }
+    { id: 'force', name: 'Force', icon: '✊', desc: 'Crush deals 200% ATK instead of 135%. SPD -8%.', mods: { spd: -0.08 }, tags: { crushMult: 2.0 } }
   ],
   chosen: [
     { id: 'valkyrie', name: 'Valkyrie', icon: '🪽', desc: 'Judgement of Wings gains 35% per Grace stack instead of 20%. Max HP -4%.', mods: { hp: -0.04 }, tags: { gracePer: 0.35 } },
@@ -612,6 +612,15 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.4', date: 'Last Stand removed, David, Seraphine, Harry, Lachlan', changes: [
+    { t: 'rework', kind: 'system', who: 'Last Stand', text: 'Removed entirely', from: '+35% damage and 15% less taken for the last hero standing, on ten heroes', to: 'gone', note: 'It was there to prop supports up in duels and put the same paragraph in ten passives. It also quietly applied to a hero boss fighting alone. Duel numbers get fixed per hero from now on.' },
+    { t: 'buff', kind: 'hero', who: 'david', what: 'Sworn Guard', text: 'Damage cut while guarding', from: '40%', to: '50%' },
+    { t: 'buff', kind: 'hero', who: 'david', what: 'Sworn Guard', text: 'Healing per hit intercepted for the guarded ally', from: 'none', to: '3% of his max HP', note: 'His guard now catches the fourteen skills that used to walk past it, so the reward grows with the extra work. Composite 48.7 to 56.' },
+    { t: 'nerf', kind: 'hero', who: 'seraphine', what: 'Behind the Scenes', text: 'What hides her', from: 'any living ally, creatures included, and every enemy', to: 'a living hero only, and bosses see her anyway' },
+    { t: 'nerf', kind: 'hero', who: 'harry', what: 'Crush', text: 'Damage', from: '150%', to: '135% ATK', note: 'Force build 220% to 200%. He was the only hero above the band at 63.6, now 59.2.' },
+    { t: 'nerf', kind: 'hero', who: 'lachlan', text: 'Max HP', from: '1400', to: '1290', note: 'Top of the duel table at 93, now 85.' },
+    { t: 'adjust', kind: 'hero', who: 'harry', what: 'Force', text: 'Build text quoted a baseline that was never true', from: 'instead of 175%', to: 'instead of 135%' }
+  ] },
   { v: '0.4.1', date: 'Guard, creatures and mimicry', changes: [
     { t: 'rework', kind: 'hero', who: 'david', what: 'Hold the Line', text: 'Which attacks the guard catches', from: 'only ordinary attacks', to: 'every single-target attack', note: 'Fourteen skills bypassed it, including Crush, Phantom Switch, Finger Frame and Sanctum Blade. Area attacks still ignore it, as described.' },
     { t: 'rework', kind: 'hero', who: 'vasco', what: 'Mimicry', text: 'What it copies', from: 'a flat 100% / 140% / 180% by slot, effects dropped', to: 'the real strength and effect of the move', note: 'Still capped so a boss move comes back balanced.' },
@@ -902,6 +911,12 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.4', items: [
+    'Last Stand is gone. It gave the last hero standing more damage and less damage taken, and the same paragraph was pasted into ten passives, which made every one of them harder to read for a rule that only really mattered in duels. It also quietly applied to a hero boss fighting alone, which nothing told you. Heroes who need help in duels will get it one at a time instead.',
+    'David is paid for the work he does. Guarding now cuts half the damage instead of 40%, and every hit he takes for the ally he is guarding heals him 3% of his max HP. His guard started catching far more in the last update, so this grows with it.',
+    'Seraphine is easier to reach. A summoned creature no longer counts as cover, so only a living hero keeps her out of sight, and bosses see her regardless.',
+    'Harry Crush down from 150% to 135% ATK, and Lachlan loses some max HP. Harry was the only hero stronger than the target band; Lachlan sat on top of the duel table.'
+  ] },
   { v: '0.4.3', items: [
     'Builds now show what they change as numbers, not only prose. The stat block in a hero sheet is drawn with the equipped build applied and marks what moved, and every build lists its stat changes as chips.',
     'The 1v1 grid can no longer be read the wrong way round. The corner names both axes, each cell says in words who beat whom and out of how many duels, and the text explains that anything near 50 is a close matchup rather than a precise number.',
@@ -988,7 +1003,7 @@ Object.assign(HEROES, {
     id: 'soham', name: 'Soham', title: 'The Hexagon Wall', eras: ['first'], role: 'Warden', color: '#ffe066',
     stats: { hp: 1550, atk: 108, def: 110, spd: 100, crit: 0.08, cdmg: 0.5, eva: 0.04 },
     look: { skin: '#c99068', hair: '#141012', hairStyle: 'messy', eye: '#ffd21f', eyeGlow: true, body: 'robe', bodyColor: '#3a3220', trim: '#ffe066', bg: '#3a3010', weapon: 'hex', brow: 'firm' },
-    passive: { name: 'Hexagon Mark', desc: 'His Hex Shields are stronger than ordinary Shields but brittle: each shatters after a set number of hits, however much is left. While a Hex Shield holds, that ally cannot be stunned. Raising a hexagon drains him: his skill can only be used every other turn. With no allies left, Hexagon on himself gives the strong single shield. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
+    passive: { name: 'Hexagon Mark', desc: 'His Hex Shields are stronger than ordinary Shields but brittle: each shatters after a set number of hits, however much is left. While a Hex Shield holds, that ally cannot be stunned. Raising a hexagon drains him: his skill can only be used every other turn. With no allies left, Hexagon on himself gives the strong single shield.' },
     basic: { name: 'Palm Strike', icon: '✋', target: 'enemy', desc: 'Strike with the marked palm for 100% ATK.' },
     skill: { name: 'Hexagon', icon: '⬡', cost: 1, target: 'ally', desc: 'On an ally: one strong Hex Shield worth 32% of Soham\'s max HP that lasts 3 hits. On himself: a wall for the whole team, a Hex Shield worth 11% of his max HP on every ally that lasts 2 hits. Usable every other turn.' },
     ult:   { name: 'Hexagon Crush', icon: '🟨', target: 'allEnemies', desc: 'Drive a hexagon into every enemy for 170% ATK with a 35% chance to Stun, then give every ally a Hex Shield worth 15% of his max HP (2 hits).' }
@@ -997,7 +1012,7 @@ Object.assign(HEROES, {
     id: 'seraphine', name: 'Seraphine', title: 'The Hand Behind the Myth', eras: ['second'], role: 'Bladecaller', color: '#f0e6ff',
     stats: { hp: 1400, atk: 136, def: 80, spd: 120, crit: 0.14, cdmg: 0.55, eva: 0.12, acc: 0.05 },
     look: { skin: '#f0d6c8', hair: '#2a1a3a', hairStyle: 'long', eye: '#f0e6ff', body: 'robe', bodyColor: '#e8e2f2', trim: '#b89cff', bg: '#241a38', weapon: 'halos', helm: 'mask' },
-    passive: { name: 'Behind the Scenes', desc: 'While any ally still stands, enemies cannot aim single-target attacks at her. After each of her actions both halos keep cutting on their own: 2 strikes of 35% ATK on random enemies. Every cut leaves a Severance mark, which does nothing on its own and only pays off when Halo Storm detonates it. The Chosen secretly obeys her.' },
+    passive: { name: 'Behind the Scenes', desc: 'While another hero on her side still stands, ordinary enemies cannot aim single-target attacks at her. Summoned creatures are not cover, and bosses see her anyway. After each of her actions both halos keep cutting on their own: 2 strikes of 35% ATK on random enemies. Every cut leaves a Severance mark, which does nothing on its own and only pays off when Halo Storm detonates it. The Chosen secretly obeys her.' },
     basic: { name: 'Halo Cut', icon: '⭕', target: 'enemy', desc: 'Send a halo through one enemy for 110% ATK, leaving a Severance mark. Marks stack up to 5 on the same enemy.' },
     skill: { name: 'Orbiting Blades', icon: '🌀', cost: 1, target: 'enemy', desc: 'Both halos circle an enemy: 80% ATK and 2 Severance marks now, then it is Encircled for 2 turns (60% ATK cut at the start of each of its turns, SPD -15%).' },
     ult:   { name: 'Halo Storm', icon: '💫', target: 'allEnemies', desc: '8 cuts of 45% ATK across all enemies, favouring Encircled ones. Then every Severance mark on every enemy detonates at once for 30% ATK per mark, and the marks are spent. If The Chosen fights beside her, The Chosen takes her turn immediately.' }
@@ -1057,7 +1072,6 @@ const stageFoes = st => st.enemies.map(x => (isHeroFoe(x)
 
 /* ================= v0.9: the court of Ethan, Trigg and Alfred ================= */
 Object.assign(STATUS, {
-  laststand: { name: 'Last Stand', icon: '🏳', type: 'buff', fixed: true, color: '#ffdf8a', desc: 'The last hero of the team still standing: deals 35% more damage and takes 15% less. Supports and defenders only: Angus, Elphi, Malakai, Yousuf, David, Soham, Ethan, Ben, Kingsley and Aamay.' },
   silenced:  { name: 'Silenced', icon: '🖋', type: 'debuff', color: '#7a8ab0', desc: 'Sealed in ink. Heroes cannot use skills or ultimates; monsters can only use their basic attack.' },
   framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +15% crit chance.' },
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
@@ -1096,21 +1110,21 @@ Object.assign(HEROES, {
   ethan: { id: 'ethan', name: 'Ethan', title: 'The Merciful King', eras: ['current'], role: 'Sovereign', color: '#f0d070',
     stats: { hp: 1500, atk: 120, def: 100, spd: 102, crit: 0.08, cdmg: 0.5, eva: 0.04 },
     look: { skin: '#e8c8a8', hair: '#f2f2f6', hairStyle: 'long', eye: '#6a4426', body: 'armour', bodyColor: '#4a2a6a', trim: '#f0d070', bg: '#2a1a40', weapon: 'sword', crown: true },
-    passive: { name: 'Treasury', desc: 'At the start of each of his turns his team gains 1 SP if it has fewer than 3. While he stands, his allies deal 8% more damage. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
+    passive: { name: 'Treasury', desc: 'At the start of each of his turns his team gains 1 SP if it has fewer than 3. While he stands, his allies deal 8% more damage.' },
     basic: { name: 'Royal Blade', icon: '⚔️', target: 'enemy', desc: 'Strike one enemy for 115% ATK.' },
     skill: { name: 'Royal Decree', icon: '📜', cost: 1, target: 'allAllies', desc: 'All allies gain ATK +20% and SPD +10% for 2 turns.' },
     ult: { name: 'Shelter of the Crown', icon: '🏰', target: 'allAllies', desc: 'Every ally gains a Shield worth 15% of his max HP, is cleansed, and has their buffs extended by 1 turn. His team gains 2 SP.' } },
   ben: { id: 'ben', name: 'Ben', title: 'The King\'s Advisor', eras: ['current'], role: 'Tactician', color: '#c8a070',
     stats: { hp: 1340, atk: 122, def: 95, spd: 124, crit: 0.12, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#e8c4a4', hair: '#6b4426', hairStyle: 'parted', eye: '#5a3a20', body: 'coat', bodyColor: '#5a1a26', trim: '#e8b830', bg: '#3a2418', weapon: 'scroll', glasses: true, chain: true },
-    passive: { name: 'Cold Counsel', desc: 'Deals 40% more damage to enemies whose turn has been delayed, or who are Stunned. He gives the orders a merciful king will not. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
+    passive: { name: 'Cold Counsel', desc: 'Deals 40% more damage to enemies whose turn has been delayed, or who are Stunned. He gives the orders a merciful king will not.' },
     basic: { name: 'Sharp Word', icon: '🗯️', target: 'enemy', desc: '120% ATK to one enemy and its next turn comes 15% later.' },
     skill: { name: 'Give the Order', icon: '☝️', cost: 0, target: 'ally', desc: 'Costs no SP, usable every other turn. Another ally acts immediately with ATK +25% for that turn and gains 20% ultimate charge.' },
     ult: { name: 'The Hard Decision', icon: '⚖️', target: 'allEnemies', desc: 'Every enemy\'s next turn comes 40% later (20% for bosses), and the enemy with the highest ATK is Exposed (+50% damage taken) for 2 turns.' } },
   kingsley: { id: 'kingsley', name: 'Kingsley', title: 'The Palace Bard', eras: ['current'], role: 'Bard', color: '#7ad06a',
     stats: { hp: 1200, atk: 110, def: 74, spd: 112, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#f0d0b4', hair: '#d8642a', hairStyle: 'messy', eye: '#3aa060', body: 'coat', bodyColor: '#2a4a2a', trim: '#f0c040', bg: '#183018', weapon: 'lute', hat: 'bard', smile: true },
-    passive: { name: 'Encore', desc: 'Allies with a Song heal 6% of their max HP and lose one debuff at the start of each of their turns. His heals on himself are 10% weaker. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
+    passive: { name: 'Encore', desc: 'Allies with a Song heal 6% of their max HP and lose one debuff at the start of each of their turns. His heals on himself are 10% weaker.' },
     basic: { name: 'Jaunty Tune', icon: '🎵', target: 'enemy', desc: 'Play at one enemy for 80% ATK. The ally with the lowest HP gains a Song for 2 turns. Playing again on an ally who already has one refreshes it back to 2 turns rather than adding a second.' },
     skill: { name: 'Borrowed Trinket', icon: '🎁', cost: 1, target: 'self', desc: 'Pull one of Vasco\'s magic items at random: Lantern (heal all allies 14%), Mirror Charm (Shield the lowest ally for 22% of his max HP), Jester\'s Bell (Blind every enemy and a 50% chance to Stun one) or Spark Box (75% ATK to every enemy).' },
     ult: { name: 'Grand Finale', icon: '🎶', target: 'allAllies', desc: 'Every ally gains a Song for 3 turns and SPD +15% for 2 turns, and is cleansed.' } },
@@ -1124,7 +1138,7 @@ Object.assign(HEROES, {
   aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',
     stats: { hp: 1300, atk: 124, def: 80, spd: 110, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#d8a882', hair: '#141016', hairStyle: 'short', eye: '#5a3a20', body: 'robe', bodyColor: '#16161c', trim: '#3a3c4a', bg: '#08080c', weapon: 'book', helm: 'cowl', ink: true },
-    passive: { name: 'The Chronicle', desc: 'Every action anyone takes in the battle adds a Page to his Chronicle, up to 12. Last Stand: as the last hero of his team standing, he deals 35% more damage and takes 15% less.' },
+    passive: { name: 'The Chronicle', desc: 'Every action anyone takes in the battle adds a Page to his Chronicle, up to 12.' },
     basic: { name: 'Ink Flick', icon: '🖋️', target: 'enemy', desc: '95% ATK with a 30% chance to Silence for 1 turn.' },
     skill: { name: 'Seal in Ink', icon: '📕', cost: 1, target: 'enemy', desc: '70% ATK, then the target is Silenced for 2 turns (bosses 1) and loses 20% SPD. Silenced heroes cannot use skills or ultimates; monsters only use their basic attack.' },
     ult: { name: 'The Last Page', icon: '📖', target: 'allEnemies', desc: 'Read the Chronicle aloud: 30% ATK per Page to every enemy, then Silence them all for 1 turn. The Pages are spent.' } }

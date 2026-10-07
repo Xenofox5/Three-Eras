@@ -74,7 +74,7 @@ Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026
 
 ## Balance targets
 - Composite = average of Campaign and 3v3 team win rate. Aim for 45 to 60 for every hero; Harry may sit slightly above as the legend. Noise is about ±3 points per run.
-- 1v1 shows solo strength only. Supports and healers are meant to be weak in duels; Last Stand (+35% damage, 15% less taken when the last hero standing, supports and defenders only) narrows the gap.
+- 1v1 shows solo strength only, and supports and healers are meant to be weak in duels. Last Stand used to narrow that gap and was removed in 0.4.4: it put the same paragraph in ten passives, confused everyone, and quietly applied to hero bosses too. Do not reintroduce a blanket rule to fix duel numbers; fix the hero.
 - Builds of the same hero should sit within about 7 points of each other.
 - Results land in `sim-results/` when you run `npm run balance`; the last saved table is in the handbook.
 
