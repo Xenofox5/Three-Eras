@@ -73,9 +73,12 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 ### Named heroes
 - [ ] **Ben.** Give the Order is abusable (a free extra turn plus ATK up plus ult charge).
   Nerf it. Compensate outside his damage if he ends up too weak.
-- [ ] **Elphi rework.** Shields slightly down, light sword emphasised. Give him a second life:
-  he returns weaker with lower HP but more determined and stronger offensively. He currently
-  dominates shields and is generally a bit too strong.
+- [x] **Elphi reworked** in v0.4.6. The first time he falls he rises with 45% of his max HP and
+  keeps ATK +40% and +10% crit chance for the rest of the fight, once per battle. Sentinel brings
+  him back at 60%, Dawnbreaker at 30%, so the builds now decide how much of him comes back.
+  Lightblade 100% to 120% ATK; the Sanctum Blade shield 15% to 11% of his max HP and the Last
+  Light shield 15% to 10%. Composite 55.4 to 56.0, so the shield cuts paid for the rest, and his
+  duel rate went 34 to 50. He leans on the sword now instead of shielding everyone.
 - [ ] **Vasco rework.** The Vessel should either trigger below a HP threshold or switch back
   and forth, and each ego gets its own set of moves rather than the same moves behaving
   differently. Both egos must be useful on their own. Mimicry must stay capped so copying a

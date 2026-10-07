@@ -399,7 +399,7 @@ function applyDamage(t, dmg, o = {}) {
   if (t.isHero && t.id === 'angus' && o.src && o.src.side !== t.side && !o.dot && isUp(o.src) && total > 0) addStatus(o.src, 'sapped', 1, { silent: true, src: t });
   if (t.isHero && t.hp > 0 && hpPct(t) < 0.3 && !t.flags.vowed) {
     const el = sideList(t).find(p => isUp(p) && p.isHero && p.id === 'elphi');
-    if (el) { t.flags.vowed = true; HOOK.fx('lastlight', { src: el, tgt: t }); addShield(el, t, el.maxHp * 0.15); HOOK.float(t, '✨ LAST LIGHT', 'shield'); HOOK.log(`Elphi's light shields ${t.name}.`, 'p'); }
+    if (el) { t.flags.vowed = true; HOOK.fx('lastlight', { src: el, tgt: t }); addShield(el, t, el.maxHp * 0.1); HOOK.float(t, '✨ LAST LIGHT', 'shield'); HOOK.log(`Elphi's light shields ${t.name}.`, 'p'); }
   }
   const ch = getSt(t, 'charging');
   if (ch && t.hp > 0) {
@@ -634,6 +634,7 @@ async function processDeaths() {
       }
       if (u.alive && u.hp <= 0) {
         if (u.def.phase2 && !u.flags.phase2) { u.flags.phase2 = true; await phaseTwo(u); changed = true; continue; }
+        if (u.isHero && u.id === 'elphi' && !u.flags.secondLife) { u.flags.secondLife = true; await secondLight(u); changed = true; continue; }
         if (u.side === 'player' && B.phoenix) {
           B.phoenix = false;
           await HOOK.ko(u);
@@ -683,6 +684,23 @@ async function processDeaths() {
     }
   }
   HOOK.update();
+}
+/* Elphi rises once per battle with a fraction of the health and a great deal more fight. */
+async function secondLight(u) {
+  await HOOK.ko(u);
+  await wait(300);
+  u.alive = true;
+  u.maxHp = Math.max(1, Math.round(u.maxHp * (bt(u, 'riseHp') || 0.45)));
+  u.hp = u.maxHp;
+  u.shield = 0;
+  u.statuses = u.statuses.filter(s => STATUS[s.key].fixed && s.key !== 'terrified');
+  u.gauge = 10000;
+  addStatus(u, 'determined', 99, { silent: true });
+  HOOK.float(u, '🔆 HE RISES', 'special');
+  HOOK.log(`${u.name} will not stay down.`, 'p');
+  HOOK.update();
+  await HOOK.revive(u);
+  await HOOK.banner('He will not fall', 'Less left to lose, and far more will to spend', '#fff2a8', 'phase', u);
 }
 async function phaseTwo(u) {
   u.hp = Math.round(u.maxHp * 0.55);
@@ -1034,7 +1052,7 @@ const KIT = {
     }
   },
   elphi: {
-    async basic(u, t) { const r = await strike(u, t, 1.0, { fx: 'lightslash' }); if (hitOK(r)) heal(u, u, r.dmg * 0.15); },
+    async basic(u, t) { const r = await strike(u, t, 1.2, { fx: 'lightslash' }); if (hitOK(r)) heal(u, u, r.dmg * 0.15); },
     async skill(u) {
       const f = foesOf(u);
       await HOOK.fx('radiant', { src: u, tgts: f, color: '#fff2a8' });
@@ -1046,7 +1064,7 @@ const KIT = {
       HOOK.update();
       await wait(200);
       await HOOK.fx('shieldall', { tgts: friendsOf(u), color: '#fff2a8' });
-      for (const a of friendsOf(u)) addShield(u, a, u.maxHp * (bt(u, 'ultShield') || 0.15));
+      for (const a of friendsOf(u)) addShield(u, a, u.maxHp * (bt(u, 'ultShield') || 0.11));
     }
   },
   daniel: {
@@ -1254,7 +1272,7 @@ function previewFor(u, kind, t) {
     case 'chosen.basic': return D(u, t, 1.05);
     case 'chosen.skill': return D(u, t, 0.55, { hits: bt(u, 'danceHits') || 3, note: bt(u, 'noDanceShield') ? '' : '+Shield' });
     case 'chosen.ult': { const st = getSt(u, 'grace'); return D(u, t, 2.6 + (bt(u, 'gracePer') || 0.2) * (st ? st.stacks : 0), { sure: true }); }
-    case 'elphi.basic': return D(u, t, 1);
+    case 'elphi.basic': return D(u, t, 1.2);
     case 'elphi.skill': return D(u, t, bt(u, 'arcMult') || 0.85);
     case 'elphi.ult': return D(u, t, 3, { sure: true });
     case 'daniel.basic': return D(u, t, 1.1, { acc: 0.05, critBonus: 0.2 });

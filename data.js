@@ -44,7 +44,8 @@ const STATUS = {
   plated:    { name: 'Plated', icon: '🔩', type: 'buff', fixed: true, max: 12, color: '#c9d2e6', desc: 'Takes 50% less damage. Every direct hit knocks off one plate. With no plates left it becomes Exposed.' },
   exposed:   { name: 'Exposed', icon: '💔', type: 'debuff', color: '#ff6b78', desc: 'Takes 50% more damage.' },
   accUp:     { name: 'ACC Up', icon: '🎯', type: 'buff', stat: 'acc', color: '#ffe9a0' },
-  unbound:   { name: 'Unbound', icon: '🟢', type: 'buff', fixed: true, mods: { atk: 0.35, spd: 0.15 }, color: '#3dff9a', desc: 'True power, briefly released. ATK +35% and SPD +15%.' }
+  unbound:   { name: 'Unbound', icon: '🟢', type: 'buff', fixed: true, mods: { atk: 0.35, spd: 0.15 }, color: '#3dff9a', desc: 'True power, briefly released. ATK +35% and SPD +15%.' },
+  determined:{ name: 'Determined', icon: '🔆', type: 'buff', fixed: true, mods: { atk: 0.4, crit: 0.1 }, color: '#fff2a8', desc: 'Back on his feet with a fraction of his health left. ATK +40% and +10% crit chance for the rest of the battle.' }
 };
 
 /* Characters whose damage gets +20% against a named rival */
@@ -107,10 +108,10 @@ const HEROES = {
     id: 'elphi', name: 'Elphi', title: 'The Light Bearer', eras: ['second'], role: 'Guardian', color: '#fff2a8',
     stats: { hp: 1420, atk: 128, def: 92, spd: 106, crit: 0.1, cdmg: 0.5 },
     look: { skin: '#ecc9a6', hair: '#c9b48a', hairStyle: 'swept', eye: '#8aa6c8', body: 'armour', bodyColor: '#8a909c', trim: '#e6eaf2', bg: '#4d4a2a', weapon: 'lightsword' },
-    passive: { name: 'Last Light', desc: 'The first time each ally drops below 30% HP, Elphi shields them with light worth 15% of his max HP. Once per ally per battle.' },
-    basic: { name: 'Lightblade', icon: '⚔️', target: 'enemy', desc: 'Deal 100% ATK to one enemy and heal himself for 15% of the damage.' },
+    passive: { name: 'Last Light', desc: 'The first time each ally drops below 30% HP, Elphi shields them with light worth 10% of his max HP, once per ally per battle. He does not stay down either: the first time he falls he rises again with 45% of his max HP, and keeps ATK +40% and +10% crit chance for the rest of the fight.' },
+    basic: { name: 'Lightblade', icon: '⚔️', target: 'enemy', desc: 'Deal 120% ATK to one enemy and heal himself for 15% of the damage.' },
     skill: { name: 'Radiant Arc', icon: '🌟', cost: 1, target: 'allEnemies', desc: 'Deal 85% ATK to all enemies. 60% chance to Blind each for 1 turn.' },
-    ult:   { name: 'Sanctum Blade', icon: '🗡️', target: 'enemy', desc: 'A colossal sword of light deals 300% ATK. All allies gain a Shield worth 15% of Elphi\'s max HP.' }
+    ult:   { name: 'Sanctum Blade', icon: '🗡️', target: 'enemy', desc: 'A colossal sword of light deals 300% ATK. All allies gain a Shield worth 11% of his max HP.' }
   },
   daniel: {
     id: 'daniel', name: 'Danielle', title: 'The Crystal Duelist', eras: ['second'], role: 'Warden', color: '#ffe066',
@@ -543,7 +544,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.5';
+const GAME_VERSION = '0.4.6';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -573,8 +574,8 @@ const BUILDS = {
     { id: 'dancer', name: 'Dancer', icon: '💃', desc: 'SPD +10%. Gilded Dance strikes 4 times, but no longer gives her a Shield.', mods: { spd: 0.1 }, tags: { danceHits: 4, noDanceShield: 1 } }
   ],
   elphi: [
-    { id: 'sentinel', name: 'Sentinel', icon: '🛡️', desc: 'DEF +10%, ATK -10%. Sanctum Blade Shields are 25% stronger.', mods: { def: 0.1, atk: -0.1 }, tags: { ultShield: 0.19 } },
-    { id: 'dawn', name: 'Dawnbreaker', icon: '🌟', desc: 'Radiant Arc deals 100% ATK and Blinds 85% of the time. DEF -10%.', mods: { def: -0.1 }, tags: { arcMult: 1.0, blindCh: 0.85 } }
+    { id: 'sentinel', name: 'Sentinel', icon: '🛡️', desc: 'DEF +10%, ATK -10%. Sanctum Blade Shields are 35% stronger and he rises with 60% of his max HP instead of 45%.', mods: { def: 0.1, atk: -0.1 }, tags: { ultShield: 0.15, riseHp: 0.6 } },
+    { id: 'dawn', name: 'Dawnbreaker', icon: '🌟', desc: 'Radiant Arc deals 100% ATK and Blinds 85% of the time. DEF -10%, and he rises with only 30% of his max HP.', mods: { def: -0.1 }, tags: { arcMult: 1.0, blindCh: 0.85, riseHp: 0.3 } }
   ],
   daniel: [
     { id: 'bastion', name: 'Bastion', icon: '🔮', desc: 'Crystal Ward Shields are 15% stronger and can reach 45% of the ally\'s max HP. Riposte chance drops from 45% to 30%.', tags: { wardMult: 1.15, wardCap: 0.45, counter: 0.3 } },
@@ -612,6 +613,13 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.6', date: 'Elphi reworked', changes: [
+    { t: 'rework', kind: 'hero', who: 'elphi', what: 'Last Light', text: 'New: he rises once per battle', from: 'nothing', to: 'the first time he falls he returns with 45% of his max HP and keeps ATK +40% and +10% crit chance', note: 'He is the one who stood in the way and did not stop. Once per battle only.' },
+    { t: 'buff', kind: 'hero', who: 'elphi', what: 'Lightblade', text: 'Damage', from: '100%', to: '120% ATK' },
+    { t: 'nerf', kind: 'hero', who: 'elphi', what: 'Sanctum Blade', text: 'Shield for every ally', from: '15%', to: '11% of his max HP' },
+    { t: 'nerf', kind: 'hero', who: 'elphi', what: 'Last Light', text: 'Shield when an ally drops low', from: '15%', to: '10% of his max HP' },
+    { t: 'adjust', kind: 'hero', who: 'elphi', what: 'Sentinel / Dawnbreaker', text: 'Both builds now also decide how much he rises with', from: 'no effect', to: 'Sentinel 60%, Dawnbreaker 30%', note: 'Composite 55.4 to 56.0, so the shield cuts pay for the rest. Duel 34 to 50. He leans on the sword now rather than on shielding everyone.' }
+  ] },
   { v: '0.4.5', date: 'Aamay reworked', changes: [
     { t: 'rework', kind: 'hero', who: 'aamay', what: 'The Chronicle', text: 'What adds a Page', from: 'any action by anyone', to: 'any action by an enemy', note: 'Standing him beside a fast hero used to fill the Chronicle twice as fast, which is what made the Yunze pairing absurd.' },
     { t: 'buff', kind: 'hero', who: 'aamay', what: 'The Chronicle', text: 'Pages it holds', from: '12', to: '20, plus 2 for every hero who falls on either side' },
@@ -923,6 +931,10 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.6', items: [
+    'Elphi reworked. He no longer stays down: the first time he falls he gets back up with 45% of his max HP and fights the rest of the battle with ATK +40% and +10% crit chance. Sentinel brings him back at 60%, Dawnbreaker at only 30%.',
+    'His light sword does the work his shields used to. Lightblade hits for 120% instead of 100%, while the Shield from Sanctum Blade drops from 15% to 11% of his max HP and the one Last Light gives a falling ally drops from 15% to 10%.'
+  ] },
   { v: '0.4.5', items: [
     'Aamay reworked. He now writes down only what the enemy does, so pairing him with a fast hero no longer fills the Chronicle twice as quickly. It holds 20 Pages instead of 12, and 2 more for every hero who falls on either side, but each Page is worth half what it was and his ultimate charges 40% slower.',
     'Aamay works in a basement nobody visits. While another hero still stands and the Chronicle is empty, an enemy aiming at him looks elsewhere 30% of the time. That protection fades as he writes and is gone once the Chronicle is full, so the moment he is most dangerous is the moment he is easiest to reach. He can always be reached, which is what keeps him different from Seraphine.',

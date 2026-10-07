@@ -140,12 +140,34 @@ const took = u => B.st[u.uid].taken;
   const am2 = B.players[0], br2 = B.enemies[0];
   let hits = 0;
   for (let i = 0; i < 400; i++) if (unlikelyAim(am2, B.players) === am2) hits++;
-  ok("aimed at about half the time while allies stand", hits > 140 && hits < 260, `${hits} of 400`);
+  ok("overlooked about 30% of the time with an empty Chronicle", hits > 240 && hits < 320, `aimed at ${hits} of 400`);
+
+  // The protection fades as he writes, and is gone once the Chronicle is full.
+  addStatus(am2, "pages", 99, { stacks: pageCap(am2), silent: true });
+  const st2 = getSt(am2, "pages"); st2.stacks = pageCap(am2);
+  let full = 0;
+  for (let i = 0; i < 200; i++) if (unlikelyAim(am2, B.players) === am2) full++;
+  ok("a full Chronicle leaves him fully exposed", full === 200, `aimed at ${full} of 200`);
+  removeStatus(am2, "pages");
   B.players[1].hp = 0; B.players[2].hp = 0;
   await processDeaths();
   let alone = 0;
   for (let i = 0; i < 100; i++) if (unlikelyAim(am2, B.players.filter(isUp)) === am2) alone++;
   ok("always reachable once he is the last hero", alone === 100, `${alone} of 100`);
+
+  // ---- 8. Elphi rises once ----
+  setupBattle({ team: ["elphi", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const el = B.players[0];
+  const fullHp = el.maxHp, atkBefore = stat(el, "atk");
+  el.hp = 0;
+  await processDeaths();
+  ok("he does not stay down", el.alive && el.hp > 0, `hp ${el.hp}`);
+  ok("he comes back smaller", el.maxHp === Math.round(fullHp * 0.45), `${fullHp} -> ${el.maxHp}`);
+  ok("and angrier", has(el, "determined") && stat(el, "atk") > atkBefore,
+     `atk ${Math.round(atkBefore)} -> ${Math.round(stat(el, "atk"))}`);
+  el.hp = 0;
+  await processDeaths();
+  ok("only once per battle", !el.alive);
 
   console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
