@@ -270,9 +270,18 @@ function shiftTempo(u, first) {
 }
 function delayUnit(t, f) { if (!isUp(t)) return; t.gauge = Math.min(16000, t.gauge + 10000 * f); t.flags.delayed = true; HOOK.float(t, '⏳ DELAYED', 'info'); }
 function silence(t, turns) { if (!isUp(t)) return; addStatus(t, 'silenced', turns); if (!t.isHero) t.intents = []; HOOK.float(t, '🖋 SILENCED', 'debuff'); }
-function bumpPages() {
+/* How many Pages the Chronicle can hold: its base, plus 2 for every hero who has fallen on
+   either side. The longer and costlier the fight, the more there is to write down. */
+function pageCap(a) {
+  const fallen = B.units.filter(x => x.isHero && !x.alive).length;
+  return (bt(a, 'pageMax') || 20) + 2 * fallen;
+}
+/* A Page is written when an enemy of his acts, not when anyone acts. Pairing him with a fast
+   hero used to fill the Chronicle twice as quickly, which is what made Yunze beside him absurd. */
+function bumpPages(actor) {
   for (const a of B.units) if (isUp(a) && a.isHero && a.id === 'aamay') {
-    const st = getSt(a, 'pages'), max = bt(a, 'pageMax') || 12;
+    if (actor && actor.side === a.side) continue;
+    const st = getSt(a, 'pages'), max = pageCap(a);
     if (!st) addStatus(a, 'pages', 99, { stacks: 1, silent: true }); else st.stacks = Math.min(max, st.stacks + 1);
   }
 }
@@ -442,6 +451,7 @@ function gainUlt(u, amt) {
   if (u.id === 'harry') amt *= 0.55;
   if (u.id === 'yunze') amt *= 0.7;
   if (u.id === 'peguicha' && !bt(u, 'hellRate')) amt *= 0.7;
+  if (u.id === 'aamay') amt *= 0.6;
   u.ult = Math.min(100, u.ult + amt);
 }
 function addShield(src, t, amt, cap = 0.8) {
@@ -806,18 +816,18 @@ const KIT = {
     }
   },
   aamay: {
-    async basic(u, t) { const r = await strike(u, t, 0.95, { fx: 'ink' }); if (hitOK(r) && isUp(t) && rnd() < (bt(u, 'flickCh') || 0.3)) silence(t, 1); },
+    async basic(u, t) { const r = await strike(u, t, 0.85, { fx: 'ink' }); if (hitOK(r) && isUp(t) && rnd() < (bt(u, 'flickCh') || 0.3)) silence(t, 1); },
     async skill(u, t) {
       await HOOK.fx('seal', { src: u, tgt: t });
-      resolveHit(u, t, 0.7, { acc: 0.1 });
-      if (isUp(t)) { silence(t, t.def.boss ? 1 : (bt(u, 'sealTurns') || 2)); addStatus(t, 'spdDown', 2, { value: 0.2 }); }
+      resolveHit(u, t, 0.55, { acc: 0.1 });
+      if (isUp(t)) { silence(t, t.def.boss ? 1 : (bt(u, 'sealTurns') || 2)); addStatus(t, 'spdDown', 3, { value: 0.3 }); addStatus(t, 'atkDown', 3, { value: 0.2 }); }
     },
     async ult(u) {
       const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0;
       removeStatus(u, 'pages');
       const f = foesOf(u);
       await HOOK.fx('lastpage', { src: u, tgts: f, n });
-      for (const e of f) { resolveHit(u, e, Math.max(0.5, (bt(u, 'pageMult') || 0.3) * n), { aoe: true, sure: true }); if (isUp(e)) silence(e, 1); }
+      for (const e of f) { resolveHit(u, e, Math.max(0.4, (bt(u, 'pageMult') || 0.15) * n), { aoe: true, sure: true }); if (isUp(e)) silence(e, 1); }
       HOOK.float(u, `📖 ${n} PAGES`, 'special');
     }
   },
@@ -1226,9 +1236,9 @@ function previewFor(u, kind, t) {
     case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.2 : 0.8);
     case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.5, { note: 'strips' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, lh ? Math.max(0.8, Math.min(2.2, lh.mult)) : 1.2, { acc: 0.05, note: lh ? 'copies ' + lh.name : 'improvised' }); }
     case 'vasco.ult': return D(u, t, 1.9, { sure: true });
-    case 'aamay.basic': return D(u, t, 0.95);
-    case 'aamay.skill': return D(u, t, 0.7, { acc: 0.1, note: 'Silence' });
-    case 'aamay.ult': { const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0; return D(u, t, Math.max(0.5, (bt(u, 'pageMult') || 0.3) * n), { sure: true, note: `${n} pages` }); }
+    case 'aamay.basic': return D(u, t, 0.85);
+    case 'aamay.skill': return D(u, t, 0.55, { acc: 0.1, note: 'Silence, SPD and ATK down' });
+    case 'aamay.ult': { const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0; return D(u, t, Math.max(0.4, (bt(u, 'pageMult') || 0.15) * n), { sure: true, note: `${n} of ${pageCap(u)} pages` }); }
     case 'angus.basic': return D(u, t, bt(u, 'basicMult') || 1.15);
     case 'angus.skill': return { txt: '🎯 Taunt +🛡' };
     case 'angus.ult': return D(u, t, 1.45);
@@ -1308,7 +1318,7 @@ async function heroAct(u, ch) {
   HOOK.log(`${u.name} uses ${sustaining ? 'Sustain Beam' : a.name}.`, 'p');
   if (kind === 'ult') { u.ult = 0; HOOK.update(); await HOOK.ult(u, a); }
   else { HOOK.actName(u, sustaining ? 'Sustain Beam' : a.name, kind); HOOK.update(); }
-  bumpPages();
+  bumpPages(u);
   B.actMult = 0; B.actStatus = null;
   await KIT[u.id][kind](u, t);
   if (h[kind].target === 'enemy' || h[kind].target === 'allEnemies') {
@@ -1437,8 +1447,20 @@ function pickTarget(e, m) {
     else if (r < focus + 0.15) t = ps.reduce((a, b) => (stat(b, 'def') < stat(a, 'def') ? b : a));
     else t = pick(ps);
   }
+  t = unlikelyAim(t, ps);
   const g = guardian(t);
   return g || t;
+}
+/* Aamay works in a basement nobody visits. While another hero still stands, an enemy that lands
+   on him looks again half the time. Unlike Seraphine he can always be reached, which is what keeps
+   the two apart. */
+function unlikelyAim(t, list) {
+  if (!t || !t.isHero || t.id !== 'aamay' || has(t, 'taunt')) return t;
+  if (!sideList(t).some(x => x !== t && isUp(x) && x.isHero)) return t;
+  const st = getSt(t, 'pages'), filled = st ? Math.min(1, st.stacks / pageCap(t)) : 0;
+  if (rnd() >= (bt(t, 'hide') || 0.3) * (1 - filled)) return t;
+  const others = list.filter(x => x !== t);
+  return others.length ? pick(others) : t;
 }
 const HERO_TT = { enemy: 'single', allEnemies: 'all', self: 'self', ally: 'ally', allAllies: 'allies' };
 function planHeroIntent(e) {
@@ -1609,7 +1631,7 @@ async function enemyAct(e) {
     await heroAct(e, ch);
     return;
   }
-  bumpPages();
+  bumpPages(e);
   if (!e.intents.length) planIntents(e);
   const list = e.intents.slice();
   for (let i = 0; i < list.length; i++) {

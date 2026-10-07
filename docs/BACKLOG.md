@@ -80,10 +80,16 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   and forth, and each ego gets its own set of moves rather than the same moves behaving
   differently. Both egos must be useful on their own. Mimicry must stay capped so copying a
   boss move gives a balanced version.
-- [ ] **Aamay rework.** Nerf ult frequency and Chronicle damage significantly, raise the max
-  Chronicle stack. Seal in Ink: less damage, stronger debuffs. Passive: harder to target while
-  allies are alive (he hides in his basement) and slightly lower HP. Gains something, for
-  example a higher Chronicle cap, when a unit falls for good. Keep the Yunze pairing in check.
+- [x] **Aamay reworked** in v0.4.5. Everything asked for: Pages only come from enemy actions, which
+  kills the Yunze pairing; the Chronicle holds 20 instead of 12 and gains 2 per fallen hero; each
+  Page is worth 15% instead of 30%; the ultimate charges 40% slower; Seal in Ink drops to 55% ATK
+  but now takes 30% SPD and 20% ATK for 3 turns; max HP 1300 to 1180 and ATK 124 to 110.
+  **The basement passive is a bigger buff than it looks.** Dying was his defining weakness, at 74%
+  of fights, and being overlooked cut that to about 50%, worth roughly 20 points of campaign win
+  rate on its own. Four balance runs went 58.9, 60.9, 60.7 and 58.3 against a starting 50.6. It is
+  tied to the Chronicle so it fades to nothing as he fills it, and the other nerfs offset the rest.
+  He sits at 58.3, top of the band. If that is still too strong the passive has to give more ground,
+  because the rest of him has little left to cut.
 - [x] **Seraphine narrowed** in v0.4.4, keeping the idea and cutting two ways: a summoned creature
   no longer counts as cover, so only a living hero hides her, and a boss sees her regardless. Still
   needs to not overlap with the Aamay passive, which is still open below.

@@ -120,6 +120,33 @@ const took = u => B.st[u.uid].taken;
   resolveHit(foe2, ally2, 0.01, { sure: true, noCrit: true });
   ok("intercepting heals David", dv.hp > hpBefore, `hp ${hpBefore} -> ${dv.hp}`);
 
+  // ---- 7. Aamay only records what the enemy does ----
+  setupBattle({ team: ["aamay", "yunze", "flynn"], enemies: [{ id: "brute" }] });
+  const am = B.players[0], yz = B.players[1], br = B.enemies[0];
+  const pages = () => { const st = getSt(am, "pages"); return st ? st.stacks : 0; };
+  await heroAct(yz, { kind: "basic", target: br });
+  ok("an ally acting writes nothing", pages() === 0, `pages ${pages()}`);
+  bumpPages(br);
+  ok("an enemy acting writes a Page", pages() === 1, `pages ${pages()}`);
+
+  // The cap rises as heroes fall, on either side.
+  const capBefore = pageCap(am);
+  B.players[2].hp = 0;
+  await processDeaths();
+  ok("a fallen hero raises the Chronicle cap", pageCap(am) === capBefore + 2, `${capBefore} -> ${pageCap(am)}`);
+
+  // He is found less often, but can still be found.
+  setupBattle({ team: ["aamay", "angus", "flynn"], enemies: [{ id: "brute" }] });
+  const am2 = B.players[0], br2 = B.enemies[0];
+  let hits = 0;
+  for (let i = 0; i < 400; i++) if (unlikelyAim(am2, B.players) === am2) hits++;
+  ok("aimed at about half the time while allies stand", hits > 140 && hits < 260, `${hits} of 400`);
+  B.players[1].hp = 0; B.players[2].hp = 0;
+  await processDeaths();
+  let alone = 0;
+  for (let i = 0; i < 100; i++) if (unlikelyAim(am2, B.players.filter(isUp)) === am2) alone++;
+  ok("always reachable once he is the last hero", alone === 100, `${alone} of 100`);
+
   console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
 })();

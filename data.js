@@ -543,7 +543,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.4';
+const GAME_VERSION = '0.4.5';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -612,6 +612,18 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.5', date: 'Aamay reworked', changes: [
+    { t: 'rework', kind: 'hero', who: 'aamay', what: 'The Chronicle', text: 'What adds a Page', from: 'any action by anyone', to: 'any action by an enemy', note: 'Standing him beside a fast hero used to fill the Chronicle twice as fast, which is what made the Yunze pairing absurd.' },
+    { t: 'buff', kind: 'hero', who: 'aamay', what: 'The Chronicle', text: 'Pages it holds', from: '12', to: '20, plus 2 for every hero who falls on either side' },
+    { t: 'nerf', kind: 'hero', who: 'aamay', what: 'The Last Page', text: 'Damage per Page', from: '30%', to: '15% ATK' },
+    { t: 'nerf', kind: 'hero', who: 'aamay', what: 'The Last Page', text: 'Ultimate charge rate', from: 'normal', to: '40% slower' },
+    { t: 'rework', kind: 'hero', who: 'aamay', what: 'The Chronicle', text: 'New: he works where nobody visits', from: 'nothing', to: 'while another hero stands, an enemy aiming at him looks elsewhere 30% of the time, fading to nothing as the Chronicle fills', note: 'He is safest with nothing written and fully exposed when the ultimate is ready. Unlike Seraphine he can always be reached.' },
+    { t: 'nerf', kind: 'hero', who: 'aamay', text: 'Max HP / ATK', from: '1300 / 124', to: '1180 / 110' },
+    { t: 'nerf', kind: 'hero', who: 'aamay', what: 'Ink Flick', text: 'Damage', from: '95%', to: '85% ATK' },
+    { t: 'nerf', kind: 'hero', who: 'aamay', what: 'Seal in Ink', text: 'Damage', from: '70%', to: '55% ATK' },
+    { t: 'buff', kind: 'hero', who: 'aamay', what: 'Seal in Ink', text: 'Debuff', from: 'SPD -20% for 2 turns', to: 'SPD -30% and ATK -20%, both for 3 turns' },
+    { t: 'adjust', kind: 'hero', who: 'aamay', what: 'Archivist / Inquisitor', text: 'Rebuilt around the new numbers', from: '16 Pages / 24% each', to: '26 Pages / 12% each', note: 'Composite 50.6 to 58.3. Surviving was his weakness, so being overlooked is worth far more than the rest costs.' }
+  ] },
   { v: '0.4.4', date: 'Last Stand removed, David, Seraphine, Harry, Lachlan', changes: [
     { t: 'rework', kind: 'system', who: 'Last Stand', text: 'Removed entirely', from: '+35% damage and 15% less taken for the last hero standing, on ten heroes', to: 'gone', note: 'It was there to prop supports up in duels and put the same paragraph in ten passives. It also quietly applied to a hero boss fighting alone. Duel numbers get fixed per hero from now on.' },
     { t: 'buff', kind: 'hero', who: 'david', what: 'Sworn Guard', text: 'Damage cut while guarding', from: '40%', to: '50%' },
@@ -911,6 +923,11 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.5', items: [
+    'Aamay reworked. He now writes down only what the enemy does, so pairing him with a fast hero no longer fills the Chronicle twice as quickly. It holds 20 Pages instead of 12, and 2 more for every hero who falls on either side, but each Page is worth half what it was and his ultimate charges 40% slower.',
+    'Aamay works in a basement nobody visits. While another hero still stands and the Chronicle is empty, an enemy aiming at him looks elsewhere 30% of the time. That protection fades as he writes and is gone once the Chronicle is full, so the moment he is most dangerous is the moment he is easiest to reach. He can always be reached, which is what keeps him different from Seraphine.',
+    'Seal in Ink hits softer but holds harder: 55% ATK instead of 70%, and the target now loses 30% SPD and 20% ATK for 3 turns rather than 20% SPD for 2. Ink Flick drops to 85% ATK, and his max HP and ATK both come down.'
+  ] },
   { v: '0.4.4', items: [
     'Last Stand is gone. It gave the last hero standing more damage and less damage taken, and the same paragraph was pasted into ten passives, which made every one of them harder to read for a rule that only really mattered in duels. It also quietly applied to a hero boss fighting alone, which nothing told you. Heroes who need help in duels will get it one at a time instead.',
     'David is paid for the work he does. Guarding now cuts half the damage instead of 40%, and every hit he takes for the ally he is guarding heals him 3% of his max HP. His guard started catching far more in the last update, so this grows with it.',
@@ -1077,7 +1094,7 @@ Object.assign(STATUS, {
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 6% max HP and removes a debuff at the start of each of its turns.' },
   vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.35 }, color: '#d1203a', desc: 'Peguicha\'s power wears Vasco\'s face: ATK +35%, hits heal him for 25% of their damage and deal double damage to Shields.' },
-  pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 12, color: '#7a8ab0', desc: 'Pages written about this battle. The Last Page spends them for 30% ATK each against every enemy.' }
+  pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
 });
 Object.assign(ENEMIES, {
   imp: { name: 'Pit Imp', color: '#e0502a', creature: true, stats: { hp: 520, atk: 100, def: 50, spd: 118, eva: 0.08 },
@@ -1136,12 +1153,12 @@ Object.assign(HEROES, {
     skill: { name: 'Mimicry', icon: '🎭', cost: 1, target: 'enemy', desc: 'Jester: copies the last attack an enemy used on his team, at his own ATK. Vessel: Peguicha\'s Gift, 150% ATK that strips the target\'s buffs and Shields.' },
     ult: { name: 'Curtain Call', icon: '🎪', target: 'allEnemies', desc: 'The mask comes off: he wakes as the Vessel if he has not, then deals 190% ATK to every enemy and Burns them.' } },
   aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',
-    stats: { hp: 1300, atk: 124, def: 80, spd: 110, crit: 0.1, cdmg: 0.5, eva: 0.08 },
+    stats: { hp: 1180, atk: 110, def: 80, spd: 110, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#d8a882', hair: '#141016', hairStyle: 'short', eye: '#5a3a20', body: 'robe', bodyColor: '#16161c', trim: '#3a3c4a', bg: '#08080c', weapon: 'book', helm: 'cowl', ink: true },
-    passive: { name: 'The Chronicle', desc: 'Every action anyone takes in the battle adds a Page to his Chronicle, up to 12.' },
-    basic: { name: 'Ink Flick', icon: '🖋️', target: 'enemy', desc: '95% ATK with a 30% chance to Silence for 1 turn.' },
-    skill: { name: 'Seal in Ink', icon: '📕', cost: 1, target: 'enemy', desc: '70% ATK, then the target is Silenced for 2 turns (bosses 1) and loses 20% SPD. Silenced heroes cannot use skills or ultimates; monsters only use their basic attack.' },
-    ult: { name: 'The Last Page', icon: '📖', target: 'allEnemies', desc: 'Read the Chronicle aloud: 30% ATK per Page to every enemy, then Silence them all for 1 turn. The Pages are spent.' } }
+    passive: { name: 'The Chronicle', desc: 'He writes down what the enemy does: every enemy action adds a Page, up to 20. Nothing his own side does is worth recording. Each hero who falls on either side raises the limit by 2, since there is more to write. He works in a basement nobody visits, so while another hero still stands and the Chronicle is empty, an enemy that aims at him looks elsewhere 30% of the time. That protection fades as he writes, and is gone entirely once the Chronicle is full, so the moment he is most dangerous is the moment he is easiest to reach. He can always be reached, unlike someone truly hidden.' },
+    basic: { name: 'Ink Flick', icon: '🖋️', target: 'enemy', desc: '85% ATK with a 30% chance to Silence for 1 turn.' },
+    skill: { name: 'Seal in Ink', icon: '📕', cost: 1, target: 'enemy', desc: '55% ATK, then the target is Silenced for 2 turns (bosses 1) and loses 30% SPD and 20% ATK for 3 turns. Silenced heroes cannot use skills or ultimates; monsters only use their basic attack.' },
+    ult: { name: 'The Last Page', icon: '📖', target: 'allEnemies', desc: 'Read the Chronicle aloud: 15% ATK per Page to every enemy, then Silence them all for 1 turn. The Pages are spent. His ultimate charges 40% slower than other heroes, so the Chronicle has time to fill.' } }
 });
 HERO_ORDER.splice(0, HERO_ORDER.length, 'angus', 'flynn', 'leo', 'harry', 'peguicha', 'vehra', 'soham', 'trigg', 'chosen', 'elphi', 'daniel', 'yunze', 'malakai', 'seraphine', 'alfred', 'lachlan', 'yousuf', 'gemia', 'david', 'ethan', 'ben', 'kingsley', 'vasco', 'aamay');
 Object.assign(BUILDS, {
@@ -1164,8 +1181,8 @@ Object.assign(BUILDS, {
     { id: 'harlequin', name: 'Harlequin', icon: '🃏', desc: 'Pranks always trick twice. The Vessel only wakes below 25% HP.', tags: { doubleTrick: 1, wakeAt: 0.25 } },
     { id: 'hollow', name: 'Hollow', icon: '😈', desc: 'The Vessel wakes below 60% HP, but its lifesteal drops to 15%.', tags: { wakeAt: 0.6, vesselSteal: 0.15 } }],
   aamay: [BALANCED,
-    { id: 'archivist', name: 'Archivist', icon: '📚', desc: 'The Chronicle holds 16 Pages, but Seal in Ink only Silences for 1 turn.', tags: { pageMax: 16, sealTurns: 1 } },
-    { id: 'inquisitor', name: 'Inquisitor', icon: '🖋', desc: 'Ink Flick Silences 55% of the time. Each Page is worth 24% instead of 30%.', tags: { flickCh: 0.55, pageMult: 0.24 } }]
+    { id: 'archivist', name: 'Archivist', icon: '📚', desc: 'The Chronicle starts at 26 Pages instead of 20, but Seal in Ink only Silences for 1 turn.', tags: { pageMax: 26, sealTurns: 1 } },
+    { id: 'inquisitor', name: 'Inquisitor', icon: '🖋', desc: 'Ink Flick Silences 55% of the time. Each Page is worth 12% instead of 15%.', tags: { flickCh: 0.55, pageMult: 0.12 } }]
 });
 SYNERGIES.push(
   { id: 'court', name: 'Peguicha\'s Court', icon: '👹', color: '#e0502a', desc: 'Trigg with Peguicha or Vehra. His creatures have 20% more HP and ATK.',
