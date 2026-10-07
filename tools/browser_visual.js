@@ -120,6 +120,45 @@ const starsFor = ids => Object.fromEntries(ids.map(id => [id, 1]));
     R.ok('they are not the same colour', !!(bars.s && bars.hx && bars.s.bg !== bars.hx.bg));
     R.ok('the ordinary one stays blue', /143, 208, 255|8fd0ff/.test((bars.s || {}).bg || ''), ((bars.s || {}).bg || '').slice(0, 60));
     R.ok('and his own is the yellow one', /255, 243, 160|fff3a0/.test((bars.hx || {}).bg || ''), ((bars.hx || {}).bg || '').slice(0, 60));
+
+    /* Seraphine lays Severance marks and moves an ally with the Hidden Hand, and both used to
+       happen with nothing on screen. Count the elements each effect puts in the overlay. */
+    await s.setSave(fastSave({ team: ['seraphine', 'chosen', 'flynn'], stars }));
+    await s.eval("showTeam({ mode: 'campaign', idx: 0 }); true");
+    await s.click('#fight');
+    await s.waitForExpr('typeof B === "object" && B && B.players && B.players.length === 3', 10000);
+    const fx = await s.eval(`(async () => {
+      const u = B.players.find(p => p.id === 'seraphine');
+      const chosen = B.players.find(p => p.id === 'chosen');
+      const foe = B.enemies.find(e => e.alive);
+      /* At this speed the whole effect is over inside a frame or two, so count the nodes it
+         adds to the overlay rather than sampling how many are present at one moment. */
+      const watch = async fn => {
+        let n = 0;
+        const mo = new MutationObserver(ms => ms.forEach(m => { n += m.addedNodes.length; }));
+        mo.observe(UI.fx, { childList: true });
+        await fn();
+        await new Promise(r => setTimeout(r, 150));
+        mo.disconnect();
+        return n;
+      };
+      const duringMark = await watch(() => FX.severmark({ src: u, tgt: foe, n: 2 }));
+      const duringHand = await watch(() => FX.hiddenhand({ src: u, tgt: chosen }));
+      return { before: 0, duringMark, duringHand };
+    })()`);
+    R.ok('laying a Severance mark draws something', fx.duringMark > fx.before, `${fx.duringMark} elements drawn`);
+    R.ok('the Hidden Hand draws its strings', fx.duringHand > fx.before, `${fx.duringHand} elements drawn`);
+
+    // And the mark itself now announces the count instead of landing silently.
+    const marked = await s.eval(`(() => {
+      const u = B.players.find(p => p.id === 'seraphine');
+      const foe = B.enemies.find(e => e.alive);
+      removeStatus(foe, 'sever');
+      addStatus(foe, 'sever', 99, { stacks: 2, src: u });
+      const st = foe.statuses.find(x => x.key === 'sever');
+      return st ? st.stacks : 0;
+    })()`);
+    R.check('two marks land as two', marked, 2);
   } finally {
     await s.close();
     host.close();

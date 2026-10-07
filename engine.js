@@ -181,7 +181,6 @@ function takenMult(t, u) {
   /* The thing wearing him is harder to put down than he is. Locked into it the Vessel fell in
      75% of fights against the jester 50%, and the owner asked for its damage cut, not its
      survival, so the gap closes here. */
-  if (has(t, 'vessel')) m *= 0.85;
   if (has(t, 'plated')) m *= 0.5;
   if (has(t, 'exposed')) m *= 1.5;
   if (has(t, 'warded')) m *= 0.5;
@@ -588,7 +587,7 @@ function battleStart(u) {
     if (u.heroId === 'gemia') { /* not used */ }
   }
 }
-const lachCap = u => bt(u, 'shieldCap') || 0.3;
+const lachCap = u => bt(u, 'shieldCap') || 0.25;
 function checkEnd() {
   if (!B.enemies.some(isUp)) return 'win';
   if (!B.players.some(p => isUp(p) && p.isHero)) return 'lose';
@@ -656,7 +655,7 @@ async function turnStart(u) {
   if (has(u, 'stone')) { heal(u, u, u.maxHp * 0.09, { noCrit: true }); HOOK.float(u, '🗿 Stone mends', 'buff'); }
   if (u.isHero && u.id === 'lachlan') {
     const cap = Math.round(u.maxHp * lachCap(u));
-    if (u.shield < cap) { const g = Math.min(cap - u.shield, Math.round(u.maxHp * (bt(u, 'shieldRegen') || 0.06))); u.shield += g; HOOK.float(u, '+' + g + ' 🛡', 'shield'); }
+    if (u.shield < cap) { const g = Math.min(cap - u.shield, Math.round(u.maxHp * (bt(u, 'shieldRegen') || 0.05))); u.shield += g; HOOK.float(u, '+' + g + ' 🛡', 'shield'); }
   }
   if (has(u, 'stun')) { removeStatus(u, 'stun'); u.flags.skip = true; }
 }
@@ -822,7 +821,7 @@ const KIT = {
     }
   },
   ben: {
-    async basic(u, t) { await strike(u, t, bt(u, 'wordMult') || 1.2, { fx: 'quill' }); if (isUp(t)) delayUnit(t, bt(u, 'wordDelay') || 0.15); },
+    async basic(u, t) { await strike(u, t, bt(u, 'wordMult') || 1.35, { fx: 'quill' }); if (isUp(t)) delayUnit(t, bt(u, 'wordDelay') || 0.2); },
     async skill(u, t) {
       await HOOK.fx('order', { src: u, tgt: t });
       t.gauge = 0; addStatus(t, 'atkUp', 1, { value: bt(u, 'orderAtk') || 0.2 }); if (t.isHero) t.ult = Math.min(100, t.ult + 20);
@@ -983,11 +982,14 @@ const KIT = {
     }
   },
   seraphine: {
-    async basic(u, t) { const r = await strike(u, t, 1.1, { fx: 'halo' }); if (hitOK(r) && isUp(t)) addStatus(t, 'sever', 99, { stacks: 1, silent: true }); },
+    async basic(u, t) {
+      const r = await strike(u, t, 1.1, { fx: 'halo' });
+      if (hitOK(r) && isUp(t)) { await HOOK.fx('severmark', { src: u, tgt: t, n: 1 }); addStatus(t, 'sever', 99, { stacks: 1 }); }
+    },
     async skill(u, t) {
       await HOOK.fx('orbit', { src: u, tgt: t });
       const r = resolveHit(u, t, 0.8, { acc: 0.05 });
-      if (hitOK(r) && isUp(t)) addStatus(t, 'sever', 99, { stacks: 2, silent: true });
+      if (hitOK(r) && isUp(t)) { await HOOK.fx('severmark', { src: u, tgt: t, n: 2 }); addStatus(t, 'sever', 99, { stacks: 2 }); }
       if (hitOK(r) && isUp(t)) addStatus(t, 'encircled', 2, { dot: 0.6 * stat(u, 'atk') * (1 + u.mods.dot), src: u });
     },
     async ult(u) {
@@ -1002,7 +1004,11 @@ const KIT = {
       for (const e of foesOf(u)) { const sv = getSt(e, 'sever'); if (sv) { removeStatus(e, 'sever'); await HOOK.fx('sever', { tgt: e, n: sv.stacks }); resolveHit(u, e, 0.3 * sv.stacks, { aoe: true, sure: true }); HOOK.float(e, `✂ SEVERED ×${sv.stacks}`, 'special'); } }
       let puppet = friendsOf(u).find(a => a.isHero && a.id === 'chosen');
       if (!puppet && bt(u, 'anyPuppet')) puppet = friendsOf(u).filter(a => a !== u).sort((a, b) => stat(b, 'atk') - stat(a, 'atk'))[0];
-      if (puppet) { puppet.gauge = 0; HOOK.float(puppet, '🎭 HIDDEN HAND', 'special'); HOOK.log(`${puppet.name} moves at Seraphine's word.`, 'i'); }
+      if (puppet) {
+        await HOOK.fx('hiddenhand', { src: u, tgt: puppet });
+        puppet.gauge = 0; HOOK.float(puppet, '🎭 HIDDEN HAND', 'special');
+        HOOK.log(`${puppet.name} moves at Seraphine's word.`, 'i');
+      }
     }
   },
   angus: {
@@ -1079,7 +1085,7 @@ const KIT = {
     async skill(u, t) {
       u.flags.glow = true; HOOK.update();
       await HOOK.fx('crush', { src: u, tgt: t });
-      const r = resolveHit(u, t, bt(u, 'crushMult') || 1.35, { pierce: 1, sure: true });
+      const r = resolveHit(u, t, bt(u, 'crushMult') || 1.45, { pierce: 1, sure: true });
       if (hitOK(r)) applyOnHit(u, t, { key: 'bleed', turns: 2, dot: 0.3 });
       await wait(250);
       u.flags.glow = false;
@@ -1174,13 +1180,13 @@ const KIT = {
       const m = mixOf(u), phial = { key: m.key, turns: 2, dot: 0.3, value: 0.22 };
       const house = mixSlot(u) === 2;
       const others = foesOf(u).filter(e => e !== t);
-      const r = await strike(u, t, 1.1, { fx: 'flask' });
+      const r = await strike(u, t, 1.0, { fx: 'flask' });
       if (r && hitOK(r)) applyOnHit(u, r.target, phial);
       if (house) {
         HOOK.float(u, '🧪 ON THE HOUSE', 'buff');
         if (others.length) {
           await HOOK.fx('splash', { src: t, tgts: others, color: '#ffb23d' });
-          for (const o of others) { resolveHit(u, o, 0.55, { aoe: true, sure: true }); applyOnHit(u, o, phial); }
+          for (const o of others) { resolveHit(u, o, 0.45, { aoe: true, sure: true }); applyOnHit(u, o, phial); }
         }
         addSp(u, 1);
       }
@@ -1231,14 +1237,14 @@ const KIT = {
     },
     async skill(u, t) {
       await strike(u, t, 1.6, { fx: 'bigorb', status: { key: 'defDown', turns: 2, value: 0.25 } });
-      addShield(u, u, u.maxHp * 0.1, lachCap(u));
+      addShield(u, u, u.maxHp * 0.08, lachCap(u));
     },
     async ult(u) {
       const f = foesOf(u);
       await HOOK.fx('nova', { src: u, tgts: f, color: '#4f8dff' });
       for (const e of f) resolveHit(u, e, 2.0, { aoe: true, sure: true });
-      const cap = Math.round(u.maxHp * lachCap(u));
-      if (u.shield < cap) { HOOK.float(u, '+' + (cap - u.shield) + ' 🛡', 'shield'); u.shield = cap; }
+      // Half a wall back, not the whole of it: the Shield has to be able to run out.
+      addShield(u, u, u.maxHp * lachCap(u) * 0.5, lachCap(u));
     }
   },
   yousuf: {
@@ -1336,7 +1342,7 @@ function previewFor(u, kind, t) {
     case 'ethan.basic': return D(u, t, 1.15);
     case 'ethan.skill': return { txt: `📜 ATK +${Math.round((bt(u, 'decreeAtk') || 0.2) * 100)}%` };
     case 'ethan.ult': return { shield: Math.round(u.maxHp * (bt(u, 'shelter') || 0.15) * (1 + u.mods.shield)) };
-    case 'ben.basic': return D(u, t, bt(u, 'wordMult') || 1.2, { note: 'delays' });
+    case 'ben.basic': return D(u, t, bt(u, 'wordMult') || 1.35, { note: 'delays' });
     case 'ben.skill': return { txt: '☝️ Acts now' };
     case 'ben.ult': return { txt: t.def.boss ? '⏳ Delay 20%' : '⏳ Delay 40%' };
     case 'kingsley.basic': return D(u, t, 0.8);
@@ -1358,7 +1364,7 @@ function previewFor(u, kind, t) {
     case 'leo.skill': { const c = chanOf(u), ramp = beamRamp(u); if (c && isUp(c.target)) { const st = Math.min(ramp.length, c.value + 1); return D(u, t, ramp[st - 1], { acc: 0.1, note: 'Beam ×' + st }); } return D(u, t, ramp[0], { acc: 0.1, note: 'starts beam' }); }
     case 'leo.ult': return D(u, t, 1.9, { sure: true });
     case 'harry.basic': return D(u, t, 0.92, { pierce: 0.3 });
-    case 'harry.skill': return D(u, t, bt(u, 'crushMult') || 1.35, { pierce: 1, sure: true });
+    case 'harry.skill': return D(u, t, bt(u, 'crushMult') || 1.45, { pierce: 1, sure: true });
     case 'harry.ult': return D(u, t, 2.6, { pierce: 1, sure: true });
     case 'chosen.basic': return D(u, t, 1.05);
     case 'chosen.skill': return D(u, t, 0.55, { hits: bt(u, 'danceHits') || 3, note: bt(u, 'noDanceShield') ? '' : '+Shield' });
@@ -1372,7 +1378,7 @@ function previewFor(u, kind, t) {
     case 'yunze.basic': return D(u, t, 0.4, { hits: 2, acc: 0.05 });
     case 'yunze.skill': return D(u, t, 1.25, { acc: 0.15 });
     case 'yunze.ult': return D(u, t, 0.4, { note: 'per hit', acc: 0.1 });
-    case 'malakai.basic': return D(u, t, 1.1, { note: mixOf(u).name + (mixSlot(u) === 2 ? ', on the house' : '') });
+    case 'malakai.basic': return D(u, t, 1.0, { note: mixOf(u).name + (mixSlot(u) === 2 ? ', on the house' : '') });
     case 'malakai.skill': { const n = sellable(t).length; return { txt: (n ? '⚗️▸' + n + ' ' : '') + '⚔️▲ 💨▲' + (bt(u, 'freeBargain') ? ' ✚' : '') }; }
     case 'malakai.ult': return { txt: '⚗️ strip' };
     case 'lachlan.basic': return far ? D(u, t, 0.85, { acc: 0.05 }) : D(u, t, 0.65, { hits: 2 });

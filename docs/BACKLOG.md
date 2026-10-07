@@ -185,6 +185,32 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [ ] **More 2 SP candidates, if wanted.** Seraphine Orbiting Blades and Elphi Radiant Arc are the
   next most plausible. Aamay was tried and reverted: his skill is the whole of what he does and he
   makes no points of his own, so the price took him from 60.0 to 39.8.
+
+### Owner feedback handled in v0.4.16
+
+- [x] **Lachlan was unkillable.** Shield cap 30% to 25%, regeneration 6% to 5%, Azure Blast 10% to
+  8%, and Azure Nova gives half a wall back instead of filling it. Composite 51.3 to 45.6, duel 88
+  to 69, falls 52 to 59. Group E below is partly answered by this: he is no longer the top duellist.
+- [x] **The Vessel damage reduction removed**, as asked. Composite 53.0 to 49.6.
+- [x] **Harry Crush 135% to 145%**, affordable now that it costs two Skill Points.
+- [x] **Malakai flask 110% to 100%** and the free splash 55% to 45%.
+- [x] **The King’s Trial fixed.** It was a sudden-death stalemate, not a damage problem: two
+  support bosses at 2.6x HP dragged the fight past turn 150, where the rules turn on the heroes.
+  100/90/97/97 now, from 100/13/27/0.
+- [x] **Seraphine Severance and Hidden Hand animated.** The last two things on her that happened
+  with nothing on screen. `npm run check:visual` counts what each one draws.
+- [x] **Ben back into the band**, 42.7 with Sharp Word at 120%, measured again after the buff.
+
+### Still open
+
+- [ ] **Alfred sits at 39.5**, the only hero outside the 45 to 60 band, on the owner’s instruction
+  that he needs no buff. His duel rate is 84, near the top, so he is a duellist rather than a weak
+  hero. Revisit only if the owner asks.
+- [ ] **Hexagon Wall, one team in four.** vehra/peguicha/yousuf wins 0% of 30 runs while the other
+  three test teams win 100%, 100% and 93%. Diagnosed: the two archers deal 3241 of the damage and
+  the team has no area damage to crack four hexshielded enemies in time. Dropping the stage ATK to
+  1.85 only moves that team to 17% while trivialising it for everyone else, so it is a team
+  composition wall rather than a tuning problem. Left alone deliberately.
 ## F. New heroes (this is what makes it v0.5.0)
 
 Three new heroes, from the owner on 2026-10-07. Under the versioning rule this is the only kind

@@ -95,7 +95,7 @@ const HEROES = {
     look: { skin: '#e8c8a8', hair: '#0e0e12', hairStyle: 'messy', eye: '#121214', glowEye: '#3dff9a', body: 'coat', bodyColor: '#22262e', trim: '#4a5260', bg: '#13261d', weapon: 'katana' },
     passive: { name: 'Close to Immortal', desc: '15% chance to evade attacks. Cannot be stunned. Once per battle, survives a lethal blow with 1 HP. Present in all three eras.' },
     basic: { name: 'Katana Draw', icon: '🗡️', target: 'enemy', desc: 'Deal 92% ATK to one enemy, ignoring 30% of its DEF.' },
-    skill: { name: 'Crush', icon: '✊', cost: 2, target: 'enemy', desc: 'His eyes glow green. The target jerks and spits blood: 135% ATK that ignores DEF and cannot miss. Bleeds for 2 turns.' },
+    skill: { name: 'Crush', icon: '✊', cost: 2, target: 'enemy', desc: 'His eyes glow green. The target jerks and spits blood: 145% ATK that ignores DEF and cannot miss. Bleeds for 2 turns.' },
     ult:   { name: 'Unsealed', icon: '🔓', target: 'allEnemies', desc: 'Crush every enemy for 260% ATK, ignoring DEF. Then he is Unsealed for 3 turns: +35% damage, +50% crit chance, +30% crit damage, +35% evasion, and attackers risk Backlash (40% chance to be crushed for 140% ATK). His ultimate charges 45% slower than other heroes and not at all while Unsealed.' }
   },
   chosen: {
@@ -138,8 +138,8 @@ const HEROES = {
     id: 'malakai', name: 'Malakai', title: 'The Alchemist', eras: ['second', 'current'], role: 'Alchemist', color: '#ffb23d',
     stats: { hp: 1120, atk: 116, def: 72, spd: 112, crit: 0.1, cdmg: 0.5 },
     look: { skin: '#f0cdaa', hair: '#ff7a1f', hairStyle: 'swept', eye: '#ffd21f', body: 'robe', bodyColor: '#3b2a1a', trim: '#ffb23d', bg: '#5a3410', weapon: 'flask' },
-    passive: { name: 'Elite Clientele', desc: 'He mixes in a fixed order and the badge above him shows which phial is next: Venom, Sedative, Solvent. Every third flask, the Solvent, is on the house: it splashes 55% ATK and the same debuff onto every other enemy, and hands the team an extra Skill Point.' },
-    basic: { name: 'Volatile Flask', icon: '🧪', target: 'enemy', desc: 'Deal 110% ATK to one enemy and apply whichever phial is next: Venom Poisons, Sedative lowers ATK by 22%, Solvent lowers DEF by 22%.' },
+    passive: { name: 'Elite Clientele', desc: 'He mixes in a fixed order and the badge above him shows which phial is next: Venom, Sedative, Solvent. Every third flask, the Solvent, is on the house: it splashes 45% ATK and the same debuff onto every other enemy, and hands the team an extra Skill Point.' },
+    basic: { name: 'Volatile Flask', icon: '🧪', target: 'enemy', desc: 'Deal 100% ATK to one enemy and apply whichever phial is next: Venom Poisons, Sedative lowers ATK by 22%, Solvent lowers DEF by 22%.' },
     skill: { name: 'Elite Bargain', icon: '🤝', cost: 1, target: 'ally', desc: 'An ally pays 8% of current HP. Every debuff on them is sold on to the enemy with the highest ATK, and they gain ATK +30% and SPD +20% for 2 turns. If they had nothing to sell, that enemy is Poisoned instead.' },
     ult:   { name: 'Grand Transmutation', icon: '⚗️', target: 'allEnemies', desc: 'Strip every enemy buff and Shield, then Poison all enemies (2 stacks) and lower their DEF by 30%. Heal allies 20% max HP and cleanse their debuffs.' }
   },
@@ -147,10 +147,10 @@ const HEROES = {
     id: 'lachlan', name: 'Lachlan', title: 'Icon of the People', eras: ['current'], role: 'Versatile', color: '#4f8dff',
     stats: { hp: 1290, atk: 134, def: 90, spd: 110, crit: 0.12, cdmg: 0.5 },
     look: { skin: '#f0d2b6', hair: '#eef2ff', hairStyle: 'swept', eye: '#3a7dff', body: 'armour', bodyColor: '#2a3f7a', trim: '#7fb0ff', bg: '#132a66', weapon: 'orb' },
-    passive: { name: 'Azure Shield', desc: 'Starts battle with a Shield worth 30% max HP. Regenerates 6% max HP of Shield each turn, up to 30%. Swaps stance after each basic attack or skill.' },
+    passive: { name: 'Azure Shield', desc: 'Starts battle with a Shield worth 25% max HP. Regenerates 5% max HP of Shield each turn, up to 25%. Swaps stance after each basic attack or skill.' },
     basic: { name: 'Close / Far', icon: '👊', target: 'enemy', desc: 'Close stance: 2 hits of 65% ATK. Far stance: an energy orb for 85% ATK that splashes 35% ATK onto every other enemy.' },
-    skill: { name: 'Azure Blast', icon: '🔵', cost: 1, target: 'enemy', desc: 'Deal 160% ATK and lower DEF by 25% for 2 turns. Restores 10% max HP of Shield.' },
-    ult:   { name: 'Azure Nova', icon: '💠', target: 'allEnemies', desc: 'Deal 200% ATK to all enemies and fully restore the Azure Shield.' }
+    skill: { name: 'Azure Blast', icon: '🔵', cost: 1, target: 'enemy', desc: 'Deal 160% ATK and lower DEF by 25% for 2 turns. Restores 8% max HP of Shield.' },
+    ult:   { name: 'Azure Nova', icon: '💠', target: 'allEnemies', desc: 'Deal 200% ATK to all enemies and restore half a wall of Azure Shield, 12.5% of his max HP. It no longer fills the Shield back up on its own, so the wall can be broken through.' }
   },
   yousuf: {
     id: 'yousuf', name: 'Yousuf', title: 'The Prodigy', eras: ['current'], role: 'Healer', color: '#5dff8f',
@@ -547,7 +547,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.15';
+const GAME_VERSION = '0.4.16';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -570,7 +570,7 @@ const BUILDS = {
   ],
   harry: [
     { id: 'stillwater', name: 'Still Water', icon: '🌊', desc: 'Backlash: when an enemy attacks him with a single-target move, 30% chance to crush them back for 140% ATK, ignoring DEF. Always triggers if he dodges. Once per enemy action. ATK -10%.', mods: { atk: -0.1 }, tags: { backlash: 0.3 } },
-    { id: 'force', name: 'Force', icon: '✊', desc: 'Crush deals 200% ATK instead of 135%. SPD -8%.', mods: { spd: -0.08 }, tags: { crushMult: 2.0 } }
+    { id: 'force', name: 'Force', icon: '✊', desc: 'Crush deals 200% ATK instead of 145%. SPD -8%.', mods: { spd: -0.08 }, tags: { crushMult: 2.0 } }
   ],
   chosen: [
     { id: 'valkyrie', name: 'Valkyrie', icon: '🪽', desc: 'Judgement of Wings gains 35% per Grace stack instead of 20%. Max HP -4%.', mods: { hp: -0.04 }, tags: { gracePer: 0.35 } },
@@ -593,8 +593,8 @@ const BUILDS = {
     { id: 'toxin', name: 'Toxicologist', icon: '☠️', desc: 'Poison you apply deals 65% more damage. Volatile Flask mixes Venom every time instead of following the order, though every third is still on the house. Grand Transmutation heals allies for 14% instead of 20%.', mods: { dot: 0.65 }, tags: { alwaysPoison: 1, transHeal: 0.14 } }
   ],
   lachlan: [
-    { id: 'aegis', name: 'Aegis', icon: '🔵', desc: 'Azure Shield caps at 44% max HP and regenerates 8.5% per turn. ATK -10%.', mods: { atk: -0.1 }, tags: { shieldCap: 0.44, shieldRegen: 0.085 } },
-    { id: 'orbcaster', name: 'Orbcaster', icon: '💠', desc: 'ATK +8%. Far stance splash deals 50% ATK. Azure Shield caps at 25%.', mods: { atk: 0.08 }, tags: { splash: 0.5, shieldCap: 0.25 } }
+    { id: 'aegis', name: 'Aegis', icon: '🔵', desc: 'Azure Shield caps at 38% max HP and regenerates 7% per turn. ATK -10%.', mods: { atk: -0.1 }, tags: { shieldCap: 0.38, shieldRegen: 0.07 } },
+    { id: 'orbcaster', name: 'Orbcaster', icon: '💠', desc: 'ATK +8%. Far stance splash deals 50% ATK. Azure Shield caps at 20%.', mods: { atk: 0.08 }, tags: { splash: 0.5, shieldCap: 0.2 } }
   ],
   yousuf: [
     { id: 'mender', name: 'Mender', icon: '✚', desc: 'Healing +10%. ATK -10%, SPD -6%.', mods: { heal: 0.1, atk: -0.1, spd: -0.06 } },
@@ -616,6 +616,16 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.16', d: '2026-10-07', date: 'Lachlan\u2019s wall, the King\u2019s Trial, and two animations Seraphine never had', changes: [
+    { t: 'nerf', kind: 'hero', who: 'lachlan', what: 'Azure Shield', text: 'Cap and regeneration', from: '30% max HP, 6% back each turn', to: '25% max HP, 5% back each turn', note: 'Aegis 44% and 8.5% to 38% and 7%, Orbcaster 25% to 20%. He soaked more than anyone on the table.' },
+    { t: 'nerf', kind: 'hero', who: 'lachlan', what: 'Azure Nova', text: 'What it gives back', from: 'the Shield filled all the way up', to: 'half a wall, 12.5% of his max HP', note: 'The ultimate handed the whole wall back, so there was never a window where the Shield was down. Composite 51.3 to 44.8, falls 52 to 59, and his duel rate drops from 88 at the top of the table to 69. Two runs read 45.6 and 44.8, so he now sits on the bottom edge of the band, which is the point of the pass.' },
+    { t: 'nerf', kind: 'hero', who: 'lachlan', what: 'Azure Blast', text: 'Shield restored', from: '10%', to: '8% max HP' },
+    { t: 'nerf', kind: 'hero', who: 'vasco', what: 'The Vessel', text: 'Damage taken', from: '15% less', to: 'normal', note: 'Asked for directly. It was added one update ago to close the gap between the two faces and the owner would rather the gap closed another way. Composite 53.0 to 49.6.' },
+    { t: 'buff', kind: 'hero', who: 'harry', what: 'Crush', text: 'Damage', from: '135%', to: '145% ATK', note: 'It costs two Skill Points now, so it can afford to hit for more of what it used to. Force build still 200%.' },
+    { t: 'nerf', kind: 'hero', who: 'malakai', what: 'Volatile Flask', text: 'Damage, and the free splash', from: '110% / 55%', to: '100% / 45% ATK', note: 'The rework was meant to make him readable, not to make him a damage dealer. Composite barely moves, 53.0 to 53.9, because his value is the debuffs and the Skill Point.' },
+    { t: 'buff', kind: 'hero', who: 'ben', what: 'Sharp Word', text: 'Damage and delay', from: '120% ATK, 15% later', to: '135% ATK, 20% later', note: 'He drifted back to 42.7 after the pass around him. His judgement is the weapon, so the word hits harder and delays longer, which feeds his own Cold Counsel more often.' },
+    { t: 'easier', kind: 'stage', who: 'kingtrial', text: 'Enemy ATK, and the hero bosses', from: 'ATK 2.3\u00d7, hero ATK 1.0\u00d7, hero HP 2.6\u00d7', to: 'ATK 1.75\u00d7, hero ATK 1.15\u00d7, hero HP 1.55\u00d7', note: 'Two support heroes at 2.6x HP could neither be killed quickly nor kill, so the fight ran past turn 150 into sudden death and that took the heroes with it: three of the four test teams averaged 190 to 240 turns and lost, at 13%, 27% and 0%. Now 100%, 90%, 97% and 97%, with the survivors on 39 to 63% health.' }
+  ] },
   { v: '0.4.15', d: '2026-10-07', date: 'Malakai, Angus, Kingsley and four more passes', changes: [
     { t: 'rework', kind: 'hero', who: 'malakai', what: 'Elite Clientele and Volatile Flask', text: 'What the flask does', from: 'a random one of three debuffs, and a 50% coin flip to refund the Skill Point', to: 'a fixed order of three phials with the next one on a badge, and every third flask splashes every enemy and pays the team a point', note: 'Both halves of him used to be invisible: nothing on screen said what you were about to get or what you had just got. Composite 48.0 to 53.6.' },
     { t: 'buff', kind: 'hero', who: 'malakai', what: 'Volatile Flask', text: 'Damage', from: '90%', to: '110% ATK' },
@@ -1004,6 +1014,12 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.16', d: '2026-10-07', items: [
+    'Lachlan can be broken through now. The Azure Shield caps at 25% instead of 30% and comes back 5% a turn instead of 6%, and Azure Nova restores half a wall rather than filling it all the way up. Refilling it completely meant there was never a moment when the Shield was actually down. He went from soaking more than anyone on the table to the bottom edge of the band, and his duel rate fell from 88, the highest in the game, to 69.',
+    'The King\u2019s Trial was unwinnable for most teams, and not for the reason it looked. Ethan and Ben are both support heroes, so at 2.6 times health they could not be killed quickly and could not kill either: the fight ran past turn 150 into sudden death, which raises damage and halves healing, and that finished the heroes rather than the bosses. Three of the four test teams were averaging 190 to 240 turns and losing. They now have less health and hit a little harder, and the sellsword with them is no longer swinging at 2.3 times attack.',
+    'Seraphine\u2019s Severance marks and her Hidden Hand finally show on screen. A mark used to land in complete silence: now a pale thread goes out from her and the scissors appear above the target, one for each mark, and the badge says how many are on it. The Hidden Hand drops strings onto the ally from above the arena and pulls them forward, instead of only printing a line of text.',
+    'The Vessel no longer takes 15% less damage, Harry\u2019s Crush goes back up to 145% now that it costs two Skill Points, Malakai\u2019s flask comes down to 100%, and Ben\u2019s Sharp Word hits for 135% and delays by 20%.'
+  ] },
   { v: '0.4.15', d: '2026-10-07', items: [
     'Malakai is countable now. He used to throw a random one of three debuffs and refund a Skill Point on a coin flip, and you could see neither. He mixes in a fixed order instead, Venom then Sedative then Solvent, with the next phial on a badge above him, and the flask hits for 110% rather than 90%. Every third one, the Solvent, is on the house: it splashes every other enemy with the same debuff and hands the team an extra Skill Point, which is the thing worth counting towards.',
     'His deal changed too. Elite Bargain used to do the same thing every time. Now it takes every debuff off the ally and sells it on to the enemy with the highest ATK, and the ally still gets the attack and speed. It reads off the board, so it is never the same spell twice, and if there was nothing to sell the enemy is Poisoned anyway.',
@@ -1240,7 +1256,7 @@ Object.assign(STATUS, {
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 7% max HP and removes a debuff at the start of each of its turns.' },
   mixture:   { name: 'Mixture', icon: '🧪', type: 'buff', fixed: true, color: '#ffb23d', desc: 'The phial Malakai has mixed next. Venom Poisons, Sedative lowers ATK, Solvent lowers DEF and comes on the house.' },
-  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, it takes 15% less damage, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
+  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
   pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
 });
 Object.assign(ENEMIES, {
@@ -1282,7 +1298,7 @@ Object.assign(HEROES, {
     stats: { hp: 1340, atk: 122, def: 95, spd: 124, crit: 0.12, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#e8c4a4', hair: '#6b4426', hairStyle: 'parted', eye: '#5a3a20', body: 'coat', bodyColor: '#5a1a26', trim: '#e8b830', bg: '#3a2418', weapon: 'scroll', glasses: true, chain: true },
     passive: { name: 'Cold Counsel', desc: 'Deals 55% more damage to enemies whose turn has been delayed, or who are Stunned. He gives the orders a merciful king will not.' },
-    basic: { name: 'Sharp Word', icon: '🗯️', target: 'enemy', desc: '120% ATK to one enemy and its next turn comes 15% later.' },
+    basic: { name: 'Sharp Word', icon: '🗯️', target: 'enemy', desc: '135% ATK to one enemy and its next turn comes 20% later.' },
     skill: { name: 'Give the Order', icon: '☝️', cost: 0, target: 'ally', desc: 'Costs no SP, usable once every three turns. Another ally acts immediately with ATK +20% for that turn and gains 20% ultimate charge.' },
     ult: { name: 'The Hard Decision', icon: '⚖️', target: 'allEnemies', desc: 'Every enemy\'s next turn comes 40% later (20% for bosses), and they all lose 20% ATK for 2 turns. The enemy with the highest ATK is also Exposed, taking 50% more damage, for 2 turns.' } },
   kingsley: { id: 'kingsley', name: 'Kingsley', title: 'The Palace Bard', eras: ['current'], role: 'Bard', color: '#7ad06a',
@@ -1295,7 +1311,7 @@ Object.assign(HEROES, {
   vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',
     stats: { hp: 1360, atk: 124, def: 82, spd: 116, crit: 0.12, cdmg: 0.55, eva: 0.1 },
     look: { skin: '#e6c2a2', hair: '#6b4426', hairStyle: 'short', eye: '#141016', glowEye: '#ff2a3a', body: 'coat', bodyColor: '#5a1a6a', trim: '#f0c040', bg: '#24102e', weapon: 'cards', helm: 'jester' },
-    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, a card dealt for the whole team, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +15%, it takes 15% less damage, its hits heal him for 35% of the damage and tear through Shields at double rate, and it earns the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
+    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, a card dealt for the whole team, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +15%, its hits heal him for 35% of the damage and tear through Shields at double rate, and it earns the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
     basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 130% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
     skill: { name: 'Wild Card', icon: '🃏', cost: 2, target: 'allAllies', desc: 'He deals one card for the whole team and nobody knows which until it turns over. It costs two Skill Points, and the jester is the one who earns them, a point at a time on every basic. Hearts heals every ally 13% of their max HP. Spades gives every ally ATK +22% for 2 turns. Clubs gives every ally a Shield worth 14% of his max HP. Diamonds hands both points straight back and charges his own switch by 35%. Roughly one draw in ten is the Joker, which does all four at 45% strength.' },
     ult:   { name: 'Curtain Call', icon: '🎪', target: 'self', desc: 'He takes the mask off. The thing behind him comes out and brings its own three moves, and he acts again at once with the new kit in hand, so changing face costs him nothing but the charge. It charges 80% faster than other ultimates, so he is meant to keep swapping.' },
@@ -1304,7 +1320,7 @@ Object.assign(HEROES, {
     altWhen: 'vessel',
     alt: {
       basic: { name: 'Hellmark', icon: '🔥', target: 'enemy', desc: 'Brand one enemy for 115% ATK and Burn it for 2 turns.' },
-      skill: { name: 'Gift of the Pit', icon: '😈', cost: 1, target: 'allEnemies', desc: '82% ATK to every enemy, and every buff any of them holds is torn off. The Vessel already tears through Shields at double rate.' },
+      skill: { name: 'Gift of the Pit', icon: '😈', cost: 1, target: 'allEnemies', desc: '82% ATK to every enemy, and every buff any of them holds is torn off. The Vessel tears through Shields at double rate.' },
       ult:   { name: 'Nothing Left to Laugh At', icon: '🩸', target: 'self', desc: 'It has had enough and hands him back the room. The jester returns with his own three moves, and he acts again at once.' }
     } },
   aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',
@@ -1327,7 +1343,7 @@ Object.assign(BUILDS, {
     { id: 'warking', name: 'War King', icon: '⚔️', desc: 'Royal Decree grants ATK +30% but no SPD. Treasury only fires below 2 SP.', tags: { decreeAtk: 0.3, decreeSpd: 0.001, treasuryBelow: 2 } },
     { id: 'patron', name: 'Patron', icon: '💰', desc: 'Treasury fires below 4 SP. Shelter Shields drop to 10%. ATK -10%.', mods: { atk: -0.1 }, tags: { treasuryBelow: 4, shelter: 0.1 } }],
   ben: [BALANCED,
-    { id: 'schemer', name: 'Schemer', icon: '🕸️', desc: 'Sharp Word delays by 30% instead of 15%, but deals 80% ATK.', tags: { wordDelay: 0.3, wordMult: 0.8 } },
+    { id: 'schemer', name: 'Schemer', icon: '🕸️', desc: 'Sharp Word delays by 30% instead of 20%, but deals 80% ATK.', tags: { wordDelay: 0.3, wordMult: 0.8 } },
     { id: 'zealot', name: 'Zealous Aide', icon: '☝️', desc: 'Give the Order grants ATK +32% instead of 20%. Max HP -10%.', mods: { hp: -0.1 }, tags: { orderAtk: 0.32 } }],
   kingsley: [BALANCED,
     { id: 'virtuoso', name: 'Virtuoso', icon: '🎶', desc: 'Songs heal 9% instead of 7%, but trinkets are 30% weaker.', tags: { songHeal: 0.09, trinket: 0.7 } },
@@ -1360,7 +1376,7 @@ SYNERGIES.push(
     { id: 'blurred', era: 'second', name: 'The Blurred Duel', atk: 1.5, hp: 1.1, heroAtk: 1.6, heroHp: 5.2, enemies: ['h:alfred'], boss: true, reward: 'alfred',
       desc: 'A swordsman who sees in blurred lines and never keeps the same rhythm twice. Watch his tempo.' });
   STAGES.splice(at('gate') + 1, 0,
-    { id: 'kingtrial', era: 'current', name: 'The King\'s Trial', atk: 2.3, hp: 1.15, heroAtk: 1.0, heroHp: 2.6, enemies: ['sellsword', 'h:ethan', 'h:ben'], boss: true, reward: ['ethan', 'ben'],
+    { id: 'kingtrial', era: 'current', name: 'The King\'s Trial', atk: 1.75, hp: 1.15, heroAtk: 1.15, heroHp: 1.55, enemies: ['sellsword', 'h:ethan', 'h:ben'], boss: true, reward: ['ethan', 'ben'],
       desc: 'Before he grants shelter, King Ethan tests the strength of Yousuf\'s guard. His advisor gives the orders the king will not.' },
     { id: 'revels', era: 'current', name: 'The Palace Revels', atk: 2.0, hp: 1.1, heroAtk: 0.95, heroHp: 2.1, enemies: ['h:kingsley', 'h:vasco'], boss: true, reward: ['kingsley', 'vasco'],
       desc: 'A performance for the guests goes wrong. Push the jester too far and something darker looks out from behind his face.' },

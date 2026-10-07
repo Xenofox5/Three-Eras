@@ -285,6 +285,36 @@ const FX = {
     (d.tgts || []).slice(1).forEach(t => burst(P(t), { color: '#8a857c', n: 8 })); shakeArena(true);
   },
   hexsingle: async d => { SND.play('shield'); beam(P(d.src), P(d.tgt), { color: '#ffe066', width: 8, dur: 360 }); await W(160); const p = P(d.tgt); ring(p, { color: '#ffe066', size: p.w * 1.4, from: 0.4, to: 1.1, dur: 460, width: 6 }); burst(p, { color: '#fff3a0', n: 10, spread: 40 }); },
+  severmark: async d => {
+    const pt = P(d.tgt);
+    beam(P(d.src), pt, { color: '#c8b4ff', width: 3, dur: 260 });
+    await W(130);
+    // The scissors show above the target, once per mark, so two marks look like two.
+    for (let k = 0; k < Math.min(3, d.n || 1); k++) later(() => {
+      const c = fxEl('', { left: (pt.x - 9 + (k - (Math.min(3, d.n || 1) - 1) / 2) * 15) + 'px', top: (pt.y - pt.w * 0.42) + 'px',
+        width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '14px', filter: 'drop-shadow(0 0 6px #c8b4ff)' });
+      c.textContent = '\u2702';
+      anim(c, [{ transform: 'scale(.4) rotate(-25deg)', opacity: 0 }, { transform: 'scale(1.1) rotate(0)', opacity: 1, offset: 0.45 }, { transform: 'scale(.9) translateY(-8px)', opacity: 0 }], 480).then(() => c.remove());
+    }, k * 90);
+    ring(pt, { color: '#c8b4ff', size: pt.w * 0.9, from: 1, to: 0.7, dur: 320, width: 2 });
+    await W(170);
+  },
+  hiddenhand: async d => {
+    SND.play('whoosh');
+    const a = P(d.src), pt = P(d.tgt), top = Math.max(0, pt.y - pt.w * 0.55);
+    for (let k = 0; k < 3; k++) later(() => {
+      const str = fxEl('', { left: (pt.x + (k - 1) * (pt.w * 0.24)) + 'px', top: '0px', width: '2px', height: top + 'px',
+        background: 'linear-gradient(180deg,transparent,#c8b4ff)', boxShadow: '0 0 8px #c8b4ff', transformOrigin: '50% 0' });
+      anim(str, [{ transform: 'scaleY(0)', opacity: 0 }, { transform: 'scaleY(1)', opacity: 1, offset: 0.4 }, { transform: 'scaleY(1)', opacity: 0 }], 640).then(() => str.remove());
+    }, k * 70);
+    await W(240);
+    beam(a, pt, { color: '#c8b4ff', width: 4, dur: 320 });
+    ring(pt, { color: '#e8dcff', size: pt.w * 1.3, from: 0.4, to: 1.15, dur: 420, width: 4 });
+    burst(pt, { color: '#c8b4ff', n: 10, spread: 34, up: 24 });
+    ghost(d.tgt, 0, -16, 320, '#c8b4ff');
+    await W(260);
+  },
   sever: async d => { const p = P(d.tgt); for (let k = 0; k < Math.min(5, d.n || 1); k++) later(() => slashAt(p, { color: '#fff', angle: -60 + k * 30, len: p.w * 1.2, thick: 3, dur: 220 }), k * 50); burst(p, { color: '#e8dcff', n: 10, spread: 40 }); await W(160); },
   lastlight: d => { if (!live()) return; SND.play('shield'); const p = P(d.tgt); beam(P(d.src), p, { color: '#fff2a8', width: 6, dur: 360 }); ring(p, { color: '#fff2a8', size: p.w * 1.5, from: 0.3, to: 1.1, dur: 520, width: 5 }); burst(p, { color: '#fffbe0', n: 12, spread: 40, up: 30 }); },
   lash: d => melee(d, { color: '#ff6a2a', angle: -20, len: 1.6, thick: 5, extra: p => burst(p, { color: '#ff8a2a', n: 8, spread: 36 }) }),
