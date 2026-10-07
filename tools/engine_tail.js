@@ -3,6 +3,7 @@
  * big to pass to node -e. No browser and no dependencies: this is the headless engine only.
  */
 HOOK.headless = true;
+const nlOf = t => (t.includes("\r\n") ? "\r\n" : "\n");
 let pass = 0, fail = 0;
 const ok = (name, cond, detail) => { cond ? pass++ : fail++; console.log(`${cond ? 'PASS' : 'FAIL'}  ${name}${detail !== undefined ? '  (' + detail + ')' : ''}`); };
 // Flynn and Leo in place of Angus: the Angus + David pair grants a starting shield that would
@@ -300,6 +301,83 @@ const took = u => B.st[u.uid].taken;
   const named = HEROES.kingsley.skill.desc;
   ["Lantern", "Mirror Charm", "Bell", "Spark Box", "Loaded Dice"].forEach(n => pulls.add(named.includes(n)));
   ok("and all five are named in the description", !pulls.has(false));
+
+  // ---- H. Benjamin: the Skulls, the Wither, and the drain ----
+  setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
+  const hb = B.players[0], hbFoe = B.enemies[0], hbFoe2 = B.enemies[1];
+  ok("he starts with three Skulls", getSt(hb, "skulls").stacks === 3, getSt(hb, "skulls").stacks);
+  hb.mods.acc = 5;  // Grave Whisper can miss, and a missed flask Withers nothing: that is correct, not the thing under test.
+  await KIT.hbenjamin.basic(hb, hbFoe);
+  ok("Grave Whisper Withers", has(hbFoe, "withered"));
+  const hbHp = hbFoe.hp;
+  heal(hb, hbFoe, 500);
+  ok("a Withered enemy cannot be mended at all", hbFoe.hp === hbHp, `${hbHp} to ${hbFoe.hp}`);
+  // A killing blow spends a Skull rather than killing him, and he comes back off the floor.
+  hb.hp = 40;
+  applyDamage(hb, 9999, { src: hbFoe });
+  ok("a Skull is spent instead of dying", hb.hp > 1 && isUp(hb), `hp ${hb.hp}`);
+  ok("and the count drops", getSt(hb, "skulls").stacks === 2, getSt(hb, "skulls").stacks);
+  // Every enemy of his that falls hands one back.
+  removeStatus(hb, "skulls"); addStatus(hb, "skulls", 99, { stacks: 1, silent: true });
+  hbFoe2.flags.lastHitBy = hb; hbFoe2.hp = 0;
+  await processDeaths();
+  ok("a fallen enemy hands a Skull back", getSt(hb, "skulls").stacks === 2, getSt(hb, "skulls").stacks);
+  // With none left he dies like anyone else.
+  removeStatus(hb, "skulls");
+  hb.hp = 40; applyDamage(hb, 9999, { src: hbFoe });
+  ok("with no Skulls he falls", hb.hp === 0);
+
+  // ---- Ephraim: the meter is the health bar ----
+  setupBattle({ team: ["ephraim", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const ep = B.players[0];
+  const full = stat(ep, "atk");
+  ep.hp = Math.round(ep.maxHp * 0.5);
+  const half = stat(ep, "atk");
+  ok("half gone is a quarter more ATK", Math.abs(half / full - 1.25) < 0.02, (half / full).toFixed(3));
+  ep.hp = 1;
+  ok("almost gone is half again", stat(ep, "atk") / full > 1.45, (stat(ep, "atk") / full).toFixed(3));
+  ok("and below half nothing stuns him", !addStatus(ep, "stun", 1));
+  ep.hp = ep.maxHp;
+  ok("at full health he can be stunned like anyone", addStatus(ep, "stun", 1));
+
+  // ---- Isaac: invisibility he spends, not invisibility he holds ----
+  setupBattle({ team: ["isaac", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const is = B.players[0], isFoe = B.enemies[0];
+  ok("he starts out of sight", has(is, "hidden"));
+  ok("and cannot be aimed at", unseen(is, isFoe));
+  await KIT.isaac.basic(is, isFoe);
+  ok("striking gives him away", !has(is, "hidden"));
+  ok("so now he can be aimed at", !unseen(is, isFoe));
+  B.sp = 5; is.flags.skillCd = 0;
+  await KIT.isaac.skill(is);
+  ok("Slipping Away puts him back", has(is, "hidden"));
+  ok("and marks the hardest hitter", has(isFoe, "exposed"));
+  is.flags.skillCd = 2;
+  ok("he cannot vanish twice running", !canUse(is, "skill"));
+
+  // ---- the Balanced build has to get the default, not zero ----
+  setupBattle({ team: ["isaac", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  ok("Balanced Isaac gets his ambush bonus", (bt(B.players[0], "ambush") || 0.5) === 0.5, bt(B.players[0], "ambush") || 0.5);
+  setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  ok("Balanced Benjamin drains in full", (bt(B.players[0], "drawSteal") || 1) === 1, bt(B.players[0], "drawSteal") || 1);
+  // No default anywhere may be written with ?? against bt, because bt never returns undefined.
+  const engineSrc = require("fs").readFileSync("engine.js", "utf8");
+  const btQQ = engineSrc.split(nlOf(engineSrc)).filter(l => l.includes("bt(") && l.includes("??"));
+  ok("no bt default is written with ??", btQQ.length === 0, btQQ.join(" | ").slice(0, 140));
+
+  // Every new hero has to be reachable, priced and described.
+  ["hbenjamin", "ephraim", "isaac"].forEach(id => {
+    ok(`${id} is in the roster`, HERO_ORDER.includes(id));
+    ok(`${id} unlocks from a stage`, !!UNLOCK_FROM[id], UNLOCK_FROM[id]);
+    ok(`${id} has two builds beside balanced`, (BUILDS[id] || []).length === 3, (BUILDS[id] || []).length);
+    const h = HEROES[id];
+    ok(`${id} has all four descriptions`, !!(h.passive.desc && h.basic.desc && h.skill.desc && h.ult.desc));
+    ok(`${id} previews all three moves`, ["basic", "skill", "ult"].every(k => {
+      setupBattle({ team: [id, "flynn", "leo"], enemies: [{ id: "brute" }] });
+      const r = previewFor(B.players[0], k, B.enemies[0]);
+      return r && (r.dmg !== undefined || r.txt !== undefined || r.heal !== undefined);
+    }));
+  });
 
 console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);

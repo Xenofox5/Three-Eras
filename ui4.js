@@ -3,6 +3,9 @@ const BIO = {
   angus: 'A swordsman who is very hard to bring down. An aura surrounds him wherever he stands.',
   flynn: 'An electricity user of the First Era.',
   leo: 'Fights by blasting beams of fire.',
+  hbenjamin: 'The oldest name in the record, and the only one with nothing written before it. A skeletal thing in a robe with skulls drifting at his hands, who found a way to keep going long before the First Era had a name for itself. Whatever he did to himself is where the near-immortality of Harry and Yunze comes from: he lent it out, and neither of them has given it back.',
+  ephraim: 'A short brawler from the First Era who fights with his hands and nothing else. Black hair, black eyes, and a habit of getting worse to deal with the more of him you take off. He latches on and does not let go, which is how he got the name.',
+  isaac: 'The fastest thing in the Current Era and the hardest to look at directly. He watches from roofs and doorways and takes what he sees down to the basement, where Aamay writes it into the Chronicle. Wild black hair, black eyes, and no interest at all in being thanked for it.',
   harry: 'A wanderer few people know exists, almost never seen fighting. His real strength is force: he crushes people from the inside at a distance. Present in all three eras. In the Second Era he defeated The Chosen and killed Elphi.',
   chosen: 'A hero known mostly through myth. Fights gracefully with a lance and is masked at all times. Disappeared soon after losing to Harry.',
   elphi: 'One of the most powerful fighters of the Second Era, with a sword made of light. He defeated Yunze. He was protecting something when Harry came for him.',
@@ -411,6 +414,7 @@ function statusLine(st, u) {
   if (st.key === 'pages') desc = `${st.stacks} of ${u ? pageCap(u) : '?'} Pages. The Last Page spends them all: ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.15) : 0.15) * 100)}% ATK to every enemy right now.`;
   if (st.key === 'vengeance') desc = `${st.stacks} stored. Next Spear Thrust: +${st.stacks * 12}% damage and heals ${st.stacks * 2}% max HP.`;
   if (st.key === 'mixture') desc = ['Venom: the next flask Poisons for 2 turns.', 'Sedative: the next flask lowers ATK by 22%.', 'Solvent: the next flask lowers DEF by 22%, splashes every other enemy for 55% ATK, and pays the team a Skill Point.'][st.value || 0];
+  if (st.key === 'skulls') desc = `${st.stacks} of ${u ? skullMax(u) : 5} left. A blow that would kill him spends one and leaves him on 1 HP, mending ${Math.round((u ? (bt(u, 'skullMend') || 0.12) : 0.12) * 100)}% of his max HP. With none left he dies like anyone else.`;
   if (st.key === 'hunted') desc = `Takes ${pctTxt(st.value || 0.25)} more damage from the Yunze who marked it.`;
   const extra = [];
   if (d.max && st.stacks > 1) extra.push(`×${st.stacks}`);

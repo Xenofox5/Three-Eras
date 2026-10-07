@@ -315,6 +315,81 @@ const FX = {
     ghost(d.tgt, 0, -16, 320, '#c8b4ff');
     await W(260);
   },
+  // H. Benjamin: a skull goes out and the target withers where it lands.
+  whisper: async d => {
+    SND.play('whoosh');
+    const b = P(d.tgt);
+    await projectile(P(d.src), b, { color: '#8fd6b4', size: 16, dur: 260 });
+    ring(b, { color: '#8fd6b4', size: b.w * 1.2, from: 0.4, to: 1.1, dur: 420, width: 3 });
+    burst(b, { color: '#dcd6c4', n: 10, spread: 38 });
+  },
+  marrow: async d => {
+    SND.play('hit');
+    const a = P(d.src), b = P(d.tgt);
+    // The beam runs the wrong way on purpose: it is taking, not giving.
+    await beam(b, a, { color: '#8fd6b4', width: 9, dur: 420 });
+    burst(b, { color: '#6a8a74', n: 14, spread: 46 });
+    ring(a, { color: '#b8e0c8', size: a.w * 1.2, from: 1.1, to: 0.6, dur: 420, width: 4 });
+  },
+  skullspend: d => {
+    if (!live()) return;
+    SND.play('break');
+    const p = P(d.tgt);
+    ring(p, { color: '#b8e0c8', size: p.w * 1.6, from: 1.3, to: 0.5, dur: 480, width: 6 });
+    burst(p, { color: '#e8e4d2', n: 18, spread: 60, size: 8 });
+  },
+  secondbreath: async d => {
+    SND.play('ult'); flash('#0e2a20', 0.4, 520);
+    const a = P(d.src);
+    ring(a, { color: '#8fd6b4', size: 240, from: 0.2, to: 1.9, dur: 620, width: 7 });
+    await W(300);
+    allP(d).forEach(p => { ring(p, { color: '#b8e0c8', size: p.w * 1.3, width: 4, dur: 460 }); burst(p, { color: '#e8e4d2', n: 10, spread: 40, up: 26 }); });
+    await W(240);
+  },
+  // Ephraim: short, flat, repeated. No reach and no flourish.
+  knuckle: d => melee(d, { color: '#e0a060', angle: 6 + ((d.i || 0) % 2) * -14, len: 0.9, thick: 9, sfx: 'crush',
+    extra: p => burst(p, { color: '#ffd0a0', n: 7, spread: 26 }) }),
+  seize: async d => {
+    SND.play('crush');
+    const p = P(d.tgt);
+    lungeIn(d.src, d.tgt);
+    await W(160);
+    // Two jaws closing on it rather than a cut across it.
+    slashAt(p, { color: '#fff', angle: -70, len: p.w * 0.9, thick: 7, dur: 300 });
+    slashAt(p, { color: '#fff', angle: 70, len: p.w * 0.9, thick: 7, dur: 300 });
+    burst(p, { color: '#e0603a', n: 14, spread: 44 });
+    shakeArena(false);
+    await W(200);
+  },
+  wontlet: async d => { SND.play('ult'); flash('#3a1008', 0.35, 420); ghost(d.src, 0, 0, 320, '#e0603a'); shakeArena(true); await W(240); },
+  // Isaac: he is only visible in the instant he commits to something.
+  quickword: async d => {
+    SND.play('whoosh');
+    const a = P(d.src), b = P(d.tgt);
+    ghost(d.src, (b.x - a.x) * 0.5, (b.y - a.y) * 0.5, 280, '#4fd1c5');
+    await W(120);
+    slashAt(b, { color: '#d8fffb', angle: -24, len: b.w * 1.1, thick: 4, dur: 240 });
+    burst(b, { color: '#4fd1c5', n: 9, spread: 32 });
+    await W(120);
+  },
+  slipaway: async d => {
+    SND.play('whoosh');
+    const a = P(d.src);
+    ghost(d.src, 0, 0, 420, '#4fd1c5');
+    for (let k = 0; k < 3; k++) later(() => ring(a, { color: '#4fd1c5', size: a.w * (1.4 - k * 0.3), from: 1, to: 0.3, dur: 420, width: 3 }), k * 90);
+    burst(a, { color: '#bff0ea', n: 12, spread: 44, up: 18 });
+    await W(280);
+  },
+  everything: async d => {
+    SND.play('ult'); flash('#07201e', 0.4, 480);
+    const a = P(d.src);
+    // The report goes out to everyone at once, then the knife lands on one of them.
+    for (const t of (d.tgts || [])) { const p = P(t); later(() => { beam(a, p, { color: '#4fd1c5', width: 5, dur: 360 }); ring(p, { color: '#d8fffb', size: p.w * 1.25, width: 4, dur: 420 }); }, 60); }
+    await W(360);
+    (d.tgts || []).forEach(t => burst(P(t), { color: '#4fd1c5', n: 9, spread: 36 }));
+    shakeArena(false);
+    await W(240);
+  },
   sever: async d => { const p = P(d.tgt); for (let k = 0; k < Math.min(5, d.n || 1); k++) later(() => slashAt(p, { color: '#fff', angle: -60 + k * 30, len: p.w * 1.2, thick: 3, dur: 220 }), k * 50); burst(p, { color: '#e8dcff', n: 10, spread: 40 }); await W(160); },
   lastlight: d => { if (!live()) return; SND.play('shield'); const p = P(d.tgt); beam(P(d.src), p, { color: '#fff2a8', width: 6, dur: 360 }); ring(p, { color: '#fff2a8', size: p.w * 1.5, from: 0.3, to: 1.1, dur: 520, width: 5 }); burst(p, { color: '#fffbe0', n: 12, spread: 40, up: 30 }); },
   lash: d => melee(d, { color: '#ff6a2a', angle: -20, len: 1.6, thick: 5, extra: p => burst(p, { color: '#ff8a2a', n: 8, spread: 36 }) }),

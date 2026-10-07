@@ -547,7 +547,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.16';
+const GAME_VERSION = '0.5.0';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -616,6 +616,21 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.5.0', d: '2026-10-07', date: 'Three new heroes', changes: [
+    { t: 'new', kind: 'hero', who: 'hbenjamin', what: 'H. Benjamin, The Oldest Name', text: 'A necromancer from before the First Era had a name for itself. He holds Skulls: a blow that would kill him spends one instead and leaves him standing, and every enemy that falls hands one back. What he marks cannot be healed at all.', from: '24 heroes', to: '27' },
+    { t: 'new', kind: 'hero', who: 'ephraim', what: 'Ephraim, The Pitbull', text: 'A First Era brawler who fights with his hands. The more of him is gone the harder he bites: +1% ATK for every 2% of max HP missing, and below half health nothing can stun him.', from: '24 heroes', to: '27' },
+    { t: 'new', kind: 'hero', who: 'isaac', what: 'Isaac, The Watcher', text: 'The Current Era observer who feeds the Chronicle. Invisibility he spends rather than holds: unseen until he strikes, and the strike out of sight hits 30% harder and always crits.', from: '24 heroes', to: '27' },
+    { t: 'new', kind: 'stage', who: 'kennels', text: 'The Kennels, a First Era stage that unlocks Ephraim', from: '31 stages', to: '34' },
+    { t: 'new', kind: 'stage', who: 'oldestgrave', text: 'The Oldest Grave, a First Era stage that unlocks H. Benjamin', from: '31 stages', to: '34' },
+    { t: 'new', kind: 'stage', who: 'rooftops', text: 'The Rooftops, a Current Era stage that unlocks Isaac', from: '31 stages', to: '34' },
+    { t: 'new', kind: 'system', who: 'Team bonuses', text: 'Three more: The Oldest Debt (H. Benjamin with Harry or Yunze), The Basement Report (Isaac with Aamay) and Off the Chain (Ephraim with Peguicha or Trigg)', from: '', to: '' },
+    { t: 'rework', kind: 'system', who: 'Healing', text: 'Every heal that also cleanses now cleanses first', from: 'healed, then removed the debuff', to: 'removes the debuff, then heals', note: 'It never mattered while Mended was the only debuff touching healing, because that one merely reduces it. Withered blocks healing outright, which showed that Yousuf, Kingsley and Malakai were each removing the thing that had just stopped the heal they had already spent.' },
+    { t: 'nerf', kind: 'hero', who: 'hbenjamin', what: 'His boss version', text: 'Skulls and how long his mark lasts, as a boss only', from: 'the same as the hero: up to 5 Skulls and a 3 turn mark', to: '2 Skulls and a 1 turn mark', note: 'At three times health the extra lives were doubled up and a permanent heal block left the player with no healer at all. The stage was 0% against all four test teams.' },
+    { t: 'rework', kind: 'system', who: 'Build defaults', text: 'Two new abilities read their default with ?? instead of ||, and bt() returns 0 for a tag a build does not set rather than undefined', from: 'on the Balanced build the default evaluated to zero', to: 'the default applies', note: 'It cost Balanced Isaac his entire ambush bonus and Balanced H. Benjamin his entire drain, and it hid itself: raising either number three times moved nothing, because the number was never being read. Found by the build table refusing to move. Isaac measured 69.8 once it worked and has been cut to 54.1. npm run test:engine now fails on any bt default written with ??.' },
+    { t: 'nerf', kind: 'hero', who: 'isaac', what: 'Quick Word, the ambush and Everything He Saw', text: 'Damage, once the ambush actually applied', from: '130% / 50% / 270%', to: '110% / 30% / 220% ATK', note: 'Composite 69.8 to 54.1.' },
+    { t: 'adjust', kind: 'hero', who: 'isaac', what: 'Ghostwalk', text: 'What it pays with', from: 'max HP', to: 'Slipping Away no longer Exposes anyone', note: 'Max HP is not a price for a hero nothing can aim at, which is why it measured 22 points above Balanced while supposedly paying 20% of it. It gives up the team utility instead: 52% ambush against 30%, and nobody gets marked.' },
+    { t: 'adjust', kind: 'hero', who: 'hbenjamin', what: 'Gravekeeper', text: 'What it starts with', from: '5 Skulls, 18% mend, no cost', to: '4 Skulls, 15% mend, max HP -8%', note: 'It measured 14 points above his other two.' }
+  ] },
   { v: '0.4.16', d: '2026-10-07', date: 'Lachlan\u2019s wall, the King\u2019s Trial, and two animations Seraphine never had', changes: [
     { t: 'nerf', kind: 'hero', who: 'lachlan', what: 'Azure Shield', text: 'Cap and regeneration', from: '30% max HP, 6% back each turn', to: '25% max HP, 5% back each turn', note: 'Aegis 44% and 8.5% to 38% and 7%, Orbcaster 25% to 20%. He soaked more than anyone on the table.' },
     { t: 'nerf', kind: 'hero', who: 'lachlan', what: 'Azure Nova', text: 'What it gives back', from: 'the Shield filled all the way up', to: 'half a wall, 12.5% of his max HP', note: 'The ultimate handed the whole wall back, so there was never a window where the Shield was down. Composite 51.3 to 44.8, falls 52 to 59, and his duel rate drops from 88 at the top of the table to 69. Two runs read 45.6 and 44.8, so he now sits on the bottom edge of the band, which is the point of the pass.' },
@@ -1014,6 +1029,15 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.5.0', d: '2026-10-07', items: [
+    'Three new heroes, which is the only kind of work that moves the middle number. The roster is 27 and the campaign is 34 stages.',
+    'H. Benjamin, The Oldest Name. A skeletal necromancer with skulls drifting at his hands, older than anything else in the record, and the reason Harry and Yunze are as hard to kill as they are: he lent it out. He holds Skulls, and a blow that would kill him spends one instead and leaves him standing on a sliver, mending as it goes. Every enemy that falls hands one back, and with none left he dies like anyone else. What he marks is Withered and cannot be healed at all, which is the first thing in the game that closes healing rather than reducing it.',
+    'Ephraim, The Pitbull. A short First Era brawler who fights with his hands and gets worse to deal with the more of him you take off: +1% ATK for every 2% of his max HP that is missing, so half again on his last point. Below half health nothing can stun him, and everything he puts down mends him. His health bar is the meter, so there is nothing to count and nothing he can lose by being hit.',
+    'Isaac, The Watcher. The fastest hero in the game, and the one who feeds Aamay. His invisibility is spent rather than held: he starts out of sight, nothing can aim at him while he is there, and striking gives him away. The blow he lands out of sight hits 30% harder and always crits, and Slipping Away puts him back out of sight every other turn while telling the team where the hardest hitter is. Put him with Aamay and the Chronicle fills twice as fast.',
+    'Three stages to unlock them from: The Kennels and The Oldest Grave in the First Era, and The Rooftops in the Current Era. H. Benjamin sits in the First Era as its oldest figure rather than in an era of his own, because there is barely anyone back there with him.',
+    'Two bugs came out of building these three. The first: every new ability that read a default with ?? was getting zero on the Balanced build, because the helper that reads build tags returns 0 for a tag the build does not set, not nothing. Balanced Isaac had no ambush bonus at all and Balanced H. Benjamin drained nothing, and it hid itself well: the numbers were raised three times and the build table never moved, because nothing was reading them. The test suite now fails on it.',
+    'The second. Every heal in the game that also cleanses was healing first and cleansing second. It had never mattered, because Mended was the only debuff that touched healing and it merely reduces it. Withered blocks healing outright, and suddenly Yousuf, Kingsley and Malakai were each removing the thing that had stopped the heal they had already spent. They all cleanse first now.'
+  ] },
   { v: '0.4.16', d: '2026-10-07', items: [
     'Lachlan can be broken through now. The Azure Shield caps at 25% instead of 30% and comes back 5% a turn instead of 6%, and Azure Nova restores half a wall rather than filling it all the way up. Refilling it completely meant there was never a moment when the Shield was actually down. He went from soaking more than anyone on the table to the bottom edge of the band, and his duel rate fell from 88, the highest in the game, to 69.',
     'The King\u2019s Trial was unwinnable for most teams, and not for the reason it looked. Ethan and Ben are both support heroes, so at 2.6 times health they could not be killed quickly and could not kill either: the fight ran past turn 150 into sudden death, which raises damage and halves healing, and that finished the heroes rather than the bosses. Three of the four test teams were averaging 190 to 240 turns and losing. They now have less health and hit a little harder, and the sellsword with them is no longer swinging at 2.3 times attack.',
@@ -1182,8 +1206,8 @@ Object.assign(HEROES, {
     id: 'seraphine', name: 'Seraphine', title: 'The Hand Behind the Myth', eras: ['second'], role: 'Bladecaller', color: '#f0e6ff',
     stats: { hp: 1400, atk: 136, def: 80, spd: 120, crit: 0.14, cdmg: 0.55, eva: 0.12, acc: 0.05 },
     look: { skin: '#f0d6c8', hair: '#2a1a3a', hairStyle: 'long', eye: '#f0e6ff', body: 'robe', bodyColor: '#e8e2f2', trim: '#b89cff', bg: '#241a38', weapon: 'halos', helm: 'mask' },
-    passive: { name: 'Behind the Scenes', desc: 'She works from the wings, slipping out of view on every third turn of hers: enemies cannot aim single-target attacks at her until her next turn, though attacks on the whole team still land. After each of her actions both halos keep cutting on their own: 2 strikes of 35% ATK on random enemies. Every cut leaves a Severance mark, which does nothing on its own and only pays off when Halo Storm detonates it. The Chosen secretly obeys her.' },
-    basic: { name: 'Halo Cut', icon: '⭕', target: 'enemy', desc: 'Send a halo through one enemy for 110% ATK, leaving a Severance mark. Marks stack up to 5 on the same enemy.' },
+    passive: { name: 'Behind the Scenes', desc: 'She works from the wings, slipping out of view on every third turn of hers: enemies cannot aim single-target attacks at her until her next turn, though attacks on the whole team still land. After each of her actions both halos keep cutting on their own: 2 strikes of 28% ATK on random enemies. Every cut leaves a Severance mark, which does nothing on its own and only pays off when Halo Storm detonates it. The Chosen secretly obeys her.' },
+    basic: { name: 'Halo Cut', icon: '⭕', target: 'enemy', desc: 'Send a halo through one enemy for 100% ATK, leaving a Severance mark. Marks stack up to 5 on the same enemy.' },
     skill: { name: 'Orbiting Blades', icon: '🌀', cost: 1, target: 'enemy', desc: 'Both halos circle an enemy: 80% ATK and 2 Severance marks now, then it is Encircled for 2 turns (60% ATK cut at the start of each of its turns, SPD -15%).' },
     ult:   { name: 'Halo Storm', icon: '💫', target: 'allEnemies', desc: '8 cuts of 45% ATK across all enemies, favouring Encircled ones. Then every Severance mark on every enemy detonates at once for 30% ATK per mark, and the marks are spent. If The Chosen fights beside her, The Chosen takes her turn immediately.' }
   }
@@ -1203,8 +1227,8 @@ BUILDS.soham = [BALANCED,
   { id: 'monolith', name: 'Monolith', icon: '🧱', desc: 'A single Hex Shield is worth 40% of his max HP and lasts 4 hits. The team wall drops to 8% each.', tags: { singleHex: 0.4, singleHits: 4, teamHex: 0.08 } },
   { id: 'breaker', name: 'Hex Breaker', icon: '💥', desc: 'Hex Shields are 25% weaker, but whenever one shatters or runs out it explodes for 65% ATK to every enemy.', tags: { hexMult: 0.75, hexBlast: 0.65 } }];
 BUILDS.seraphine = [BALANCED,
-  { id: 'puppeteer', name: 'Puppeteer', icon: '🎭', desc: 'Halo Storm hands a turn to The Chosen, or to the ally with the highest ATK if she is absent. Halo cuts deal 28% instead of 35%.', tags: { anyPuppet: 1, haloMult: 0.28 } },
-  { id: 'twinedge', name: 'Twin Edge', icon: '⭕', desc: 'Halo cuts deal 46% ATK instead of 35%. Max HP -10%.', mods: { hp: -0.1 }, tags: { haloMult: 0.46 } }];
+  { id: 'puppeteer', name: 'Puppeteer', icon: '🎭', desc: 'Halo Storm hands a turn to The Chosen, or to the ally with the highest ATK if she is absent. Halo cuts deal 22% instead of 28%.', tags: { anyPuppet: 1, haloMult: 0.22 } },
+  { id: 'twinedge', name: 'Twin Edge', icon: '⭕', desc: 'Halo cuts deal 38% ATK instead of 28%. Max HP -10%.', mods: { hp: -0.1 }, tags: { haloMult: 0.38 } }];
 
 SYNERGIES.push(
   { id: 'pact', name: 'Infernal Pact', icon: '😈', color: '#d1203a',
@@ -1255,6 +1279,8 @@ Object.assign(STATUS, {
   framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +15% crit chance.' },
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 7% max HP and removes a debuff at the start of each of its turns.' },
+  withered:  { name: 'Withered', icon: '🥀', type: 'debuff', color: '#8fd6b4', desc: 'Marked by H. Benjamin. It cannot be healed at all while this lasts, and it takes 20% more damage from him.' },
+  skulls:    { name: 'Skulls', icon: '💀', type: 'buff', fixed: true, max: 5, color: '#b8e0c8', desc: 'The skulls at his hands. A blow that would kill him spends one instead and leaves him on 1 HP, and he mends as it goes. Every enemy that falls hands one back.' },
   mixture:   { name: 'Mixture', icon: '🧪', type: 'buff', fixed: true, color: '#ffb23d', desc: 'The phial Malakai has mixed next. Venom Poisons, Sedative lowers ATK, Solvent lowers DEF and comes on the house.' },
   vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
   pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
@@ -1331,7 +1357,64 @@ Object.assign(HEROES, {
     skill: { name: 'Seal in Ink', icon: '📕', cost: 1, target: 'enemy', desc: '55% ATK, then the target is Silenced for 2 turns (bosses 1) and loses 30% SPD and 20% ATK for 3 turns. Silenced heroes cannot use skills or ultimates; monsters only use their basic attack.' },
     ult: { name: 'The Last Page', icon: '📖', target: 'allEnemies', desc: 'He reads the Chronicle aloud and spends every Page at once. Each Page is 15% ATK to every enemy, so 10 Pages is 150% ATK and a full Chronicle of 20 is 300%. The badge on his card shows how many he is holding, and the number shown when you aim is what it will deal right now. Then every enemy is Silenced for 1 turn and the Chronicle is empty again. It charges 40% slower than other ultimates, so there is time to fill it.' } }
 });
-HERO_ORDER.splice(0, HERO_ORDER.length, 'angus', 'flynn', 'leo', 'harry', 'peguicha', 'vehra', 'soham', 'trigg', 'chosen', 'elphi', 'daniel', 'yunze', 'malakai', 'seraphine', 'alfred', 'lachlan', 'yousuf', 'gemia', 'david', 'ethan', 'ben', 'kingsley', 'vasco', 'aamay');
+/* ================= v0.5.0: the oldest name, the brawler and the watcher ================= */
+Object.assign(HEROES, {
+  hbenjamin: { id: 'hbenjamin', name: 'H. Benjamin', title: 'The Oldest Name', eras: ['first'], role: 'Necromancer', color: '#8fd6b4',
+    stats: { hp: 1250, atk: 118, def: 78, spd: 94, crit: 0.08, cdmg: 0.5 },
+    look: { skin: '#dcd6c4', hair: '#1a1a1a', hairStyle: 'bald', eye: '#6fe0b0', glowEye: '#6fe0b0', body: 'robe', bodyColor: '#12161c', trim: '#8fd6b4', bg: '#08100e', weapon: 'skulls', gaunt: true, cloak: true, beard: true },
+    passive: { name: 'The Oldest Bargain', desc: 'He starts with 3 Skulls and can hold 5. A blow that would kill him spends a Skull instead: he is left standing on 1 HP and mends 10% of his max HP. Every enemy that falls hands a Skull back. With no Skulls left he dies like anyone else.' },
+    basic: { name: 'Grave Whisper', icon: '🦴', target: 'enemy', desc: 'Deal 105% ATK to one enemy and Wither it for 2 turns: it cannot be healed at all, and it takes 20% more damage from him.' },
+    skill: { name: 'Marrow Draw', icon: '💀', cost: 1, target: 'enemy', desc: 'Deal 115% ATK and take half the damage back as his own health. Against an enemy that is already Withered he takes all of it. The target is Withered for 2 turns either way.' },
+    ult: { name: 'The Second Breath', icon: '🕯', target: 'allAllies', desc: 'He lends out what he gave Harry and Yunze. For 2 turns every ally is Unbreakable and cannot fall below 1 HP, he takes 3 Skulls back, and every enemy is Withered for 3 turns, so nothing on their side can be mended while it lasts.' } },
+  ephraim: { id: 'ephraim', name: 'Ephraim', title: 'The Pitbull', eras: ['first'], role: 'Brawler', color: '#e0603a',
+    stats: { hp: 1600, atk: 126, def: 104, spd: 104, crit: 0.1, cdmg: 0.55, eva: 0.04 },
+    look: { skin: '#cf9460', hair: '#101014', hairStyle: 'wild', eye: '#101014', body: 'armour', bodyColor: '#6a3c24', trim: '#e0a060', bg: '#381610', weapon: 'knuckles', scars: true, brow: 'firm', bandana: true },
+    passive: { name: 'Pitbull', desc: 'The more of him is gone the harder he bites: +1% ATK for every 2% of his max HP that is missing, so +50% on his last point. Below half health he cannot be Stunned at all, and every enemy he puts down mends him 6% of his max HP.' },
+    basic: { name: 'Knuckle Down', icon: '🥊', target: 'enemy', desc: '3 hits of 48% ATK on one enemy. He fights too close to miss, so they always land.' },
+    skill: { name: 'Seize', icon: '🦷', cost: 1, target: 'enemy', desc: 'He bites down and will not let go: 135% ATK, the target Bleeds for 3 turns, and he Taunts every enemy for 2 turns with DEF +20%.' },
+    ult: { name: 'Won\u2019t Let Go', icon: '🩸', target: 'enemy', desc: '6 punches of 68% ATK, which always land and each mend him 3% of his max HP. If the target goes down early the rest land on whoever is next.' } },
+  isaac: { id: 'isaac', name: 'Isaac', title: 'The Watcher', eras: ['current'], role: 'Scout', color: '#4fd1c5',
+    stats: { hp: 1180, atk: 124, def: 76, spd: 132, crit: 0.16, cdmg: 0.55, eva: 0.14, acc: 0.06 },
+    look: { skin: '#dfb189', hair: '#0c0c10', hairStyle: 'wild', eye: '#0c0c10', body: 'coat', bodyColor: '#152626', trim: '#4fd1c5', bg: '#071414', weapon: 'glass', cloak: true, young: true },
+    passive: { name: 'Never Seen Coming', desc: 'He starts the battle out of sight, and while he is there enemies cannot aim single-target attacks at him at all; attacks on the whole team still reach him. Striking gives him away. Every blow he lands out of sight deals 30% more damage and is always a critical.' },
+    basic: { name: 'Quick Word', icon: '🗡', target: 'enemy', desc: '110% ATK to one enemy. Out of sight it cannot fail to crit, and landing it gives him away.' },
+    skill: { name: 'Slipping Away', icon: '🌫', cost: 1, target: 'self', desc: 'No attack. He steps out of sight again and gains SPD +30% for 2 turns, and he passes on what he has seen: the enemy with the highest ATK is Exposed, taking 50% more damage, for 2 turns. He can only do this every other turn.' },
+    ult: { name: 'Everything He Saw', icon: '📜', target: 'allEnemies', desc: 'He delivers the lot. Every enemy is Exposed for 2 turns, every ally gains Crit Up +20% for 2 turns, and he puts 220% ATK into the enemy with the highest ATK without being seen to do it. Then he is out of sight again.' } }
+});
+BUILDS.hbenjamin = [BALANCED,
+  { id: 'gravekeeper', name: 'Gravekeeper', icon: '🪦', desc: 'He starts with 4 Skulls and mends 15% when one is spent, but Marrow Draw only ever takes half the damage back and his max HP drops 14%.', mods: { hp: -0.14 }, tags: { skullStart: 4, skullMend: 0.15, drawSteal: 0.5 } },
+  { id: 'plaguebearer', name: 'Plaguebearer', icon: '🧫', desc: 'Grave Whisper Withers every enemy instead of one, but it deals 82% ATK.', tags: { witherAll: 1, whisperMult: 0.82 } }];
+BUILDS.ephraim = [BALANCED,
+  { id: 'mongrel', name: 'Mongrel', icon: '🐕', desc: 'The ATK he gains doubles to +1% for every 1% of max HP missing, so +100% on his last point. DEF -18%.', mods: { def: -0.18 }, tags: { rageRate: 1.0 } },
+  { id: 'ironjaw', name: 'Iron Jaw', icon: '🦴', desc: 'Seize Taunts for 3 turns and gives DEF +35%, but Knuckle Down drops to 3 hits of 40%.', tags: { tauntTurns: 3, seizeDef: 0.35, knuckle: 0.4 } }];
+BUILDS.isaac = [BALANCED,
+  { id: 'courier', name: 'Courier', icon: '✉️', desc: 'Slipping Away also gives every other ally SPD +10%, but out of sight he only hits 15% harder instead of 30%.', tags: { courier: 1, ambush: 0.15 } },
+  { id: 'ghostwalk', name: 'Ghostwalk', icon: '🌫', desc: 'Out of sight he hits 52% harder instead of 30%, but Slipping Away no longer Exposes anyone: he keeps what he sees to himself.', tags: { ambush: 0.52, noMark: 1 } }];
+SYNERGIES.push(
+  { id: 'oldestdebt', name: 'The Oldest Debt', icon: '💀', color: '#8fd6b4', desc: 'H. Benjamin with Harry or Yunze. He starts with all 5 Skulls, and Yunze is lent the same one-time refusal to die that Harry already has.',
+    test: t => t.includes('hbenjamin') && (t.includes('harry') || t.includes('yunze')),
+    apply: P => P.forEach(p => { if (p.id === 'hbenjamin') p.flags.skullStart = 5; if (p.id === 'yunze') p.flags.oldestDebt = true; }) },
+  { id: 'report', name: 'The Basement Report', icon: '📖', color: '#4fd1c5', desc: 'Isaac and Aamay. Isaac watches and Aamay writes it down, so every enemy action adds 2 Pages to the Chronicle instead of 1.',
+    test: t => t.includes('isaac') && t.includes('aamay'),
+    apply: P => P.forEach(p => { if (p.id === 'aamay') p.flags.report = true; }) },
+  { id: 'kennel', name: 'Off the Chain', icon: '🥊', color: '#e0603a', desc: 'Ephraim with Peguicha or Trigg. Ephraim gains DEF +20% and mends 10% of his max HP on a kill instead of 6%.',
+    test: t => t.includes('ephraim') && (t.includes('peguicha') || t.includes('trigg')),
+    apply: P => P.forEach(p => { if (p.id === 'ephraim') { p.mods.def += 0.2; p.flags.kennel = true; } }) }
+);
+(() => {
+  const at = id => STAGES.findIndex(s => s.id === id);
+  STAGES.splice(at('hexwall') + 1, 0,
+    { id: 'kennels', era: 'first', name: 'The Kennels', atk: 1.65, hp: 1.1, heroAtk: 1.1, heroHp: 2.3, enemies: ['wolf', 'h:ephraim', 'wolf'], boss: true, reward: 'ephraim',
+      desc: 'A short man in a bandana who fights with his hands between two of Peguicha\u2019s wolves. The more you hurt him the harder he hits, so finish him or do not start.' });
+  STAGES.splice(at('kennels') + 1, 0,
+    { id: 'oldestgrave', era: 'first', name: 'The Oldest Grave', atk: 1.8, hp: 0.9, heroAtk: 1.0, heroHp: 2.0, enemies: ['wisp', 'h:hbenjamin', 'golem'], boss: true, reward: 'hbenjamin',
+      desc: 'Older than anything else in the record. He cannot be mended once he has marked you, and he will not go down while a skull is still at his hand.' });
+  STAGES.splice(at('archive') + 1, 0,
+    { id: 'rooftops', era: 'current', name: 'The Rooftops', atk: 2.4, hp: 1.05, heroAtk: 1.5, heroHp: 3.4, enemies: ['h:isaac', 'crossbow'], boss: true, reward: 'isaac',
+      desc: 'Someone has been watching the palace and reporting it to the basement. You cannot aim at him until he moves first.' });
+  STAGES.forEach(s => { if (s.reward) [].concat(s.reward).forEach(r => { UNLOCK_FROM[r] = s.id; }); });
+})();
+HERO_ORDER.splice(0, HERO_ORDER.length, 'hbenjamin', 'angus', 'ephraim', 'flynn', 'leo', 'harry', 'peguicha', 'vehra', 'soham', 'trigg', 'chosen', 'elphi', 'daniel', 'yunze', 'malakai', 'seraphine', 'alfred', 'lachlan', 'yousuf', 'gemia', 'david', 'ethan', 'ben', 'kingsley', 'vasco', 'aamay', 'isaac');
 Object.assign(BUILDS, {
   trigg: [BALANCED,
     { id: 'packmaster', name: 'Packmaster', icon: '👹', desc: 'Commands up to 3 creatures, but they have 20% less HP.', tags: { creatureCap: 3, creatureHp: 0.8 } },

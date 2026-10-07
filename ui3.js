@@ -126,6 +126,7 @@ function badge(st) {
   else if (st.key === 'hexshield') num = st.hits + '✦';
   else if (st.key === 'tempo') { icon = (TEMPO[st.value] || TEMPO.andante).icon; num = ''; }
   else if (st.key === 'mixture') { icon = MIXTURE[st.value || 0].icon; num = ''; }
+  else if (st.key === 'skulls') num = st.stacks;
   else if (d.max && st.stacks > 1) num = '×' + st.stacks;
   else if (st.turns < 99) num = st.turns;
   return `<span class="sb ${d.type}" style="--c:${d.color}">${icon}${num !== '' ? `<b>${num}</b>` : ''}</span>`;

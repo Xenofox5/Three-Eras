@@ -9,6 +9,9 @@ const TE = { vehra: [['angus', 'flynn', 'leo'], ['angus', 'leo', 'yousuf'], ['da
   blurred: [['angus', 'flynn', 'yousuf'], ['lachlan', 'malakai', 'daniel'], ['trigg', 'soham', 'yousuf'], ['vehra', 'peguicha', 'gemia']],
   kingtrial: [['angus', 'flynn', 'yousuf'], ['harry', 'chosen', 'yousuf'], ['lachlan', 'elphi', 'daniel'], ['alfred', 'seraphine', 'soham']],
   revels: [['angus', 'flynn', 'yousuf'], ['harry', 'chosen', 'yousuf'], ['lachlan', 'elphi', 'daniel'], ['ethan', 'ben', 'gemia']],
+  kennels: [['angus', 'flynn', 'yousuf'], ['vehra', 'leo', 'yousuf'], ['david', 'gemia', 'daniel'], ['angus', 'harry', 'yousuf']],
+  oldestgrave: [['angus', 'flynn', 'yousuf'], ['harry', 'chosen', 'yousuf'], ['lachlan', 'elphi', 'daniel'], ['vehra', 'gemia', 'kingsley']],
+  rooftops: [['angus', 'flynn', 'yousuf'], ['harry', 'chosen', 'yousuf'], ['lachlan', 'elphi', 'daniel'], ['aamay', 'seraphine', 'soham']],
   archive: [['angus', 'flynn', 'yousuf'], ['harry', 'chosen', 'yousuf'], ['lachlan', 'elphi', 'daniel'], ['kingsley', 'vasco', 'david']] };
 (async () => {
   for (const sid of Object.keys(TE)) {

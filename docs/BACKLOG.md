@@ -216,26 +216,24 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 Three new heroes, from the owner on 2026-10-07. Under the versioning rule this is the only kind
 of work that moves the middle number, so these ship together as **v0.5.0**.
 
-- [ ] **H. Benjamin** (pre-first era). An ancient skeletal wizard with necromancy, skulls floating
-  around his hands. He predates every other figure in the record, and whatever he did to sustain
-  himself is where the near-immortality of Harry and Yunze comes from.
-- [ ] **Ephraim** (first era). A short berserker brawler: tough knuckles, high endurance, fights
-  like a pitbull. Black hair, black eyes.
-- [ ] **Isaac** (third era, which is `current` in the code). An invisibility user. A fast observer
-  and messenger, and the source behind Aamay: Isaac watches, Aamay writes it down in the basement.
-  Wild black hair, black eyes.
+- [x] **H. Benjamin** shipped in v0.5.0. Skulls are the mechanic: a killing blow spends one and
+  leaves him standing, enemies that fall hand them back, and Withered closes healing outright.
+  Unlocks from The Oldest Grave. The lore is carried by The Oldest Debt team bonus with Harry or
+  Yunze rather than by a fourth era.
+- [x] **Ephraim** shipped in v0.5.0. The health bar is the rage meter: +1% ATK per 2% of max HP
+  missing, stun immunity below half, and a mend on every kill. Unlocks from The Kennels.
+- [x] **Isaac** shipped in v0.5.0. Unlocks from The Rooftops, and The Basement Report pairs him
+  with Aamay for 2 Pages per enemy action.
 
 ### Decisions these need before any code
 
-- [ ] **Does "pre-first era" become a fourth era?** `ERA` has first, second, current and echo. A new
-  era is not a small change: it feeds the era synergies (Old Blood wants three First Era heroes),
-  the Heroes gallery grouping, the campaign headings, and the game is called Three Eras. The
-  alternative is that H. Benjamin sits in the First Era as its oldest figure, with the lore doing
-  the work instead of a new category. Owner decides.
-- [ ] **Isaac still needs his own answer, but the other two are settled now.** Aamay cannot be aimed at while a hero stands; Seraphine slips out one round in three. Originally: three hiding mechanics would overlap. Seraphine cannot be targeted while an ally
-  stands, Aamay is due a passive that makes him harder to target while allies live, and Isaac is an
-  invisibility user. They need to be clearly different from each other or two of them will feel the
-  same. Worth settling alongside the Seraphine nerf already in group D.
+- [x] **No fourth era.** The owner decided on 2026-10-07: "the pre-first era is not a 4th era as
+  there will barely be any ppl there." H. Benjamin sits in `first` as its oldest figure and the lore
+  does the work. `ERA` is untouched, so the era synergies, the gallery and the game name all stand.
+- [x] **All three hiding mechanics are now distinct.** Aamay is covered passively while another
+  hero of his stands. Seraphine slips out on a countable timer, one round in three. Isaac spends
+  his: he is unseen until he strikes, the strike out of sight is the payoff, and Slipping Away buys
+  it back every other turn. Passive, timed and spent, so no two of them play the same.
 
 ### What each new hero needs (so this is not underestimated)
 
