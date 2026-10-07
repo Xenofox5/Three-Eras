@@ -317,6 +317,7 @@ ${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}
 ${abilHTML(h.basic.icon, h.basic.name, 'Basic, +1 SP', h.basic.desc)}
 ${abilHTML(h.skill.icon, h.skill.name, 'Skill, 1 SP', h.skill.desc)}
 ${abilHTML(h.ult.icon, h.ult.name, 'Ultimate', h.ult.desc)}
+${h.alt ? `<h4>His other set, while ${esc(STATUS[h.altWhen].name)} holds him</h4>${abilHTML(h.alt.basic.icon, h.alt.basic.name, 'Basic, +1 SP', h.alt.basic.desc)}${abilHTML(h.alt.skill.icon, h.alt.skill.name, 'Skill, 1 SP', h.alt.skill.desc)}${abilHTML(h.alt.ult.icon, h.alt.ult.name, 'Ultimate', h.alt.ult.desc)}` : ''}
 ${(() => { const hist = BALANCE.flatMap(v => v.changes.filter(c => c.kind === 'hero' && c.who === id).map(c => Object.assign({ v: v.v }, c))); return hist.length ? `<h4>Balance history <button class="qbtn" data-guide="balance">All changes</button></h4>${hist.map(c => bcRow(c, false).replace('<div class="btx">', `<div class="btx"><span class="bv">v${esc(c.v)}</span> `)).join('')}` : ''; })()}
 <h4>Builds</h4>
 <div class="builds">${BUILDS[id].map(b => `<button class="bopt ${b.id === cur ? 'on' : ''}" data-b="${b.id}" style="--hc:${h.color}" ${unlocked ? '' : 'disabled'}><span class="i">${b.icon}</span><span><b>${esc(b.name)}${b.id === cur ? ' <em>Equipped</em>' : ''}</b>${buildMods(b)}<p>${esc(b.desc)}</p>${buildStatLine(id, b.id)}</span></button>`).join('')}</div>
@@ -418,7 +419,8 @@ function unitSheet(u) {
   } else {
     const h = HEROES[u.id];
     if (en && u.intents.length) body += `<h4>Next turn</h4>${u.intents.map(it => `<p><b style="color:var(--tx)">${it.move.icon} ${esc(it.move.name)}</b>${it.target && it.move.target === 'single' ? ` on ${esc(it.target.name)}` : ''}</p>`).join('')}`;
-    body += `<h4>Abilities</h4>${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}${abilHTML(h.basic.icon, h.basic.name, 'Basic', h.basic.desc)}${abilHTML(h.skill.icon, h.skill.name, 'Skill', h.skill.desc)}${abilHTML(h.ult.icon, h.ult.name, 'Ultimate', h.ult.desc)}`;
+    const ab = k => abil(u, k);
+    body += `<h4>Abilities${h.alt && has(u, h.altWhen) ? ' <span class="chip">' + esc(STATUS[h.altWhen].name) + '</span>' : ''}</h4>${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}${abilHTML(ab('basic').icon, ab('basic').name, 'Basic', ab('basic').desc)}${abilHTML(ab('skill').icon, ab('skill').name, 'Skill', ab('skill').desc)}${abilHTML(ab('ult').icon, ab('ult').name, 'Ultimate', ab('ult').desc)}`;
     if (u.build && u.build.id !== 'balanced') body += `<h4>Build</h4>${abilHTML(u.build.icon, u.build.name, 'Build', u.build.desc)}`;
   }
   sheet(body);

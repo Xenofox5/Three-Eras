@@ -20,12 +20,12 @@ const took = u => B.st[u.uid].taken;
   ok('David guarding an ally', has(ally, 'guarded') && has(david, 'guarding'));
 
   let d0 = took(david), a0 = took(ally);
-  let r = resolveHit(foe, ally, 1.0, {});            // a direct single-target hit, as Crush does
+  let r = resolveHit(foe, ally, 1.0, { sure: true });            // a direct single-target hit, as Crush does
   ok('direct resolveHit is redirected to David', r.target === david && took(david) > d0 && took(ally) === a0,
      `David +${took(david) - d0}, ally +${took(ally) - a0}`);
 
   d0 = took(david); a0 = took(ally);
-  r = resolveHit(foe, ally, 1.0, { aoe: true });     // area hits must still ignore Guard
+  r = resolveHit(foe, ally, 1.0, { aoe: true, sure: true });   // sure, so a 5% miss cannot flake the test     // area hits must still ignore Guard
   ok('area hits still ignore Guard', r.target === ally && took(ally) > a0 && took(david) === d0,
      `David +${took(david) - d0}, ally +${took(ally) - a0}`);
 

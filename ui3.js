@@ -271,11 +271,11 @@ function actIdle() {
 }
 function showActions() {
   const p = UI.pending; if (!p) return;
-  const u = p.u, h = HEROES[u.id];
+  const u = p.u;
   const a = $('#act');
   const chan = u.id === 'leo' && chanOf(u) && isUp(chanOf(u).target) ? chanOf(u) : null;
   const btns = ['basic', 'skill', 'ult'].map(k => {
-    let ab = h[k]; const ok = canUse(u, k);
+    let ab = abil(u, k); const ok = canUse(u, k);
     if (k === 'skill' && chan) ab = { name: 'Sustain Beam', icon: '🔥' };
     const lone = u.id === 'yunze';
     const noBeads = k === 'skill' && u.id === 'peguicha' && !(u.flags.beads > 0);
@@ -283,7 +283,7 @@ function showActions() {
     const sub = hexCd ? `Ready in ${u.flags.skillCd}` : noBeads ? 'No beads' : k === 'skill' && chan ? `Free, ×${Math.min(beamRamp(u).length, chan.value + 1)}` : k === 'basic' ? (lone ? 'No SP' : '+1 SP') : k === 'skill' ? (lone ? (ok ? 'Free, ready' : `Ready in ${u.flags.skillCd}`) : (ok ? 'Costs 1 SP' : 'Need 1 SP')) : (u.ult >= 100 ? 'Ready' : Math.floor(u.ult) + '%');
     return `<button class="ab ${k === 'ult' ? 'ul' : ''} ${k === 'ult' && ok ? 'rdy' : ''} ${k === 'skill' && chan ? 'sustain' : ''} ${p.kind === k ? 'sel' : ''}" data-k="${k}" ${ok ? '' : 'disabled'} style="--c:${u.color}"><span class="i">${ab.icon}</span><b>${esc(ab.name)}</b><small>${sub}</small></button>`;
   }).join('');
-  const bd = u.build && u.build.id !== 'balanced' ? u.build.name : h.role;
+  const bd = u.build && u.build.id !== 'balanced' ? u.build.name : HEROES[u.id].role;
   a.innerHTML = `<div class="who" style="--c:${u.color}"><div class="p">${miniPortrait(u)}</div><div class="wn"><b>${esc(u.name)}</b> <small>${esc(bd)}</small></div>${spHTML()}</div><div class="abtn">${btns}</div><div class="descrow" id="descrow"></div>`;
   $$('.ab', a).forEach(bt => bt.onclick = () => selectKind(bt.dataset.k));
   const who = $('.who', a); if (who) { who.style.cursor = 'pointer'; who.onclick = e => { if (!e.target.closest('.sp')) unitSheet(u); }; }
@@ -291,14 +291,14 @@ function showActions() {
 }
 function selectKind(k) {
   const p = UI.pending; if (!p || !canUse(p.u, k)) return;
-  if (p.kind === k) { const tt = HEROES[p.u.id][k].target; if (tt !== 'enemy' && tt !== 'ally') { confirmAoE(); return; } }
+  if (p.kind === k) { const tt = abil(p.u, k).target; if (tt !== 'enemy' && tt !== 'ally') { confirmAoE(); return; } }
   p.kind = k; SND.play('select');
   $$('#act .ab').forEach(b => b.classList.toggle('sel', b.dataset.k === k));
   renderDesc(); markTargets();
 }
 function renderDesc() {
   const p = UI.pending; if (!p) return;
-  let a = HEROES[p.u.id][p.kind];
+  let a = abil(p.u, p.kind);
   const ch = p.u.id === 'leo' && chanOf(p.u) && isUp(chanOf(p.u).target) ? chanOf(p.u) : null;
   if (ch && p.kind === 'skill') {
     const ramp = beamRamp(p.u), nx = Math.min(ramp.length, ch.value + 1);

@@ -79,10 +79,11 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   Lightblade 100% to 120% ATK; the Sanctum Blade shield 15% to 11% of his max HP and the Last
   Light shield 15% to 10%. Composite 55.4 to 56.0, so the shield cuts paid for the rest, and his
   duel rate went 34 to 50. He leans on the sword now instead of shielding everyone.
-- [ ] **Vasco rework.** The Vessel should either trigger below a HP threshold or switch back
-  and forth, and each ego gets its own set of moves rather than the same moves behaving
-  differently. Both egos must be useful on their own. Mimicry must stay capped so copying a
-  boss move gives a balanced version.
+- [x] **Vasco reworked** in v0.4.8. Two separate sets of three moves, not the same buttons behaving
+  differently: the jester keeps Prank, Mimicry and Curtain Call, and the Vessel brings Hellmark,
+  Gift of the Pit and Nothing Left to Laugh At. The mask changes hands both ways now, taking over
+  below 40% HP and handing back above 60%, so both sets matter in one fight. Mimicry is capped at
+  180% instead of 220%. Composite 52.7 to 52.1, so the shape changed and the power did not.
 - [x] **Aamay reworked** in v0.4.5. Everything asked for: Pages only come from enemy actions, which
   kills the Yunze pairing; the Chronicle holds 20 instead of 12 and gains 2 per fallen hero; each
   Page is worth 15% instead of 30%; the ultimate charges 40% slower; Seal in Ink drops to 55% ATK

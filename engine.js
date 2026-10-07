@@ -287,6 +287,16 @@ function bumpPages(actor) {
     if (!st) addStatus(a, 'pages', 99, { stacks: 1, silent: true }); else st.stacks = Math.min(max, st.stacks + 1);
   }
 }
+/* He climbs back out of it. Waking at 40% and sleeping only above 60% leaves a gap, so he does
+   not flicker between faces every time he is healed a point. */
+async function sleepVessel(u) {
+  if (!has(u, 'vessel')) return;
+  u.flags.vessel = false;
+  removeStatus(u, 'vessel');
+  HOOK.float(u, '🃏 THE MASK RETURNS', 'special');
+  HOOK.log(`The thing behind ${u.name} sinks back out of sight.`, 'i');
+  HOOK.update();
+}
 async function wakeVessel(u) {
   if (u.flags.vessel) return;
   u.flags.vessel = true; addStatus(u, 'vessel', 99, { silent: true }); HOOK.update();
@@ -600,6 +610,7 @@ async function turnStart(u) {
     }
   }
   if (!isUp(u)) return;
+  if (u.isHero && u.id === 'vasco' && has(u, 'vessel') && hpPct(u) >= (bt(u, 'sleepAt') || 0.6)) await sleepVessel(u);
   if (u.isHero && u.id === 'seraphine' && !has(u, 'taunt')) {
     u.flags.veilTurn = (u.flags.veilTurn || 0) + 1;
     const every = bt(u, 'hideEvery') || 3;
@@ -820,8 +831,8 @@ const KIT = {
   vasco: {
     async basic(u, t) {
       if (has(u, 'vessel')) { await strike(u, t, 1.2, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
-      const r = await strike(u, t, 0.8, { fx: 'cards' });
-      if (hitOK(r) && isUp(t)) { const n = bt(u, 'doubleTrick') ? 2 : 1; for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, k === 'blind' ? 1 : 2, { value: 0.2 }); }
+      const r = await strike(u, t, 0.85, { fx: 'cards' });
+      if (hitOK(r) && isUp(t)) { const n = bt(u, 'doubleTrick') ? 2 : 1; for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 2, { value: 0.2 }); }
     },
     async skill(u, t) {
       if (has(u, 'vessel')) {
@@ -833,14 +844,21 @@ const KIT = {
       const lh = B.lastHit && B.lastHit[u.side];
       HOOK.float(u, `🎭 ${lh ? lh.name.toUpperCase() : 'IMPROVISED'}`, 'special');
       await HOOK.fx('mimic', { src: u, tgt: t });
-      const r = resolveHit(u, t, lh ? Math.max(0.8, Math.min(2.2, lh.mult)) : 1.2, { acc: 0.05 });
+      const r = resolveHit(u, t, lh ? Math.max(0.8, Math.min(1.8, lh.mult)) : 1.2, { acc: 0.05 });
       if (hitOK(r) && lh && lh.status && isUp(t)) applyOnHit(u, t, lh.status);
     },
     async ult(u) {
-      if (!has(u, 'vessel')) await wakeVessel(u);
+      const vessel = has(u, 'vessel');
+      if (!vessel) await wakeVessel(u);
       const f = foesOf(u);
       await HOOK.fx('curtain', { src: u, tgts: f });
-      for (const e of f) { const r = resolveHit(u, e, 1.9, { aoe: true, sure: true }); if (hitOK(r)) addStatus(e, 'burn', 2, { stacks: 1, dot: 0.3 * stat(u, 'atk'), src: u }); }
+      let dealt = 0;
+      for (const e of f) {
+        const r = resolveHit(u, e, vessel ? 2.15 : 1.9, { aoe: true, sure: true });
+        if (hitOK(r)) { dealt += r.dmg || 0; addStatus(e, 'burn', 2, { stacks: 1, dot: 0.3 * stat(u, 'atk'), src: u }); }
+      }
+      // Only the thing behind him drinks from it.
+      if (vessel && dealt > 0 && isUp(u)) heal(u, u, dealt * 0.3, { noCrit: true, tick: true });
     }
   },
   aamay: {
@@ -1261,9 +1279,9 @@ function previewFor(u, kind, t) {
     case 'kingsley.basic': return D(u, t, 0.8);
     case 'kingsley.skill': return { txt: '🎁 Random trinket' };
     case 'kingsley.ult': return { txt: '🎶 Song' };
-    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.2 : 0.8);
-    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.5, { note: 'strips' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, lh ? Math.max(0.8, Math.min(2.2, lh.mult)) : 1.2, { acc: 0.05, note: lh ? 'copies ' + lh.name : 'improvised' }); }
-    case 'vasco.ult': return D(u, t, 1.9, { sure: true });
+    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.2 : 0.85, { note: has(u, 'vessel') ? '+Burn' : '+ a random trick' });
+    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.5, { note: 'strips buffs and Shield' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, lh ? Math.max(0.8, Math.min(1.8, lh.mult)) : 1.2, { acc: 0.05, note: lh ? 'copies ' + lh.name : 'improvised' }); }
+    case 'vasco.ult': return D(u, t, has(u, 'vessel') ? 2.15 : 1.9, { sure: true, note: has(u, 'vessel') ? 'and he drinks' : 'the mask comes off' });
     case 'aamay.basic': return D(u, t, 0.85);
     case 'aamay.skill': return D(u, t, 0.55, { acc: 0.1, note: 'Silence, SPD and ATK down' });
     case 'aamay.ult': { const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0; return D(u, t, Math.max(0.4, (bt(u, 'pageMult') || 0.15) * n), { sure: true, note: `${n} of ${pageCap(u)} pages` }); }
@@ -1312,7 +1330,7 @@ function previewFor(u, kind, t) {
 function validTargets(u, kind) {
   if (kind === 'skill' && u.id === 'ben' && u.isHero) return friendsOf(u).filter(x => x !== u);
   if (kind === 'skill' && u.id === 'leo' && chanOf(u) && isUp(chanOf(u).target)) return [chanOf(u).target];
-  const tt = HEROES[u.id][kind].target;
+  const tt = abil(u, kind).target;
   if (tt === 'enemy') { const f = seenOnly(foesOf(u), u), tn = f.filter(x => has(x, 'taunt')); return tn.length ? tn : f; }
   if (tt === 'allEnemies') return foesOf(u);
   if (tt === 'ally' || tt === 'allAllies') return friendsOf(u);
@@ -1325,7 +1343,7 @@ function canUse(u, kind) {
   if (kind === 'skill' && u.id === 'peguicha' && !(u.flags.beads > 0)) return false;
   if (kind === 'skill' && u.id === 'soham' && u.flags.skillCd > 0) return false;
   if (kind === 'skill' && u.id === 'ben' && (!friendsOf(u).some(x => x !== u) || u.flags.skillCd > 0)) return false;
-  if (kind === 'skill') return u.id === 'yunze' ? !(u.flags.skillCd > 0) : spOf(u) >= (HEROES[u.id].skill.cost || 1);
+  if (kind === 'skill') return u.id === 'yunze' ? !(u.flags.skillCd > 0) : spOf(u) >= (abil(u, 'skill').cost || 1);
   if (kind === 'ult') return u.ult >= 100;
   return true;
 }
@@ -1333,7 +1351,7 @@ function canUse(u, kind) {
 /* ---------- hero action ---------- */
 async function heroAct(u, ch) {
   const kind = ch.kind; let t = ch.target;
-  const h = HEROES[u.id]; const a = h[kind];
+  const a = abil(u, kind);
   if (!canUse(u, kind)) return heroAct(u, { kind: 'basic', target: foesOf(u)[0] });
   const vt = validTargets(u, kind);
   if (!vt.includes(t)) t = (a.target === 'self') ? u : (a.target === 'ally' || a.target === 'allAllies') ? lowest(vt) : vt[0];
@@ -1349,9 +1367,9 @@ async function heroAct(u, ch) {
   bumpPages(u);
   B.actMult = 0; B.actStatus = null;
   await KIT[u.id][kind](u, t);
-  if (h[kind].target === 'enemy' || h[kind].target === 'allEnemies') {
+  if (a.target === 'enemy' || a.target === 'allEnemies') {
     B.lastHit = B.lastHit || {};
-    B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: B.actMult || 1, name: h[kind].name, status: B.actStatus };
+    B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: B.actMult || 1, name: a.name, status: B.actStatus };
   }
   if (u.isHero && u.id === 'alfred' && isUp(u)) { const t0 = tempoOf(u); u.flags.advance = t0 === 'allegro' ? 0.5 : 0; shiftTempo(u); }
   if (u.isHero && u.id === 'seraphine' && isUp(u)) {
@@ -1382,13 +1400,13 @@ function pickFocus(u, en) {
   return pool.reduce((a, b) => ((b.hp + b.shield) < (a.hp + a.shield) ? b : a));
 }
 function aiChoose(u) {
-  const h = HEROES[u.id]; const enAll = foesOf(u); const en = seenOnly(enAll, u); const al = friendsOf(u);
+  const enAll = foesOf(u); const en = seenOnly(enAll, u); const al = friendsOf(u);
   if (!en.length) return { kind: 'basic', target: null };
   const lowA = lowest(al);
   const focus = pickFocus(u, en);
   const boss = en.find(e => e.def.boss);
   const taunter = en.find(e => has(e, 'taunt'));
-  const tgtFor = kind => { const tt = h[kind].target; if (tt === 'enemy') return taunter || ((kind === 'ult' && boss) ? boss : focus); if (tt === 'ally') return lowA; return u; };
+  const tgtFor = kind => { const tt = abil(u, kind).target; if (tt === 'enemy') return taunter || ((kind === 'ult' && boss) ? boss : focus); if (tt === 'ally') return lowA; return u; };
   const sp = spOf(u), mine = sideList(u);
   if (u.ult >= 100) {
     if (u.id === 'yousuf') { if (hpPct(lowA) < 0.65 || mine.some(p => !p.alive)) return { kind: 'ult', target: u }; }
@@ -1481,7 +1499,7 @@ function pickTarget(e, m) {
 const HERO_TT = { enemy: 'single', allEnemies: 'all', self: 'self', ally: 'ally', allAllies: 'allies' };
 function planHeroIntent(e) {
   const ch = aiChoose(e);
-  const a = HEROES[e.id][ch.kind];
+  const a = abil(e, ch.kind);
   e.intents = [{ move: { id: ch.kind, name: a.name, icon: a.icon, target: HERO_TT[a.target], heroKind: ch.kind }, target: ch.target, plan: ch }];
 }
 function planIntents(e) {

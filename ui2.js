@@ -358,7 +358,7 @@ HOOK.log = (t, cls) => { UI.log.push([t, cls]); if (UI.log.length > 300) UI.log.
 HOOK.actName = (u, name, kind) => {
   if (!live()) return;
   let icon = '';
-  if (u.isHero) { const hk = HEROES[u.id]; const ab = hk[kind] || ['basic', 'skill', 'ult'].map(k => hk[k]).find(x => x.name === name); icon = ab ? ab.icon : ''; }
+  if (u.isHero) { const ab = abil(u, kind) || ['basic', 'skill', 'ult'].map(k => abil(u, k)).find(x => x && x.name === name); icon = ab ? ab.icon : ''; }
   else { const m = (movesFor(u) || []).find(x => x.name === name); icon = m ? m.icon : ''; }
   caption(`${icon} ${esc(name)} <small>${esc(u.name)}</small>`, u.color);
 };

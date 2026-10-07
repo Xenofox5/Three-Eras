@@ -1,6 +1,6 @@
 # Three Eras
 
-A turn-based team battler in one self-contained HTML file. Build a team of 3 from 24 heroes across three eras; fight a 31-stage campaign, an endless Gauntlet, or custom hero-vs-hero battles. Current version: v0.4.0 (`GAME_VERSION` in `data.js`).
+A turn-based team battler in one self-contained HTML file. Build a team of 3 from 24 heroes across three eras; fight a 31-stage campaign, an endless Gauntlet, or custom hero-vs-hero battles. Current version: v0.4.8 (`GAME_VERSION` in `data.js`).
 
 ## Owner's rules (apply to all game text, comments shown to players, logs and docs)
 - UK English and metric units.
@@ -82,6 +82,7 @@ Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026
 - Use `u.isHero`, `sideList(u)`, `spOf(u)`, `addSp(u, n)`, `foesOf(u)`, `friendsOf(u)`; never `side === 'player'` for hero logic, because heroes also fight on the enemy side (custom battles, hero bosses `h:<id>` in `STAGES`).
 - Hero abilities: `KIT[id].basic/skill/ult(u, target)`. Use `strike()` for single-target hits (handles counters and guards) and `resolveHit()` for area hits. Add matching `previewFor` cases (`'<id>.basic'` etc.) and an `aiChoose` case when the skill needs judgement.
 - Build options read through `bt(u, 'tagName')`; `mods` are added to `u.mods` at setup.
+- A hero can carry a second kit: `alt` plus `altWhen` on the `HEROES` entry, swapped in while that status is on them. Vasco is the one who does. **Never read `HEROES[u.id][kind]` for a unit**, use `abil(u, kind)`, or the action bar, previews, AI, intents and sheets will disagree about which kit is live. `KIT[id]` still holds one implementation per slot and branches internally.
 - Statuses count down on their owner's turns; `fixed: true` means cannot be cleansed. Badges in `badge()` (`ui3.js`), live text in `statusLine()` (`ui4.js`).
 - Creatures (`minion: true`, e.g. Trigg's imps) are non-hero units on either side; they never count for stars, records or summaries. A side loses when its last hero falls.
 - Sudden death from turn 150 (damage up, healing halved) ends stalemates.

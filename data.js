@@ -545,7 +545,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.7';
+const GAME_VERSION = '0.4.8';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -614,6 +614,13 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.8', date: 'Vasco reworked', changes: [
+    { t: 'rework', kind: 'hero', who: 'vasco', what: 'Two Faces', text: 'What the two faces are', from: 'the same three moves behaving differently', to: 'two separate sets of three moves', note: 'The jester keeps Prank, Mimicry and Curtain Call. The Vessel brings Hellmark, Gift of the Pit and Nothing Left to Laugh At.' },
+    { t: 'rework', kind: 'hero', who: 'vasco', what: 'Two Faces', text: 'How it changes hands', from: 'wakes once below 40% HP and stays for the battle', to: 'wakes below 40% HP and sleeps again above 60%, as often as the fight demands' },
+    { t: 'buff', kind: 'hero', who: 'vasco', what: 'Nothing Left to Laugh At', text: 'The Vessel version of the ultimate', from: '190% ATK, the same as the jester version', to: '215% ATK and he heals for 30% of what it deals' },
+    { t: 'buff', kind: 'hero', who: 'vasco', what: 'Prank', text: 'Damage, and the Blind now lasts as long as the other tricks', from: '80% ATK, Blind 1 turn', to: '85% ATK, every trick 2 turns' },
+    { t: 'nerf', kind: 'hero', who: 'vasco', what: 'Mimicry', text: 'Ceiling on a copied move', from: '220%', to: '180% ATK', note: 'Composite 52.7 to 52.1, so the shape changed and the power did not.' }
+  ] },
   { v: '0.4.7', date: 'Hiding swapped, Aamay explained, Elphi trimmed', changes: [
     { t: 'rework', kind: 'hero', who: 'aamay', what: 'The Chronicle', text: 'How he keeps out of reach', from: 'a 30% chance to be overlooked, which nothing on screen ever showed', to: 'while another hero stands he cannot be aimed at with single-target attacks at all', note: 'Swapped with Seraphine. He is the one nobody knows is there. Bosses still find him and area attacks still reach him.' },
     { t: 'rework', kind: 'hero', who: 'seraphine', what: 'Behind the Scenes', text: 'How she keeps out of reach', from: 'untargetable the whole time another hero stood', to: 'out of sight for one round on every third turn of hers', note: 'She is known and watched, so she can only slip away for a moment. It is a status with a countdown, so it can be read off the card.' },
@@ -938,6 +945,11 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.8', items: [
+    'Vasco now has two separate sets of moves rather than three buttons that behave differently. The jester keeps Prank, Mimicry and Curtain Call. The thing behind him brings its own: Hellmark, Gift of the Pit, and Nothing Left to Laugh At, which hits every enemy for 215% ATK and heals him for 30% of it.',
+    'The mask can change hands more than once. It takes over below 40% HP as before, but now hands back once he climbs above 60%, so both sets matter in one fight. The gap between the two numbers keeps him from flickering every time he is healed a point.',
+    'His hero page lists both sets, and in battle the action bar and his details show whichever one he is holding. Prank hits a little harder and all three of its tricks last 2 turns. A copied move is capped at 180% ATK instead of 220%.'
+  ] },
   { v: '0.4.7', items: [
     'Aamay and Seraphine have traded hiding places. Aamay is the one nobody knows is down there, so while another of his heroes still stands he cannot be aimed at with single-target attacks at all. Bosses find him anyway and attacks on the whole team still reach him. Seraphine is known and watched, so she only slips out of view for one round on every third turn of hers.',
     'No more invisible dice. The old version gave Aamay a 30% chance to be overlooked, which nothing on screen ever showed, so there was no way to tell it had happened. Out of Sight is now a status on the card with a countdown, like every other.',
@@ -1090,6 +1102,15 @@ SYNERGIES.push(
 );
 
 /* new stages: hero bosses use 'h:' ids and the stage's heroAtk / heroHp multipliers */
+/* A hero can carry a second kit that replaces the first while a status is on them. Vasco is the
+   one who does: the jester and the thing wearing him have separate moves, not the same three
+   buttons behaving differently. Everything that reads an ability off a unit goes through here. */
+function abil(u, kind) {
+  const h = HEROES[u.heroId || u.id];
+  if (!h) return null;
+  if (h.alt && h.altWhen && u.statuses && u.statuses.some(s => s.key === h.altWhen)) return h.alt[kind];
+  return h[kind];
+}
 const foeId = x => String(x).replace(/^h:/, '');
 const isHeroFoe = x => String(x).startsWith('h:');
 const foeName = x => (isHeroFoe(x) ? HEROES[foeId(x)].name : ENEMIES[x].name);
@@ -1173,10 +1194,18 @@ Object.assign(HEROES, {
   vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',
     stats: { hp: 1260, atk: 124, def: 76, spd: 116, crit: 0.12, cdmg: 0.55, eva: 0.1 },
     look: { skin: '#e6c2a2', hair: '#6b4426', hairStyle: 'short', eye: '#141016', glowEye: '#ff2a3a', body: 'coat', bodyColor: '#5a1a6a', trim: '#f0c040', bg: '#24102e', weapon: 'cards', helm: 'jester' },
-    passive: { name: 'Two Faces', desc: 'The first time he drops below 40% HP his alter ego wakes for the rest of the battle: Peguicha\'s Vessel. ATK +35%, his hits heal him for 25% of their damage and deal double damage to Shields, and his kit turns dark.' },
-    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Jester: 80% ATK and a random trick (Blind, ATK -20% or SPD -20%). Vessel: Hellmark, 120% ATK and Burn.' },
-    skill: { name: 'Mimicry', icon: '🎭', cost: 1, target: 'enemy', desc: 'Jester: copies the last attack an enemy used on his team, at his own ATK. Vessel: Peguicha\'s Gift, 150% ATK that strips the target\'s buffs and Shields.' },
-    ult: { name: 'Curtain Call', icon: '🎪', target: 'allEnemies', desc: 'The mask comes off: he wakes as the Vessel if he has not, then deals 190% ATK to every enemy and Burns them.' } },
+    passive: { name: 'Two Faces', desc: 'Two sets of moves, and the fight decides which he is holding. Drop below 40% HP and the thing behind him takes over with its own three moves: ATK +35%, its hits heal him for 25% of the damage and deal double damage to Shields. Climb back above 60% HP and the jester returns with his. It can change hands as often as the fight demands.' },
+    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 85% ATK to one enemy and pull one trick at random: Blind, ATK -20% or SPD -20%, each for 2 turns.' },
+    skill: { name: 'Mimicry', icon: '🎭', cost: 1, target: 'enemy', desc: 'Repeat the last attack an enemy used on his team, at his own ATK and carrying the same effect. Anything stronger than 180% ATK comes back as 180%, so copying a boss does not hand him a boss move.' },
+    ult:   { name: 'Curtain Call', icon: '🎪', target: 'allEnemies', desc: 'The mask comes off whatever his HP: the thing behind him takes over, then deals 190% ATK to every enemy and Burns them for 2 turns.' },
+    /* The second kit. Everything that reads an ability off a unit goes through abil(), which
+       swaps to this while the Vessel status is on him. */
+    altWhen: 'vessel',
+    alt: {
+      basic: { name: 'Hellmark', icon: '🔥', target: 'enemy', desc: 'Brand one enemy for 120% ATK and Burn it for 2 turns.' },
+      skill: { name: 'Gift of the Pit', icon: '😈', cost: 1, target: 'enemy', desc: '150% ATK that tears off every buff the target holds and shatters its Shield outright.' },
+      ult:   { name: 'Nothing Left to Laugh At', icon: '🩸', target: 'allEnemies', desc: 'Deal 215% ATK to every enemy, Burn them for 2 turns, and he drinks deep: he heals for 30% of everything it deals.' }
+    } },
   aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',
     stats: { hp: 1180, atk: 110, def: 80, spd: 110, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#d8a882', hair: '#141016', hairStyle: 'short', eye: '#5a3a20', body: 'robe', bodyColor: '#16161c', trim: '#3a3c4a', bg: '#08080c', weapon: 'book', helm: 'cowl', ink: true },
