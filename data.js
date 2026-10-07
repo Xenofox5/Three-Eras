@@ -545,7 +545,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.11';
+const GAME_VERSION = '0.4.12';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -614,6 +614,10 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.12', d: '2026-10-07', date: 'Vasco: both faces lifted together', changes: [
+    { t: 'buff', kind: 'hero', who: 'vasco', what: 'Prank / Hellmark / Gift of the Pit', text: 'Damage on both kits, raised together so the balance between them holds', from: '120% / 120% / 90%', to: '140% / 140% / 105% ATK' },
+    { t: 'buff', kind: 'hero', who: 'vasco', what: 'The Vessel', text: 'ATK', from: '+20%', to: '+25%', note: 'Measured on their own over 110 fights each, the two faces now win 41.8% apiece, against 34.2% and 53.3% before this pass. Composite 44.5.' }
+  ] },
   { v: '0.4.11', d: '2026-10-07', date: 'Vasco: the two faces balanced', changes: [
     { t: 'buff', kind: 'hero', who: 'vasco', what: 'Prank', text: 'Damage, and the tricks it pulls', from: '95% ATK, one trick at 20% for 2 turns', to: '120% ATK, two tricks at 25% for 3 turns' },
     { t: 'buff', kind: 'hero', who: 'vasco', what: 'Mimicry', text: 'Copying a move that hit the whole team', from: 'came back as a single hit', to: 'comes back wide, at a lower rate for each enemy', note: 'It had never been able to copy an area attack at all.' },
@@ -964,6 +968,9 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.12', d: '2026-10-07', items: [
+    'Vasco&rsquo;s two faces are now worth the same. Played on their own they win 41.8% of fights each, where the jester used to win a third and the thing behind him over half. The first pass balanced them by pulling the Vessel down too far, so both have been raised together: Prank and Hellmark to 140% ATK and Gift of the Pit to 105%.'
+  ] },
   { v: '0.4.11', d: '2026-10-07', items: [
     'Mimicry can copy an attack that hit the whole team. It never could: anything it borrowed came back as a single hit, whatever the original was. A wide move now comes back wide, at a lower rate for each enemy.',
     'Vasco&rsquo;s two faces are closer together. Measured on their own, the jester won about a third of his fights and the thing behind him over half, dealing three times the damage. Prank now hits for 120% and pulls two tricks at 25% for 3 turns, while the Vessel loses ATK, lifesteal and damage, and Gift of the Pit no longer shatters every Shield outright.',
@@ -1174,7 +1181,7 @@ Object.assign(STATUS, {
   framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +15% crit chance.' },
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 6% max HP and removes a debuff at the start of each of its turns.' },
-  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.2 }, color: '#d1203a', desc: 'Peguicha\'s power wears Vasco\'s face: ATK +35%, hits heal him for 25% of their damage and deal double damage to Shields.' },
+  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.25 }, color: '#d1203a', desc: 'Peguicha\'s power wears Vasco\'s face: ATK +35%, hits heal him for 25% of their damage and deal double damage to Shields.' },
   pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
 });
 Object.assign(ENEMIES, {
@@ -1229,16 +1236,16 @@ Object.assign(HEROES, {
   vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',
     stats: { hp: 1360, atk: 124, def: 82, spd: 116, crit: 0.12, cdmg: 0.55, eva: 0.1 },
     look: { skin: '#e6c2a2', hair: '#6b4426', hairStyle: 'short', eye: '#141016', glowEye: '#ff2a3a', body: 'coat', bodyColor: '#5a1a6a', trim: '#f0c040', bg: '#24102e', weapon: 'cards', helm: 'jester' },
-    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, copied moves, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +20%, its hits heal him for 20% of the damage and tear through Shields at double rate, and it gives the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
-    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 120% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
+    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, copied moves, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +25%, its hits heal him for 20% of the damage and tear through Shields at double rate, and it gives the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
+    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 140% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
     skill: { name: 'Mimicry', icon: '🎭', cost: 1, target: 'enemy', desc: 'Repeat the last attack an enemy used on his team, at his own ATK and carrying the same effect. A move that hit the whole team comes back the same way, at a lower rate for each enemy. Nothing copied exceeds 200% ATK, or 115% when it goes wide, so copying a boss does not hand him a boss move.' },
     ult:   { name: 'Curtain Call', icon: '🎪', target: 'self', desc: 'He takes the mask off. The thing behind him comes out and brings its own three moves, and he acts again at once with the new kit in hand, so changing face costs him nothing but the charge. It charges 80% faster than other ultimates, so he is meant to keep swapping.' },
     /* The second kit. Everything that reads an ability off a unit goes through abil(), which
        swaps to this while the Vessel status is on him. */
     altWhen: 'vessel',
     alt: {
-      basic: { name: 'Hellmark', icon: '🔥', target: 'enemy', desc: 'Brand one enemy for 120% ATK and Burn it for 2 turns.' },
-      skill: { name: 'Gift of the Pit', icon: '😈', cost: 1, target: 'allEnemies', desc: '90% ATK to every enemy, and every buff any of them holds is torn off. The Vessel already tears through Shields at double rate.' },
+      basic: { name: 'Hellmark', icon: '🔥', target: 'enemy', desc: 'Brand one enemy for 140% ATK and Burn it for 2 turns.' },
+      skill: { name: 'Gift of the Pit', icon: '😈', cost: 1, target: 'allEnemies', desc: '105% ATK to every enemy, and every buff any of them holds is torn off. The Vessel already tears through Shields at double rate.' },
       ult:   { name: 'Nothing Left to Laugh At', icon: '🩸', target: 'self', desc: 'It has had enough and hands him back the room. The jester returns with his own three moves, and he acts again at once.' }
     } },
   aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',

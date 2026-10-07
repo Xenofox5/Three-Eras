@@ -839,8 +839,8 @@ const KIT = {
   },
   vasco: {
     async basic(u, t) {
-      if (has(u, 'vessel')) { await strike(u, t, 1.2, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
-      const r = await strike(u, t, 1.2, { fx: 'cards' });
+      if (has(u, 'vessel')) { await strike(u, t, 1.4, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
+      const r = await strike(u, t, 1.4, { fx: 'cards' });
       const n = bt(u, 'noTrick') ? 0 : (bt(u, 'doubleTrick') ? 3 : 2);
       if (hitOK(r) && isUp(t) && n) for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 3, { value: 0.25 });
     },
@@ -849,7 +849,7 @@ const KIT = {
         const f = foesOf(u);
         await HOOK.fx('curtain', { src: u, tgts: f });
         for (const e of f) {
-          const r = resolveHit(u, e, 0.9, { aoe: true, acc: 0.05 });
+          const r = resolveHit(u, e, 1.05, { aoe: true, acc: 0.05 });
           if (hitOK(r) && isUp(e)) stripBuffs(e);
         }
         return;
@@ -1296,8 +1296,8 @@ function previewFor(u, kind, t) {
     case 'kingsley.basic': return D(u, t, 0.8);
     case 'kingsley.skill': return { txt: '🎁 Random trinket' };
     case 'kingsley.ult': return { txt: '🎶 Song' };
-    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.2 : 1.2, { note: has(u, 'vessel') ? '+Burn' : '+ 2 random tricks' });
-    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 0.9, { note: 'every enemy, strips buffs' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, mimicMult(u), { acc: 0.05, note: lh ? (lh.aoe ? 'copies ' + lh.name + ', every enemy' : 'copies ' + lh.name) : 'improvised' }); }
+    case 'vasco.basic': return D(u, t, 1.4, { note: has(u, 'vessel') ? '+Burn' : '+ 2 random tricks' });
+    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.05, { note: 'every enemy, strips buffs' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, mimicMult(u), { acc: 0.05, note: lh ? (lh.aoe ? 'copies ' + lh.name + ', every enemy' : 'copies ' + lh.name) : 'improvised' }); }
     case 'vasco.ult': return { txt: has(u, 'vessel') ? '🃏 Back to the jester' : '😈 Let it out' };
     case 'aamay.basic': return D(u, t, 0.85);
     case 'aamay.skill': return D(u, t, 0.55, { acc: 0.1, note: 'Silence, SPD and ATK down' });

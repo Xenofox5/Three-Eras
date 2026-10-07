@@ -236,7 +236,7 @@ ${info}
   $$('[data-rm]').forEach(b => b.onclick = e => { e.stopPropagation(); UI.team = UI.team.filter(x => x !== b.dataset.rm); SND.play('click'); renderTeam(); });
   $$('[data-slot]').forEach(b => b.onclick = () => buildSheet(b.dataset.slot, true));
   $$('[data-foe]').forEach(b => b.onclick = () => (isHeroFoe(b.dataset.foe) ? heroSheet(foeId(b.dataset.foe)) : enemyInfoSheet(b.dataset.foe, ctx.mode === 'campaign' ? STAGES[ctx.idx] : null)));
-  $('[data-syn]').forEach(b => b.onclick = () => { const s = SYNERGIES.find(x => x.id === b.dataset.syn); sheet(`<h3>${s.icon} ${esc(s.name)}</h3><p style="margin-top:10px">${esc(s.desc)}</p>`); });
+  $$('[data-syn]').forEach(b => b.onclick = () => { const s = SYNERGIES.find(x => x.id === b.dataset.syn); sheet(`<h3>${s.icon} ${esc(s.name)}</h3><p style="margin-top:10px">${esc(s.desc)}</p>`); });
   const sm = $('#synMore');
   if (sm) sm.onclick = () => { UI.showNear = !UI.showNear; SND.play('click'); const sc = $('.scroll').scrollTop; renderTeam(); $('.scroll').scrollTop = sc; };
   $$('.rc').forEach(c => {
