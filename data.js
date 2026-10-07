@@ -45,7 +45,8 @@ const STATUS = {
   exposed:   { name: 'Exposed', icon: '💔', type: 'debuff', color: '#ff6b78', desc: 'Takes 50% more damage.' },
   accUp:     { name: 'ACC Up', icon: '🎯', type: 'buff', stat: 'acc', color: '#ffe9a0' },
   unbound:   { name: 'Unbound', icon: '🟢', type: 'buff', fixed: true, mods: { atk: 0.35, spd: 0.15 }, color: '#3dff9a', desc: 'True power, briefly released. ATK +35% and SPD +15%.' },
-  determined:{ name: 'Determined', icon: '🔆', type: 'buff', fixed: true, mods: { atk: 0.4, crit: 0.1 }, color: '#fff2a8', desc: 'Back on his feet with a fraction of his health left. ATK +40% and +10% crit chance for the rest of the battle.' }
+  determined:{ name: 'Determined', icon: '🔆', type: 'buff', fixed: true, mods: { atk: 0.3, crit: 0.1 }, color: '#fff2a8', desc: 'Back on his feet with a fraction of his health left. ATK +30% and +10% crit chance for the rest of the battle.' },
+  hidden:    { name: 'Out of Sight', icon: '🕯', type: 'buff', color: '#7a8ab0', desc: 'Enemies cannot aim single-target attacks at it. Attacks that hit the whole team still land.' }
 };
 
 /* Characters whose damage gets +20% against a named rival */
@@ -108,7 +109,7 @@ const HEROES = {
     id: 'elphi', name: 'Elphi', title: 'The Light Bearer', eras: ['second'], role: 'Guardian', color: '#fff2a8',
     stats: { hp: 1420, atk: 128, def: 92, spd: 106, crit: 0.1, cdmg: 0.5 },
     look: { skin: '#ecc9a6', hair: '#c9b48a', hairStyle: 'swept', eye: '#8aa6c8', body: 'armour', bodyColor: '#8a909c', trim: '#e6eaf2', bg: '#4d4a2a', weapon: 'lightsword' },
-    passive: { name: 'Last Light', desc: 'The first time each ally drops below 30% HP, Elphi shields them with light worth 10% of his max HP, once per ally per battle. He does not stay down either: the first time he falls he rises again with 45% of his max HP, and keeps ATK +40% and +10% crit chance for the rest of the fight.' },
+    passive: { name: 'Last Light', desc: 'The first time each ally drops below 30% HP, Elphi shields them with light worth 10% of his max HP, once per ally per battle. He does not stay down either: the first time he falls he rises again with 30% of his max HP, and keeps ATK +30% and +10% crit chance for the rest of the fight.' },
     basic: { name: 'Lightblade', icon: '⚔️', target: 'enemy', desc: 'Deal 120% ATK to one enemy and heal himself for 15% of the damage.' },
     skill: { name: 'Radiant Arc', icon: '🌟', cost: 1, target: 'allEnemies', desc: 'Deal 85% ATK to all enemies. 60% chance to Blind each for 1 turn.' },
     ult:   { name: 'Sanctum Blade', icon: '🗡️', target: 'enemy', desc: 'A colossal sword of light deals 300% ATK. All allies gain a Shield worth 11% of his max HP.' }
@@ -544,7 +545,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.6';
+const GAME_VERSION = '0.4.7';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -574,8 +575,8 @@ const BUILDS = {
     { id: 'dancer', name: 'Dancer', icon: '💃', desc: 'SPD +10%. Gilded Dance strikes 4 times, but no longer gives her a Shield.', mods: { spd: 0.1 }, tags: { danceHits: 4, noDanceShield: 1 } }
   ],
   elphi: [
-    { id: 'sentinel', name: 'Sentinel', icon: '🛡️', desc: 'DEF +10%, ATK -10%. Sanctum Blade Shields are 35% stronger and he rises with 60% of his max HP instead of 45%.', mods: { def: 0.1, atk: -0.1 }, tags: { ultShield: 0.15, riseHp: 0.6 } },
-    { id: 'dawn', name: 'Dawnbreaker', icon: '🌟', desc: 'Radiant Arc deals 100% ATK and Blinds 85% of the time. DEF -10%, and he rises with only 30% of his max HP.', mods: { def: -0.1 }, tags: { arcMult: 1.0, blindCh: 0.85, riseHp: 0.3 } }
+    { id: 'sentinel', name: 'Sentinel', icon: '🛡️', desc: 'DEF +10%, ATK -10%. Sanctum Blade Shields are 35% stronger and he rises with 40% of his max HP instead of 30%.', mods: { def: 0.1, atk: -0.1 }, tags: { ultShield: 0.15, riseHp: 0.4 } },
+    { id: 'dawn', name: 'Dawnbreaker', icon: '🌟', desc: 'Radiant Arc deals 100% ATK and Blinds 85% of the time. DEF -10%, and he rises with only 20% of his max HP.', mods: { def: -0.1 }, tags: { arcMult: 1.0, blindCh: 0.85, riseHp: 0.2 } }
   ],
   daniel: [
     { id: 'bastion', name: 'Bastion', icon: '🔮', desc: 'Crystal Ward Shields are 15% stronger and can reach 45% of the ally\'s max HP. Riposte chance drops from 45% to 30%.', tags: { wardMult: 1.15, wardCap: 0.45, counter: 0.3 } },
@@ -613,6 +614,12 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.7', date: 'Hiding swapped, Aamay explained, Elphi trimmed', changes: [
+    { t: 'rework', kind: 'hero', who: 'aamay', what: 'The Chronicle', text: 'How he keeps out of reach', from: 'a 30% chance to be overlooked, which nothing on screen ever showed', to: 'while another hero stands he cannot be aimed at with single-target attacks at all', note: 'Swapped with Seraphine. He is the one nobody knows is there. Bosses still find him and area attacks still reach him.' },
+    { t: 'rework', kind: 'hero', who: 'seraphine', what: 'Behind the Scenes', text: 'How she keeps out of reach', from: 'untargetable the whole time another hero stood', to: 'out of sight for one round on every third turn of hers', note: 'She is known and watched, so she can only slip away for a moment. It is a status with a countdown, so it can be read off the card.' },
+    { t: 'nerf', kind: 'hero', who: 'elphi', what: 'Last Light', text: 'He rises with', from: '45% max HP and ATK +40%', to: '30% max HP and ATK +30%', note: 'Sentinel 60% to 40%, Dawnbreaker 30% to 20%.' },
+    { t: 'adjust', kind: 'hero', who: 'aamay', what: 'The Last Page', text: 'Live status text still quoted 30% a Page after the rework halved it', from: '30%', to: '15%, with the current total shown' }
+  ] },
   { v: '0.4.6', date: 'Elphi reworked', changes: [
     { t: 'rework', kind: 'hero', who: 'elphi', what: 'Last Light', text: 'New: he rises once per battle', from: 'nothing', to: 'the first time he falls he returns with 45% of his max HP and keeps ATK +40% and +10% crit chance', note: 'He is the one who stood in the way and did not stop. Once per battle only.' },
     { t: 'buff', kind: 'hero', who: 'elphi', what: 'Lightblade', text: 'Damage', from: '100%', to: '120% ATK' },
@@ -931,6 +938,12 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.7', items: [
+    'Aamay and Seraphine have traded hiding places. Aamay is the one nobody knows is down there, so while another of his heroes still stands he cannot be aimed at with single-target attacks at all. Bosses find him anyway and attacks on the whole team still reach him. Seraphine is known and watched, so she only slips out of view for one round on every third turn of hers.',
+    'No more invisible dice. The old version gave Aamay a 30% chance to be overlooked, which nothing on screen ever showed, so there was no way to tell it had happened. Out of Sight is now a status on the card with a countdown, like every other.',
+    'The Last Page says what it will do. The description works it through, the badge shows how many Pages he is holding out of his limit, and the status text gives the exact damage it would deal right now. That text had also been left quoting 30% a Page after the rework dropped it to 15%.',
+    'Elphi rises with less: 30% of his max HP and ATK +30%, instead of 45% and +40%. Sentinel brings him back at 40% and Dawnbreaker at 20%.'
+  ] },
   { v: '0.4.6', items: [
     'Elphi reworked. He no longer stays down: the first time he falls he gets back up with 45% of his max HP and fights the rest of the battle with ATK +40% and +10% crit chance. Sentinel brings him back at 60%, Dawnbreaker at only 30%.',
     'His light sword does the work his shields used to. Lightblade hits for 120% instead of 100%, while the Shield from Sanctum Blade drops from 15% to 11% of his max HP and the one Last Light gives a falling ally drops from 15% to 10%.'
@@ -1041,7 +1054,7 @@ Object.assign(HEROES, {
     id: 'seraphine', name: 'Seraphine', title: 'The Hand Behind the Myth', eras: ['second'], role: 'Bladecaller', color: '#f0e6ff',
     stats: { hp: 1400, atk: 136, def: 80, spd: 120, crit: 0.14, cdmg: 0.55, eva: 0.12, acc: 0.05 },
     look: { skin: '#f0d6c8', hair: '#2a1a3a', hairStyle: 'long', eye: '#f0e6ff', body: 'robe', bodyColor: '#e8e2f2', trim: '#b89cff', bg: '#241a38', weapon: 'halos', helm: 'mask' },
-    passive: { name: 'Behind the Scenes', desc: 'While another hero on her side still stands, ordinary enemies cannot aim single-target attacks at her. Summoned creatures are not cover, and bosses see her anyway. After each of her actions both halos keep cutting on their own: 2 strikes of 35% ATK on random enemies. Every cut leaves a Severance mark, which does nothing on its own and only pays off when Halo Storm detonates it. The Chosen secretly obeys her.' },
+    passive: { name: 'Behind the Scenes', desc: 'She works from the wings, slipping out of view on every third turn of hers: enemies cannot aim single-target attacks at her until her next turn, though attacks on the whole team still land. After each of her actions both halos keep cutting on their own: 2 strikes of 35% ATK on random enemies. Every cut leaves a Severance mark, which does nothing on its own and only pays off when Halo Storm detonates it. The Chosen secretly obeys her.' },
     basic: { name: 'Halo Cut', icon: '⭕', target: 'enemy', desc: 'Send a halo through one enemy for 110% ATK, leaving a Severance mark. Marks stack up to 5 on the same enemy.' },
     skill: { name: 'Orbiting Blades', icon: '🌀', cost: 1, target: 'enemy', desc: 'Both halos circle an enemy: 80% ATK and 2 Severance marks now, then it is Encircled for 2 turns (60% ATK cut at the start of each of its turns, SPD -15%).' },
     ult:   { name: 'Halo Storm', icon: '💫', target: 'allEnemies', desc: '8 cuts of 45% ATK across all enemies, favouring Encircled ones. Then every Severance mark on every enemy detonates at once for 30% ATK per mark, and the marks are spent. If The Chosen fights beside her, The Chosen takes her turn immediately.' }
@@ -1167,10 +1180,10 @@ Object.assign(HEROES, {
   aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',
     stats: { hp: 1180, atk: 110, def: 80, spd: 110, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#d8a882', hair: '#141016', hairStyle: 'short', eye: '#5a3a20', body: 'robe', bodyColor: '#16161c', trim: '#3a3c4a', bg: '#08080c', weapon: 'book', helm: 'cowl', ink: true },
-    passive: { name: 'The Chronicle', desc: 'He writes down what the enemy does: every enemy action adds a Page, up to 20. Nothing his own side does is worth recording. Each hero who falls on either side raises the limit by 2, since there is more to write. He works in a basement nobody visits, so while another hero still stands and the Chronicle is empty, an enemy that aims at him looks elsewhere 30% of the time. That protection fades as he writes, and is gone entirely once the Chronicle is full, so the moment he is most dangerous is the moment he is easiest to reach. He can always be reached, unlike someone truly hidden.' },
+    passive: { name: 'The Chronicle', desc: 'Nobody knows he is down there. While another hero of his still stands, enemies cannot aim single-target attacks at him at all; only attacks on the whole team reach him, and a boss can find him anyway. He writes down what the enemy does: every enemy action adds a Page, up to 20. Nothing his own side does is worth recording, and every hero who falls on either side raises the limit by 2.' },
     basic: { name: 'Ink Flick', icon: '🖋️', target: 'enemy', desc: '85% ATK with a 30% chance to Silence for 1 turn.' },
     skill: { name: 'Seal in Ink', icon: '📕', cost: 1, target: 'enemy', desc: '55% ATK, then the target is Silenced for 2 turns (bosses 1) and loses 30% SPD and 20% ATK for 3 turns. Silenced heroes cannot use skills or ultimates; monsters only use their basic attack.' },
-    ult: { name: 'The Last Page', icon: '📖', target: 'allEnemies', desc: 'Read the Chronicle aloud: 15% ATK per Page to every enemy, then Silence them all for 1 turn. The Pages are spent. His ultimate charges 40% slower than other heroes, so the Chronicle has time to fill.' } }
+    ult: { name: 'The Last Page', icon: '📖', target: 'allEnemies', desc: 'He reads the Chronicle aloud and spends every Page at once. Each Page is 15% ATK to every enemy, so 10 Pages is 150% ATK and a full Chronicle of 20 is 300%. The badge on his card shows how many he is holding, and the number shown when you aim is what it will deal right now. Then every enemy is Silenced for 1 turn and the Chronicle is empty again. It charges 40% slower than other ultimates, so there is time to fill it.' } }
 });
 HERO_ORDER.splice(0, HERO_ORDER.length, 'angus', 'flynn', 'leo', 'harry', 'peguicha', 'vehra', 'soham', 'trigg', 'chosen', 'elphi', 'daniel', 'yunze', 'malakai', 'seraphine', 'alfred', 'lachlan', 'yousuf', 'gemia', 'david', 'ethan', 'ben', 'kingsley', 'vasco', 'aamay');
 Object.assign(BUILDS, {

@@ -122,6 +122,18 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   number. Older v0.3.8 figures for reference: Ben 35.1, Yousuf 32.5 in 3v3, Alfred 39.5,
   Leo 39.8, Aamay 39.8, Flynn 40.4. Buff or rework rather than nudging one number.
 
+
+### Owner feedback on the reworks, handled in v0.4.7
+
+- [x] **The Aamay hiding roll was unreadable.** A 30% chance to be overlooked showed nothing on
+  screen, so there was no way to tell it had fired. Replaced with a plain cycle and a status that
+  counts down on the card.
+- [x] **The Last Page was confusing.** The description now works the numbers through, the badge
+  shows Pages held out of the limit, and the status text gives the exact damage it would deal now.
+  The live text had also been left quoting 30% a Page after the rework halved it to 15%.
+- [x] **Hiding swapped between Aamay and Seraphine**, since Aamay is the more obscure of the two.
+  He cannot be aimed at while another hero stands; she slips out of view one round in three.
+- [x] **Elphi rose too easily.** Down to 30% max HP and ATK +30%, from 45% and +40%.
 ## F. New heroes (this is what makes it v0.5.0)
 
 Three new heroes, from the owner on 2026-10-07. Under the versioning rule this is the only kind
@@ -143,7 +155,7 @@ of work that moves the middle number, so these ship together as **v0.5.0**.
   the Heroes gallery grouping, the campaign headings, and the game is called Three Eras. The
   alternative is that H. Benjamin sits in the First Era as its oldest figure, with the lore doing
   the work instead of a new category. Owner decides.
-- [ ] **Three hiding mechanics would now overlap.** Seraphine cannot be targeted while an ally
+- [ ] **Isaac still needs his own answer, but the other two are settled now.** Aamay cannot be aimed at while a hero stands; Seraphine slips out one round in three. Originally: three hiding mechanics would overlap. Seraphine cannot be targeted while an ally
   stands, Aamay is due a passive that makes him harder to target while allies live, and Isaac is an
   invisibility user. They need to be clearly different from each other or two of them will feel the
   same. Worth settling alongside the Seraphine nerf already in group D.

@@ -390,7 +390,7 @@ function statusLine(st, u) {
   if (st.key === 'bracelet') desc = `${st.stacks} beads left on the bracelet.`;
   if (st.key === 'cinder') desc = `${st.stacks} ${st.stacks === 1 ? 'bead' : 'beads'} embedded: ${Math.round((st.dot || 0) * st.stacks)} pain per turn, ATK and DEF -${st.stacks * 8}%.`;
   if (st.key === 'tempo') desc = { allegro: 'Allegro: hits for 80% and his next turn comes 50% sooner.', andante: 'Andante: steady, normal hits.', grave: 'Grave: slow and crushing, hits for 140%.' }[st.value] || '';
-  if (st.key === 'pages') desc = `${st.stacks} Pages. The Last Page deals ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.3) : 0.3) * 100)}% ATK to every enemy.`;
+  if (st.key === 'pages') desc = `${st.stacks} of ${u ? pageCap(u) : '?'} Pages. The Last Page spends them all: ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.15) : 0.15) * 100)}% ATK to every enemy right now.`;
   if (st.key === 'vengeance') desc = `${st.stacks} stored. Next Spear Thrust: +${st.stacks * 12}% damage and heals ${st.stacks * 2}% max HP.`;
   if (st.key === 'hunted') desc = `Takes ${pctTxt(st.value || 0.25)} more damage from the Yunze who marked it.`;
   const extra = [];

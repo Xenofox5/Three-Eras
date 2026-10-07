@@ -99,8 +99,8 @@ const took = u => B.st[u.uid].taken;
   await processDeaths();
   ok("no Last Stand when alone", !has(B.players[0], "laststand") && !STATUS.laststand);
 
-  // ---- 5. Seraphine is hidden only by a living hero, and never from a boss ----
-  setupBattle({ team: ["seraphine", "trigg", "flynn"], enemies: [{ id: "brute" }, { id: "wyvern", boss: true }] });
+  // ---- 5. Aamay is hidden only by a living hero, and never from a boss ----
+  setupBattle({ team: ["aamay", "trigg", "flynn"], enemies: [{ id: "brute" }, { id: "wyvern", boss: true }] });
   const ser = B.players[0], trig = B.players[1], fly = B.players[2];
   const brute2 = B.enemies[0], boss2 = B.enemies[1];
   ok("hidden from an ordinary enemy while heroes stand", !seenOnly(foesOf(brute2), brute2).includes(ser));
@@ -135,26 +135,17 @@ const took = u => B.st[u.uid].taken;
   await processDeaths();
   ok("a fallen hero raises the Chronicle cap", pageCap(am) === capBefore + 2, `${capBefore} -> ${pageCap(am)}`);
 
-  // He is found less often, but can still be found.
-  setupBattle({ team: ["aamay", "angus", "flynn"], enemies: [{ id: "brute" }] });
+  // Seraphine steps out of sight on a fixed cycle, which the player can count.
+  setupBattle({ team: ["seraphine", "angus", "flynn"], enemies: [{ id: "brute" }] });
   const am2 = B.players[0], br2 = B.enemies[0];
-  let hits = 0;
-  for (let i = 0; i < 400; i++) if (unlikelyAim(am2, B.players) === am2) hits++;
-  ok("overlooked about 30% of the time with an empty Chronicle", hits > 240 && hits < 320, `aimed at ${hits} of 400`);
+  const seen = [];
+  for (let turn = 1; turn <= 6; turn++) { await turnStart(am2); seen.push(has(am2, "hidden") ? "hidden" : "open"); turnEnd(am2); }
+  ok("out of sight on every third turn", seen.join(",") === "open,open,hidden,open,open,hidden", seen.join(","));
 
-  // The protection fades as he writes, and is gone once the Chronicle is full.
-  addStatus(am2, "pages", 99, { stacks: pageCap(am2), silent: true });
-  const st2 = getSt(am2, "pages"); st2.stacks = pageCap(am2);
-  let full = 0;
-  for (let i = 0; i < 200; i++) if (unlikelyAim(am2, B.players) === am2) full++;
-  ok("a full Chronicle leaves him fully exposed", full === 200, `aimed at ${full} of 200`);
-  removeStatus(am2, "pages");
-  B.players[1].hp = 0; B.players[2].hp = 0;
-  await processDeaths();
-  let alone = 0;
-  for (let i = 0; i < 100; i++) if (unlikelyAim(am2, B.players.filter(isUp)) === am2) alone++;
-  ok("always reachable once he is the last hero", alone === 100, `${alone} of 100`);
-
+  await turnStart(am2); await turnStart(am2); await turnStart(am2);
+  ok("enemies cannot aim at him while hidden", has(am2, "hidden") && !seenOnly(foesOf(br2), br2).includes(am2));
+  removeStatus(am2, "hidden");
+  ok("and can again once it lapses", seenOnly(foesOf(br2), br2).includes(am2));
   // ---- 8. Elphi rises once ----
   setupBattle({ team: ["elphi", "flynn", "leo"], enemies: [{ id: "brute" }] });
   const el = B.players[0];
@@ -162,7 +153,7 @@ const took = u => B.st[u.uid].taken;
   el.hp = 0;
   await processDeaths();
   ok("he does not stay down", el.alive && el.hp > 0, `hp ${el.hp}`);
-  ok("he comes back smaller", el.maxHp === Math.round(fullHp * 0.45), `${fullHp} -> ${el.maxHp}`);
+  ok("he comes back smaller", el.maxHp === Math.round(fullHp * 0.3), `${fullHp} -> ${el.maxHp}`);
   ok("and angrier", has(el, "determined") && stat(el, "atk") > atkBefore,
      `atk ${Math.round(atkBefore)} -> ${Math.round(stat(el, "atk"))}`);
   el.hp = 0;

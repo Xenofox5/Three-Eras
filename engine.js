@@ -233,11 +233,13 @@ function shatterHex(t, why) {
   const so = h.src;
   if (so && isUp(so) && bt(so, 'hexBlast')) { HOOK.float(t, '💥 HEX BURST', 'special'); HOOK.fx('hexburst', { src: t, owner: so, tgts: foesOf(so) }); for (const e of foesOf(so)) resolveHit(so, e, bt(so, 'hexBlast'), { aoe: true, sure: true }); }
 }
-/* Seraphine stays out of reach only while another hero is still standing to hold the eye: a
-   summoned creature is not cover, and a boss sees her regardless. */
-const unseen = (p, by) => p.isHero && p.id === 'seraphine'
-  && !(by && by.def && by.def.boss)
-  && sideList(p).some(x => x !== p && isUp(x) && x.isHero);
+/* Who cannot be aimed at with a single-target attack. Out of Sight is a status anyone can
+   carry, so it shows on the card and counts down where the player can see it. Seraphine is the
+   standing case: only a living hero is cover, never a creature, and a boss sees her regardless. */
+const unseen = (p, by) => has(p, 'hidden')
+  || (p.isHero && p.id === 'aamay'
+    && !(by && by.def && by.def.boss)
+    && sideList(p).some(x => x !== p && isUp(x) && x.isHero));
 const seenOnly = (list, by) => { const v = list.filter(p => !unseen(p, by)); return v.length ? v : list; };
 function wallFor(t) { return sideList(t).find(p => isUp(p) && p.isHero && p.id === 'soham' && has(p, 'hexwall')); }
 function raiseWall(u, amt) {
@@ -598,6 +600,14 @@ async function turnStart(u) {
     }
   }
   if (!isUp(u)) return;
+  if (u.isHero && u.id === 'seraphine' && !has(u, 'taunt')) {
+    u.flags.veilTurn = (u.flags.veilTurn || 0) + 1;
+    const every = bt(u, 'hideEvery') || 3;
+    if (u.flags.veilTurn % every === 0 && sideList(u).some(x => x !== u && isUp(x) && x.isHero)) {
+      addStatus(u, 'hidden', 1, { silent: true });
+      HOOK.float(u, '🕯 OUT OF SIGHT', 'buff');
+    }
+  }
   const rg = getSt(u, 'regen');
   if (rg) heal(rg.src || u, u, u.maxHp * (rg.value || 0.05), { noCrit: true, tick: true });
   if (u.isHero && u.id === 'angus') heal(u, u, u.maxHp * 0.03);
@@ -690,7 +700,7 @@ async function secondLight(u) {
   await HOOK.ko(u);
   await wait(300);
   u.alive = true;
-  u.maxHp = Math.max(1, Math.round(u.maxHp * (bt(u, 'riseHp') || 0.45)));
+  u.maxHp = Math.max(1, Math.round(u.maxHp * (bt(u, 'riseHp') || 0.3)));
   u.hp = u.maxHp;
   u.shield = 0;
   u.statuses = u.statuses.filter(s => STATUS[s.key].fixed && s.key !== 'terrified');
@@ -1465,20 +1475,8 @@ function pickTarget(e, m) {
     else if (r < focus + 0.15) t = ps.reduce((a, b) => (stat(b, 'def') < stat(a, 'def') ? b : a));
     else t = pick(ps);
   }
-  t = unlikelyAim(t, ps);
   const g = guardian(t);
   return g || t;
-}
-/* Aamay works in a basement nobody visits. While another hero still stands, an enemy that lands
-   on him looks again half the time. Unlike Seraphine he can always be reached, which is what keeps
-   the two apart. */
-function unlikelyAim(t, list) {
-  if (!t || !t.isHero || t.id !== 'aamay' || has(t, 'taunt')) return t;
-  if (!sideList(t).some(x => x !== t && isUp(x) && x.isHero)) return t;
-  const st = getSt(t, 'pages'), filled = st ? Math.min(1, st.stacks / pageCap(t)) : 0;
-  if (rnd() >= (bt(t, 'hide') || 0.3) * (1 - filled)) return t;
-  const others = list.filter(x => x !== t);
-  return others.length ? pick(others) : t;
 }
 const HERO_TT = { enemy: 'single', allEnemies: 'all', self: 'self', ally: 'ally', allAllies: 'allies' };
 function planHeroIntent(e) {
