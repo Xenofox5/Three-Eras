@@ -596,7 +596,6 @@ body.reduced .card.tgt .por,body.reduced .card.aloft .por::before{animation:none
 .card.stone .pi{filter:grayscale(1) sepia(.25) brightness(.85) contrast(1.15)}
 .card.stone .por::before{content:"";position:absolute;inset:0;z-index:2;border-radius:10px;pointer-events:none;background:repeating-linear-gradient(115deg,transparent 0 14px,rgba(40,36,30,.35) 14px 15px),repeating-linear-gradient(35deg,transparent 0 22px,rgba(40,36,30,.3) 22px 23px);box-shadow:inset 0 0 0 2px #a8a29a}
 .card.hexed .bub{border-color:#ffe066;box-shadow:0 0 16px #ffe066,inset 0 0 18px rgba(255,224,102,.45);border-radius:22%;opacity:.9;transform:scale(1)}
-.card.hexed .hp .s{background:repeating-linear-gradient(135deg,#fff3a0 0 4px,#e0b020 4px 8px)}
 .card.unseen .pi{opacity:.62}
 .card.unseen .por{box-shadow:0 0 0 2px rgba(176,156,255,.6),0 0 16px rgba(120,100,200,.35)}
 .card.unseen .por::after{content:"Out of sight";position:absolute;left:50%;top:4px;transform:translateX(-50%);z-index:4;font-size:10px;font-weight:800;color:#e8dcff;background:rgba(20,14,40,.82);border:1px solid rgba(176,156,255,.6);border-radius:6px;padding:1px 6px;white-space:nowrap}
@@ -626,7 +625,7 @@ body.reduced .card.tgt .por,body.reduced .card.aloft .por::before{animation:none
 .row.pl.many .nm{font-size:11px}.row.pl.many .nm em{display:none}
 .row.pl.many .hp{height:13px}.row.pl.many .hp b{font-size:10px}
 .row.pl.many .ab b{font-size:11px}
-.hp .hx{background:repeating-linear-gradient(135deg,#fff3a0 0 4px,#e0b020 4px 8px);opacity:.95;border-right:2px solid #fffbe0}
+.hp .hx{background:repeating-linear-gradient(135deg,#fff3a0 0 4px,#e0b020 4px 8px);opacity:.95;border-left:1px solid #0a0918;border-right:2px solid #fffbe0}
 .card.vessel .pi{filter:saturate(1.3) hue-rotate(-15deg) contrast(1.1)}
 .card.vessel .por{box-shadow:0 0 0 2px #d1203a,0 0 18px rgba(209,32,58,.7)}
 .card.silenced .por::after{content:"🖋";position:absolute;right:-6px;bottom:-6px;z-index:4;font-size:18px;filter:drop-shadow(0 0 4px #7a8ab0)}

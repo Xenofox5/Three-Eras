@@ -282,6 +282,10 @@ function showHeroes() {
 function synergiesFor(id) {
   return SYNERGIES.filter(s => HERO_ORDER.some(a => HERO_ORDER.some(b => a !== b && a !== id && b !== id && s.test([id, a, b]) && !s.test([a, b]))));
 }
+/* One place that says what a slot costs and what it pays back, so the action bar, the gallery
+   and the in-battle sheet can never disagree again. */
+const skillLabel = sk => `Skill, ${sk.cost || 1} SP`;
+const basicLabel = pays => pays ? 'Basic, +1 SP' : 'Basic, no SP';
 function abilHTML(ic, name, kind, desc) {
   return `<div class="abil"><div class="ic">${ic}</div><div><b>${esc(name)}</b><span class="k">${kind}</span><p>${esc(desc)}</p></div></div>`;
 }
@@ -327,10 +331,10 @@ ${heroStatsHTML(id)}
 ${statRows(h.stats, h.color, buildOf(id, SAVE.builds[id]))}
 <h4>Abilities</h4>
 ${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}
-${abilHTML(h.basic.icon, h.basic.name, 'Basic, +1 SP', h.basic.desc)}
-${abilHTML(h.skill.icon, h.skill.name, `Skill, ${h.skill.cost || 1} SP`, h.skill.desc)}
+${abilHTML(h.basic.icon, h.basic.name, basicLabel(h.id !== 'yunze'), h.basic.desc)}
+${abilHTML(h.skill.icon, h.skill.name, skillLabel(h.skill), h.skill.desc)}
 ${abilHTML(h.ult.icon, h.ult.name, 'Ultimate', h.ult.desc)}
-${h.alt ? `<h4>His other set, while ${esc(STATUS[h.altWhen].name)} holds him</h4>${abilHTML(h.alt.basic.icon, h.alt.basic.name, 'Basic, +1 SP', h.alt.basic.desc)}${abilHTML(h.alt.skill.icon, h.alt.skill.name, `Skill, ${h.alt.skill.cost || 1} SP`, h.alt.skill.desc)}${abilHTML(h.alt.ult.icon, h.alt.ult.name, 'Ultimate', h.alt.ult.desc)}` : ''}
+${h.alt ? `<h4>His other set, while ${esc(STATUS[h.altWhen].name)} holds him</h4>${abilHTML(h.alt.basic.icon, h.alt.basic.name, basicLabel(h.id !== 'vasco'), h.alt.basic.desc)}${abilHTML(h.alt.skill.icon, h.alt.skill.name, skillLabel(h.alt.skill), h.alt.skill.desc)}${abilHTML(h.alt.ult.icon, h.alt.ult.name, 'Ultimate', h.alt.ult.desc)}` : ''}
 ${(() => { const hist = BALANCE.flatMap(v => v.changes.filter(c => c.kind === 'hero' && c.who === id).map(c => Object.assign({ v: v.v }, c))); return hist.length ? `<h4>Balance history <button class="qbtn" data-guide="balance">All changes</button></h4>${hist.map(c => bcRow(c, false).replace('<div class="btx">', `<div class="btx"><span class="bv">v${esc(c.v)}</span> `)).join('')}` : ''; })()}
 <h4>Builds</h4>
 <div class="builds">${BUILDS[id].map(b => `<button class="bopt ${b.id === cur ? 'on' : ''}" data-b="${b.id}" style="--hc:${h.color}" ${unlocked ? '' : 'disabled'}><span class="i">${b.icon}</span><span><b>${esc(b.name)}${b.id === cur ? ' <em>Equipped</em>' : ''}</b>${buildMods(b)}<p>${esc(b.desc)}</p>${buildStatLine(id, b.id)}</span></button>`).join('')}</div>
@@ -393,7 +397,7 @@ ${notes.length ? `<h4>Notes</h4>${notes.map(n => `<p>${esc(n)}</p>`).join('')}` 
 }
 function statusLine(st, u) {
   const d = STATUS[st.key];
-  const name = st.key === 'stance' ? (st.value === 'far' ? 'Far stance' : 'Close stance') : d.name;
+  const name = st.key === 'stance' ? (st.value === 'far' ? 'Far stance' : 'Close stance') : st.key === 'mixture' ? 'Next: ' + MIXTURE[st.value || 0].name : d.name;
   let desc = d.desc || '';
   if (d.stat) desc = `${d.name.split(' ')[0]} ${d.neg ? '-' : '+'}${pctTxt(st.value || 0.2)}.`;
   if (d.dot) desc = `${Math.round((st.dot || 40) * (st.stacks || 1))} damage at the start of each turn.`;
@@ -403,14 +407,15 @@ function statusLine(st, u) {
   if (st.key === 'hexwall') desc = `Strength ${Math.round(st.value)} of ${u ? wallMax(u) : '?'}. Soaks ${Math.round((u ? (bt(u, 'wallSoak') || 0.3) : 0.3) * 100)}% of every direct hit on his team.`;
   if (st.key === 'bracelet') desc = `${st.stacks} beads left on the bracelet.`;
   if (st.key === 'cinder') desc = `${st.stacks} ${st.stacks === 1 ? 'bead' : 'beads'} embedded: ${Math.round((st.dot || 0) * st.stacks)} pain per turn, ATK and DEF -${st.stacks * 8}%.`;
-  if (st.key === 'tempo') desc = { allegro: 'Allegro: hits for 80% and his next turn comes 50% sooner.', andante: 'Andante: steady, normal hits.', grave: 'Grave: slow and crushing, hits for 140%.' }[st.value] || '';
+  if (st.key === 'tempo') { const w = u && bt(u, 'wild'); desc = { allegro: `Allegro: hits for ${w ? 90 : 80}% and his next turn comes 50% sooner.`, andante: 'Andante: hits for 100% and cannot miss.', grave: `Grave: hits for ${w ? 155 : 130}% and ignores 30% of the target DEF.` }[st.value] || ''; }
   if (st.key === 'pages') desc = `${st.stacks} of ${u ? pageCap(u) : '?'} Pages. The Last Page spends them all: ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.15) : 0.15) * 100)}% ATK to every enemy right now.`;
   if (st.key === 'vengeance') desc = `${st.stacks} stored. Next Spear Thrust: +${st.stacks * 12}% damage and heals ${st.stacks * 2}% max HP.`;
+  if (st.key === 'mixture') desc = ['Venom: the next flask Poisons for 2 turns.', 'Sedative: the next flask lowers ATK by 22%.', 'Solvent: the next flask lowers DEF by 22%, splashes every other enemy for 55% ATK, and pays the team a Skill Point.'][st.value || 0];
   if (st.key === 'hunted') desc = `Takes ${pctTxt(st.value || 0.25)} more damage from the Yunze who marked it.`;
   const extra = [];
   if (d.max && st.stacks > 1) extra.push(`×${st.stacks}`);
   if (st.turns < 99) extra.push(`${st.turns} ${st.turns === 1 ? 'turn' : 'turns'} left`);
-  const icon = st.key === 'stance' ? (st.value === 'far' ? '🔵' : '👊') : d.icon;
+  const icon = st.key === 'stance' ? (st.value === 'far' ? '🔵' : '👊') : st.key === 'mixture' ? MIXTURE[st.value || 0].icon : d.icon;
   return `<div><b style="color:${d.color}">${icon} ${esc(name)}</b>${extra.length ? ` <span style="color:var(--tx3)">${extra.join(', ')}</span>` : ''}<br><span style="color:var(--tx2)">${esc(desc)}</span></div>`;
 }
 function unitSheet(u) {
@@ -433,11 +438,11 @@ function unitSheet(u) {
     const h = HEROES[u.id];
     if (en && u.intents.length) body += `<h4>Next turn</h4>${u.intents.map(it => `<p><b style="color:var(--tx)">${it.move.icon} ${esc(it.move.name)}</b>${it.target && it.move.target === 'single' ? ` on ${esc(it.target.name)}` : ''}</p>`).join('')}`;
     const holding = h.alt && has(u, h.altWhen);
-    const set = (src, label, now) => `<h4>${label}${now ? ' <span class="chip">holding this</span>' : ''}</h4>${abilHTML(src.basic.icon, src.basic.name, 'Basic', src.basic.desc)}${abilHTML(src.skill.icon, src.skill.name, 'Skill', src.skill.desc)}${abilHTML(src.ult.icon, src.ult.name, 'Ultimate', src.ult.desc)}`;
+    const set = (src, label, now, pays) => `<h4>${label}${now ? ' <span class="chip">holding this</span>' : ''}</h4>${abilHTML(src.basic.icon, src.basic.name, basicLabel(pays), src.basic.desc)}${abilHTML(src.skill.icon, src.skill.name, skillLabel(src.skill), src.skill.desc)}${abilHTML(src.ult.icon, src.ult.name, 'Ultimate', src.ult.desc)}`;
     body += `<h4>Passive</h4>${abilHTML('✦', h.passive.name, 'Passive', h.passive.desc)}`;
     body += h.alt
-      ? set(h, 'His own three', !holding) + set(h.alt, `With ${esc(STATUS[h.altWhen].name)}`, holding)
-      : set(h, 'Abilities', false);
+      ? set(h, 'His own three', !holding, true) + set(h.alt, `With ${esc(STATUS[h.altWhen].name)}`, holding, u.id !== 'vasco')
+      : set(h, 'Abilities', false, u.id !== 'yunze');
     if (u.build && u.build.id !== 'balanced') body += `<h4>Build</h4>${abilHTML(u.build.icon, u.build.name, 'Build', u.build.desc)}`;
   }
   sheet(body);

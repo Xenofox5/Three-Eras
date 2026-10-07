@@ -100,10 +100,14 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [x] **Seraphine narrowed** in v0.4.4, keeping the idea and cutting two ways: a summoned creature
   no longer counts as cover, so only a living hero hides her, and a boss sees her regardless. Still
   needs to not overlap with the Aamay passive, which is still open below.
-- [ ] **Kingsley.** Slight buff. One more random trinket, so five.
-- [ ] **The Chosen.** Slightly too tanky.
-- [ ] **Angus.** Cycling Unbreakable makes him effectively immortal (seen in a 5v1). Nerf the
-  cycle, buff his offence slightly to compensate.
+- [x] **Kingsley** in v0.4.15. A fifth item, the Loaded Dice, which pays the team 2 SP and gives
+  everyone Crit Up. The item he pulled now shows above him instead of only tinting the screen.
+  Tune 80% to 95%, Songs 6% to 7%. Composite 49.6 to 50.6.
+- [x] **The Chosen** in v0.4.15. Grace gives 2% damage reduction per stack instead of 3%, so 22%
+  at five stacks rather than 27%, and the dive mends 15% instead of 20%. Composite 55.4 to 51.9.
+- [x] **Angus** in v0.4.15. Unbreakable leaves him Spent for 4 turns with no ultimate charge at
+  all, which takes his invulnerable share of a fight from about half to about a quarter. Sword
+  115% to 130% and the ultimate 145% to 160% pay for it: composite 51.4 to 51.7.
 - [x] **David buffed** in v0.4.4: guarding cuts 50% of damage instead of 40%, and every hit he
   intercepts heals him 3% of his max HP, so the reward grows with how much he now catches.
   Originally: asked for directly on 2026-10-07, and the v0.4.1 Guard fix
@@ -111,13 +115,18 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   he soaks far more than he did while his composite barely moved (48.7). He is doing more work for
   the same result. Buff his own survivability or his payoff for guarding, not his damage, since the
   guard is the point of him.
-- [ ] **Danielle.** Riposte chance is too high.
-- [ ] **Alfred.** Verify the tempo multipliers do what the descriptions say, and make the three
-  tempos feel more distinct from each other.
+- [x] **Danielle** in v0.4.15. 45% to 32%, Bastion 30% to 22%, Duelist 70% to 52%, and each
+  answer hits for 115% instead of 95% so the ones that land are worth watching.
+- [x] **Alfred** in v0.4.15, without the rework he was told not to get. The tooltip claimed Grave
+  hit for 140% when the engine has always used 130%, and ignored Wild Rhythm; Broken Rhythm cycled
+  a Grave of 140% that exists nowhere else. Each tempo now has its own reason to want it: Allegro
+  buys time, Andante cannot miss, Grave ignores 30% of the target DEF.
 - [x] **Lachlan.** Max HP 1400 to 1290 in v0.4.4. Composite 55.1 to 48.3, duel 93 to 85. Still the
   top duellist, so group E still points at him.
-- [ ] **Malakai.** Buff Living Bargain, rework the skill, and rework the passive so he plays less
-  monotonously. Composite 46.1, near the bottom.
+- [x] **Malakai** in v0.4.15. The flask follows a fixed order with the next phial on a badge, and
+  every third is on the house: it splashes every enemy and pays the team a Skill Point. The bargain
+  sells the ally’s debuffs on to the strongest enemy, so it reads off the board instead of doing
+  one thing. Flask 90% to 110%. Composite 48.0 to 53.6.
 - [x] **Harry.** Crush 150% to 135% ATK in v0.4.4, Force build 220% to 200%. Composite 63.6 to
   59.2, so he is inside the band for the first time. The Force build text also quoted a 175%
   baseline that was never true.

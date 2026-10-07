@@ -235,6 +235,72 @@ const took = u => B.st[u.uid].taken;
   const twos = HERO_ORDER.filter(id => (HEROES[id].skill.cost || 1) === 2);
   ok("only a few skills cost two", twos.length === 2, twos.join(","));
 
+  // ---- Malakai mixes in a fixed order, and every third flask is on the house ----
+  setupBattle({ team: ["malakai", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
+  const mk = B.players[0], e1 = B.enemies[0], e2 = B.enemies[1];
+  ok("he starts on Venom", mixOf(mk).name === "Venom", mixOf(mk).name);
+  await KIT.malakai.basic(mk, e1);
+  ok("the first flask Poisons", has(e1, "poison"));
+  ok("then Sedative is next", mixOf(mk).name === "Sedative", mixOf(mk).name);
+  await KIT.malakai.basic(mk, e1);
+  ok("the second lowers ATK", has(e1, "atkDown"));
+  ok("then Solvent is next", mixOf(mk).name === "Solvent", mixOf(mk).name);
+  const spBefore = B.sp, e2Before = e2.hp;
+  await KIT.malakai.basic(mk, e1);
+  ok("the third splashes the other enemy", e2.hp < e2Before && has(e2, "defDown"));
+  ok("and pays the team a point", B.sp === spBefore + 1, `${spBefore} to ${B.sp}`);
+  ok("then the order comes round again", mixOf(mk).name === "Venom", mixOf(mk).name);
+
+  // The bargain sells on whatever ails the ally, so it never does the same thing twice.
+  setupBattle({ team: ["malakai", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const ma = B.players[0], mate = B.players[1], buyer = B.enemies[0];
+  addStatus(mate, "poison", 2, { dot: 40 }); addStatus(mate, "defDown", 2, { value: 0.2 });
+  addStatus(mate, "taunt", 2);
+  await KIT.malakai.skill(ma, mate);
+  ok("the ally is clean afterwards", !has(mate, "poison") && !has(mate, "defDown"));
+  ok("the buyer takes both debuffs", has(buyer, "poison") && has(buyer, "defDown"));
+  ok("a Taunt is not a debuff to sell", has(mate, "taunt") && !has(buyer, "taunt"));
+  ok("the ally still gets the deal", has(mate, "atkUp") && has(mate, "spdUp"));
+  setupBattle({ team: ["malakai", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  await KIT.malakai.skill(B.players[0], B.players[1]);
+  ok("with nothing to sell the buyer is Poisoned anyway", has(B.enemies[0], "poison"));
+
+  // ---- Angus cannot stand in Unbreakable forever ----
+  setupBattle({ team: ["angus", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const an = B.players[0];
+  await KIT.angus.ult(an);
+  ok("Unbreakable holds him up", has(an, "undying"));
+  ok("and leaves him Spent", has(an, "spent"));
+  an.ult = 0; gainUlt(an, 60);
+  ok("Spent means no charge at all", an.ult === 0, `ult ${an.ult}`);
+  removeStatus(an, "spent"); gainUlt(an, 60);
+  ok("and he charges again once it passes", an.ult > 0, `ult ${an.ult}`);
+
+  // ---- Alfred: each tempo does its own thing, at the numbers the text prints ----
+  setupBattle({ team: ["alfred", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const al2 = B.players[0];
+  removeStatus(al2, "tempo"); addStatus(al2, "tempo", 99, { value: "andante", silent: true });
+  ok("Andante cannot miss", tempoOpts(al2).sure === true);
+  ok("Andante hits at full strength", tempoMult(al2) === 1, tempoMult(al2));
+  removeStatus(al2, "tempo"); addStatus(al2, "tempo", 99, { value: "grave", silent: true });
+  ok("Grave cuts through armour", tempoOpts(al2).pierce === 0.3);
+  ok("Grave hits for the 130% the text says", tempoMult(al2) === 1.3, tempoMult(al2));
+  removeStatus(al2, "tempo"); addStatus(al2, "tempo", 99, { value: "allegro", silent: true });
+  ok("Allegro has neither, it buys time instead", !tempoOpts(al2).sure && !tempoOpts(al2).pierce);
+  ok("Allegro hits for the 80% the text says", Math.abs(tempoMult(al2) - 0.8) < 1e-9, tempoMult(al2));
+
+  // ---- Kingsley has a fifth item in the bag ----
+  setupBattle({ team: ["kingsley", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const kg = B.players[0];
+  const pulls = new Set();
+  let dice = 0;
+  for (let i = 0; i < 400; i++) { B.sp = 0; await KIT.kingsley.skill(kg); if (B.sp > 0) dice++; kg.statuses = kg.statuses.filter(x => x.key !== "critUp"); }
+  // One item in five, so 400 pulls should turn up the dice somewhere near eighty times.
+  ok("Loaded Dice comes up about one pull in five", dice > 40 && dice < 130, `${dice} of 400`);
+  const named = HEROES.kingsley.skill.desc;
+  ["Lantern", "Mirror Charm", "Bell", "Spark Box", "Loaded Dice"].forEach(n => pulls.add(named.includes(n)));
+  ok("and all five are named in the description", !pulls.has(false));
+
 console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
 })();

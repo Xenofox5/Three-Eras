@@ -310,10 +310,19 @@ const FX = {
   song: d => { (d.tgts || []).forEach(t => { const p = P(t); burst(p, { color: '#7ad06a', n: 8, spread: 30, up: 50 }); }); },
   trinket: async d => {
     SND.play('gain'); const a = P(d.src);
-    const col = { lantern: '#ffd56b', mirror: '#cfe8ff', bell: '#f0c040', spark: '#ff6a2a' }[d.item] || '#fff';
+    const col = { lantern: '#ffd56b', mirror: '#cfe8ff', bell: '#f0c040', spark: '#ff6a2a', dice: '#b0ff8a' }[d.item] || '#fff';
+    const face = { lantern: '🏮', mirror: '🪞', bell: '🔔', spark: '🎆', dice: '🎲' }[d.item] || '🎁';
     ring(a, { color: col, size: 90, width: 4 }); burst(a, { color: col, n: 12, spread: 40, up: 30 });
-    await W(220); allP(d).forEach(p => { ring(p, { color: col, size: p.w * 1.2, dur: 360 }); burst(p, { color: col, n: 8 }); });
+    // The item itself comes up out of the bag, so you can see what he pulled.
+    const c = fxEl('te-trinket', { left: (a.x - 20) + 'px', top: (a.y - 58) + 'px', width: '40px', height: '40px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px',
+      filter: 'drop-shadow(0 0 10px ' + col + ')' });
+    c.textContent = face;
+    anim(c, [{ transform: 'translateY(14px) scale(.4)', opacity: 0 }, { transform: 'translateY(0) scale(1.2)', opacity: 1, offset: 0.5 }, { transform: 'translateY(0) scale(1)', opacity: 1 }], 380);
+    await W(260); allP(d).forEach(p => { ring(p, { color: col, size: p.w * 1.2, dur: 360 }); burst(p, { color: col, n: 8 }); });
+    anim(c, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.7) translateY(-16px)' }], 260).then(() => c.remove());
     if (d.item === 'spark') shakeArena(false);
+    await W(200);
   },
   cards: async d => { SND.play('whoosh'); const a = P(d.src), b = P(d.tgt); for (let k = 0; k < 3; k++) later(() => projectile(a, { x: b.x + (k - 1) * 10, y: b.y }, { color: '#f4f0e8', size: 10, dur: 220, ease: 'linear' }), k * 60); await W(300); burst(b, { color: '#a050d0', n: 8 }); },
   hellmark: d => melee(d, { color: '#d1203a', angle: 40, thick: 7, len: 1.4, extra: p => burst(p, { color: '#ff4a2a', n: 10, up: 20 }) }),

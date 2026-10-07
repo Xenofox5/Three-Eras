@@ -81,6 +81,7 @@ function statusLabel(key, v, st) {
   const d = STATUS[key];
   if (d.stat) return `${d.icon} ${d.name}${v ? ' ' + (d.neg ? '-' : '+') + Math.round(v * 100) + '%' : ''}`;
   if (key === 'stance') return st && st.value === 'far' ? '🔵 Far stance' : '👊 Close stance';
+  if (key === 'mixture') return `🧪 Next: ${MIXTURE[(st && st.value) || 0].name}`;
   return `${d.icon} ${d.name}`;
 }
 function addStatus(t, key, turns, o = {}) {
@@ -126,6 +127,7 @@ function cleanse(t, n = 99) {
   if (c) HOOK.float(t, '✧ CLEANSED', 'buff');
   return c;
 }
+const sellable = t => t.statuses.filter(s => STATUS[s.key].type === 'debuff' && !STATUS[s.key].fixed);
 function stripBuffs(t) {
   const before = t.statuses.length + (t.shield > 0 ? 1 : 0);
   t.statuses = t.statuses.filter(s => { const d = STATUS[s.key]; return !(d.type === 'buff' && !d.fixed); });
@@ -174,7 +176,7 @@ function dmgBonus(u, t) {
 function takenMult(t, u) {
   let m = 1 - (t.dr || 0);
   if (has(t, 'guarding')) m *= 1 - (bt(t, 'guardDr') || 0.5);
-  if (t.isHero && t.id === 'chosen') { const g = getSt(t, 'grace'); if (g) m *= 1 - 0.03 * g.stacks; }
+  if (t.isHero && t.id === 'chosen') { const g = getSt(t, 'grace'); if (g) m *= 1 - 0.02 * g.stacks; }
   if (has(t, 'stone')) m *= 1 - (bt(t, 'stoneDr') || 0.5);
   /* The thing wearing him is harder to put down than he is. Locked into it the Vessel fell in
      75% of fights against the jester 50%, and the owner asked for its damage cut, not its
@@ -265,8 +267,22 @@ function summonCreature(owner, kind) {
   return c;
 }
 const TEMPO = { allegro: { icon: '⏩', name: 'Allegro' }, andante: { icon: '🎵', name: 'Andante' }, grave: { icon: '🐢', name: 'Grave' } };
+const MIXTURE = [
+  { key: 'poison', icon: '☠️', name: 'Venom' },
+  { key: 'atkDown', icon: '💤', name: 'Sedative' },
+  { key: 'defDown', icon: '⚗️', name: 'Solvent' }
+];
+const mixSlot = u => { const st = getSt(u, 'mixture'); return st ? st.value : 0; };
+// Toxicologist throws the order away and mixes Venom every time.
+const mixOf = u => MIXTURE[bt(u, 'alwaysPoison') ? 0 : mixSlot(u)];
+function shiftMix(u) {
+  const nx = (mixSlot(u) + 1) % MIXTURE.length;
+  removeStatus(u, 'mixture'); addStatus(u, 'mixture', 99, { value: nx, silent: true });
+}
 function tempoOf(u) { const st = getSt(u, 'tempo'); return st ? st.value : 'andante'; }
 function tempoMult(u) { const t = tempoOf(u), w = bt(u, 'wild'); return t === 'allegro' ? (w ? 0.9 : 0.8) : t === 'grave' ? (w ? 1.55 : 1.3) : 1; }
+/* What each tempo is for beyond the number: Andante never misses, Grave cuts through armour. */
+const tempoOpts = u => { const t = tempoOf(u); return t === 'andante' ? { sure: true } : t === 'grave' ? { pierce: 0.3 } : {}; };
 function shiftTempo(u, first) {
   const cur = first ? null : tempoOf(u);
   const opts = (bt(u, 'wild') ? ['allegro', 'grave'] : bt(u, 'noGrave') ? ['allegro', 'andante'] : ['allegro', 'andante', 'grave']).filter(x => x !== cur);
@@ -460,7 +476,7 @@ function heal(src, t, amt, o = {}) {
   return real;
 }
 function gainUlt(u, amt) {
-  if (!u.isHero || has(u, 'unsealed')) return;
+  if (!u.isHero || has(u, 'unsealed') || has(u, 'spent')) return;
   if (u.id === 'harry') amt *= 0.55;
   if (u.id === 'yunze') amt *= 0.7;
   if (u.id === 'peguicha' && !bt(u, 'hellRate')) amt *= 0.7;
@@ -493,11 +509,11 @@ async function strike(u, t, mult, o = {}) {
   const r = resolveHit(u, t, mult, o);
   if (r && !r.miss && !r.blocked && o.status) applyOnHit(u, t, o.status);
   const foeHit = r && t.isHero && t.side !== u.side && isUp(t) && isUp(u) && !o.noCounter;
-  if (foeHit && t.id === 'daniel' && !r.miss && (r.blocked || rnd() < (bt(t, 'counter') || 0.45))) {
+  if (foeHit && t.id === 'daniel' && !r.miss && (r.blocked || rnd() < (bt(t, 'counter') || 0.32))) {
     await wait(140);
     HOOK.float(t, '🤺 RIPOSTE', 'special');
     await HOOK.fx('rapier', { src: t, tgt: u, color: '#ffe066' });
-    resolveHit(t, u, bt(t, 'ripMult') || 0.95, { sure: true, noCounter: true, critBonus: 0.25 });
+    resolveHit(t, u, bt(t, 'ripMult') || 1.15, { sure: true, noCounter: true, critBonus: 0.25 });
   }
   const blCh = t.id === 'harry' ? (bt(t, 'backlash') || 0) + (has(t, 'unsealed') ? 0.4 : 0) : 0;
   if (foeHit && blCh > 0 && t.flags.blTurn !== B.turn && (r.miss || rnd() < blCh)) {
@@ -561,6 +577,7 @@ function battleStart(u) {
     if (u.id === 'lachlan') { u.shield = Math.round(u.maxHp * lachCap(u)); addStatus(u, 'stance', 99, { value: 'close', silent: true }); }
     if (u.id === 'harry') u.flags.cheat = true;
     if (u.id === 'alfred') shiftTempo(u, true);
+    if (u.id === 'malakai') addStatus(u, 'mixture', 99, { value: 0, silent: true });
     if (u.id === 'peguicha') { u.flags.beadMax = bt(u, 'beads') || 5; u.flags.beads = u.flags.beadMax; syncBeads(u); }
     if (u.id === 'gemia' && B.units.some(x => x !== u && x.heroId === 'yunze')) addStatus(u, 'terrified', 99, { silent: true });
     if (u.id === 'vasco' && u.flags.startVessel) { u.flags.vessel = true; addStatus(u, 'vessel', 99, { silent: true }); }
@@ -770,7 +787,7 @@ const KIT = {
   alfred: {
     async basic(u, t) {
       const fc = u.flags.frameCrit === t.uid && has(t, 'framed');
-      await strike(u, t, 1.12 * tempoMult(u), { fx: 'katana', forceCrit: fc, acc: 0.05 });
+      await strike(u, t, 1.12 * tempoMult(u), { fx: 'katana', forceCrit: fc, acc: 0.05, ...tempoOpts(u) });
       if (fc) u.flags.frameCrit = null;
     },
     async skill(u, t) {
@@ -779,7 +796,8 @@ const KIT = {
       if (isUp(t)) { addStatus(t, 'framed', bt(u, 'frameTurns') || 2, { src: u }); u.flags.frameCrit = t.uid; HOOK.float(t, '👌 FRAMED', 'debuff'); }
     },
     async ult(u) {
-      const tempos = [0.8, 1, 1.4];
+      const w = bt(u, 'wild');
+      const tempos = [w ? 0.9 : 0.8, 1, w ? 1.55 : 1.3];
       for (let i = 0; i < 6; i++) {
         const f = foesOf(u); if (!f.length) break;
         const fr = f.filter(e => has(e, 'framed'));
@@ -821,28 +839,29 @@ const KIT = {
   },
   kingsley: {
     async basic(u, t) {
-      await strike(u, t, 0.8, { fx: 'note' });
-      const l = lowest(friendsOf(u)); if (l) { addStatus(l, 'song', 2, { src: u, value: bt(u, 'songHeal') || 0.06 }); HOOK.fx('song', { tgts: [l] }); }
+      await strike(u, t, 0.95, { fx: 'note' });
+      const l = lowest(friendsOf(u)); if (l) { addStatus(l, 'song', 2, { src: u, value: bt(u, 'songHeal') || 0.07 }); HOOK.fx('song', { tgts: [l] }); }
     },
     async skill(u) {
       const k = (bt(u, 'trinket') || 1) * (u.flags.borrowed ? 1.25 : 1);
-      const item = pick(['lantern', 'mirror', 'bell', 'spark']);
-      HOOK.float(u, { lantern: '🏮 LANTERN', mirror: '🪞 MIRROR CHARM', bell: '🔔 JESTER\'S BELL', spark: '🎆 SPARK BOX' }[item], 'special');
-      await HOOK.fx('trinket', { src: u, item, tgts: item === 'lantern' ? friendsOf(u) : foesOf(u) });
+      const item = pick(['lantern', 'mirror', 'bell', 'spark', 'dice']);
+      HOOK.float(u, { lantern: '🏮 LANTERN', mirror: '🪞 MIRROR CHARM', bell: '🔔 JESTER\'S BELL', spark: '🎆 SPARK BOX', dice: '🎲 LOADED DICE' }[item], 'special');
+      await HOOK.fx('trinket', { src: u, item, tgts: (item === 'lantern' || item === 'dice') ? friendsOf(u) : foesOf(u) });
       if (item === 'lantern') { for (const a of friendsOf(u)) heal(u, a, a.maxHp * 0.14 * k); HOOK.sfx('heal'); }
       else if (item === 'mirror') { const l = lowest(friendsOf(u)); if (l) addShield(u, l, u.maxHp * 0.22 * k); }
       else if (item === 'bell') { const f = foesOf(u); for (const e of f) addStatus(e, 'blind', 1); const e = pick(f); if (e && rnd() < Math.min(1, 0.5 * k)) addStatus(e, 'stun', 1); }
+      else if (item === 'dice') { addSp(u, 2); HOOK.float(u, '🔷 +2 SP', 'buff'); for (const a of friendsOf(u)) addStatus(a, 'critUp', 2, { value: 0.12 * k }); }
       else { for (const e of foesOf(u)) resolveHit(u, e, 0.75 * k, { aoe: true }); }
     },
     async ult(u) {
       await HOOK.fx('blessing', { tgts: friendsOf(u), color: '#7ad06a' });
-      for (const a of friendsOf(u)) { addStatus(a, 'song', 3, { src: u, value: bt(u, 'songHeal') || 0.06 }); addStatus(a, 'spdUp', 2, { value: 0.15 }); cleanse(a); }
+      for (const a of friendsOf(u)) { addStatus(a, 'song', 3, { src: u, value: bt(u, 'songHeal') || 0.07 }); addStatus(a, 'spdUp', 2, { value: 0.15 }); cleanse(a); }
     }
   },
   vasco: {
     async basic(u, t) {
       if (has(u, 'vessel')) { await strike(u, t, 1.15, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
-      const r = await strike(u, t, 1.55, { fx: 'cards' });
+      const r = await strike(u, t, 1.3, { fx: 'cards' });
       const n = bt(u, 'noTrick') ? 0 : (bt(u, 'doubleTrick') ? 3 : 2);
       if (hitOK(r) && isUp(t) && n) for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 3, { value: 0.25 });
     },
@@ -987,7 +1006,7 @@ const KIT = {
     }
   },
   angus: {
-    async basic(u, t) { await strike(u, t, bt(u, 'basicMult') || 1.15, { fx: 'slash' }); },
+    async basic(u, t) { await strike(u, t, bt(u, 'basicMult') || 1.3, { fx: 'slash' }); },
     async skill(u) {
       await HOOK.fx('aura', { tgt: u, color: '#ff9a3c' });
       addStatus(u, 'taunt', bt(u, 'tauntTurns') || 2); addShield(u, u, u.maxHp * 0.12); addStatus(u, 'defUp', 2, { value: 0.2 });
@@ -995,8 +1014,8 @@ const KIT = {
     async ult(u) {
       const f = foesOf(u);
       await HOOK.fx('quake', { src: u, tgts: f, color: '#ff9a3c' });
-      for (const e of f) resolveHit(u, e, 1.45, { aoe: true });
-      addStatus(u, 'undying', 2);
+      for (const e of f) resolveHit(u, e, 1.6, { aoe: true });
+      addStatus(u, 'undying', 2); addStatus(u, 'spent', 4);
       for (const a of friendsOf(u)) addStatus(a, 'defUp', 2, { value: 0.25 });
     }
   },
@@ -1093,7 +1112,7 @@ const KIT = {
       resolveHit(u, t, 2.6 + (bt(u, 'gracePer') || 0.2) * n, { sure: true });
       HOOK.update();
       await wait(200);
-      heal(u, u, u.maxHp * 0.2);
+      heal(u, u, u.maxHp * 0.15);
       HOOK.sfx('heal');
     }
   },
@@ -1152,14 +1171,40 @@ const KIT = {
   },
   malakai: {
     async basic(u, t) {
-      const r = await strike(u, t, 0.9, { fx: 'flask' });
-      if (r && hitOK(r)) applyOnHit(u, r.target, { key: bt(u, 'alwaysPoison') ? 'poison' : 'alch', turns: 2, dot: 0.3, value: 0.22 });
+      const m = mixOf(u), phial = { key: m.key, turns: 2, dot: 0.3, value: 0.22 };
+      const house = mixSlot(u) === 2;
+      const others = foesOf(u).filter(e => e !== t);
+      const r = await strike(u, t, 1.1, { fx: 'flask' });
+      if (r && hitOK(r)) applyOnHit(u, r.target, phial);
+      if (house) {
+        HOOK.float(u, '🧪 ON THE HOUSE', 'buff');
+        if (others.length) {
+          await HOOK.fx('splash', { src: t, tgts: others, color: '#ffb23d' });
+          for (const o of others) { resolveHit(u, o, 0.55, { aoe: true, sure: true }); applyOnHit(u, o, phial); }
+        }
+        addSp(u, 1);
+      }
+      shiftMix(u);
     },
     async skill(u, t) {
       await HOOK.fx('bargain', { src: u, tgt: t, color: '#ffb23d' });
       if (bt(u, 'freeBargain')) heal(u, t, t.maxHp * (bt(u, 'bargainHeal') || 0.1));
       else { const cost = Math.floor(t.hp * 0.08); if (cost > 0 && t.hp > cost) { t.hp -= cost; HOOK.float(t, '-' + cost + ' price', 'cost'); } }
-      addStatus(t, 'atkUp', 2, { value: bt(u, 'bargainAtk') || 0.35 }); addStatus(t, 'spdUp', 2, { value: 0.2 });
+      /* The transmutation. Whatever ails the ally is sold on to the strongest enemy, so the deal
+         reads off the board rather than doing the same thing every time, and the buyer always
+         gets the worse end of it. */
+      const f = foesOf(u);
+      const mark = f.length ? f.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a), f[0]) : null;
+      const sold = sellable(t);
+      if (mark) {
+        await HOOK.fx('transmute', { tgts: [mark], color: '#ffb23d' });
+        if (sold.length) {
+          for (const s of sold) addStatus(mark, s.key, Math.max(2, s.turns), { value: s.value, dot: s.dot, stacks: s.stacks, src: u });
+          HOOK.float(mark, '⚗️ SOLD ON ×' + sold.length, 'debuff');
+        } else addStatus(mark, 'poison', 2, { dot: 0.3 * stat(u, 'atk') * (1 + u.mods.dot), src: u });
+      }
+      if (sold.length) cleanse(t);
+      addStatus(t, 'atkUp', 2, { value: bt(u, 'bargainAtk') || 0.3 }); addStatus(t, 'spdUp', 2, { value: 0.2 });
     },
     async ult(u) {
       const f = foesOf(u);
@@ -1285,7 +1330,7 @@ function previewFor(u, kind, t) {
     case 'trigg.basic': return D(u, t, 0.95);
     case 'trigg.skill': { const cap = bt(u, 'creatureCap') || 2, n = creaturesOf(u).length; return { txt: n < cap ? `👹 Imp (${n + 1}/${cap})` : '✚ Mend creatures' }; }
     case 'trigg.ult': { const n = creaturesOf(u).length; return n ? D(u, t, 1.1 * n, { sure: true, note: `${n} burst + Hellhound` }) : { txt: '🐺 Hellhound' }; }
-    case 'alfred.basic': return D(u, t, 1.12 * tempoMult(u), { acc: 0.05, note: TEMPO[tempoOf(u)].name });
+    case 'alfred.basic': return D(u, t, 1.12 * tempoMult(u), { acc: 0.05, note: TEMPO[tempoOf(u)].name, ...tempoOpts(u) });
     case 'alfred.skill': return D(u, t, 0.95 * tempoMult(u), { acc: 0.1, note: '+Framed' });
     case 'alfred.ult': return D(u, t, 0.75, { note: 'per cut', acc: 0.1 });
     case 'ethan.basic': return D(u, t, 1.15);
@@ -1297,15 +1342,15 @@ function previewFor(u, kind, t) {
     case 'kingsley.basic': return D(u, t, 0.8);
     case 'kingsley.skill': return { txt: '🎁 Random trinket' };
     case 'kingsley.ult': return { txt: '🎶 Song' };
-    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.15 : 1.55, { note: has(u, 'vessel') ? '+Burn' : '+ 2 random tricks' });
+    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.15 : 1.3, { note: has(u, 'vessel') ? '+Burn' : '+ 2 random tricks' });
     case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 0.82, { note: 'every enemy, strips buffs' }); return { txt: '🃏 Deal a card' }; }
     case 'vasco.ult': return { txt: has(u, 'vessel') ? '🃏 Back to the jester' : '😈 Let it out' };
     case 'aamay.basic': return D(u, t, 0.85);
     case 'aamay.skill': return D(u, t, 0.55, { acc: 0.1, note: 'Silence, SPD and ATK down' });
     case 'aamay.ult': { const pg = getSt(u, 'pages'), n = pg ? pg.stacks : 0; return D(u, t, Math.max(0.4, (bt(u, 'pageMult') || 0.15) * n), { sure: true, note: `${n} of ${pageCap(u)} pages` }); }
-    case 'angus.basic': return D(u, t, bt(u, 'basicMult') || 1.15);
+    case 'angus.basic': return D(u, t, bt(u, 'basicMult') || 1.3);
     case 'angus.skill': return { txt: '🎯 Taunt +🛡' };
-    case 'angus.ult': return D(u, t, 1.45);
+    case 'angus.ult': return D(u, t, 1.6);
     case 'flynn.basic': return D(u, t, 1, { acc: 0.05 });
     case 'flynn.skill': return D(u, t, 1.2, { acc: 0.05 });
     case 'flynn.ult': return D(u, t, 0.65, { note: 'per bolt', acc: 0.1 });
@@ -1327,8 +1372,8 @@ function previewFor(u, kind, t) {
     case 'yunze.basic': return D(u, t, 0.4, { hits: 2, acc: 0.05 });
     case 'yunze.skill': return D(u, t, 1.25, { acc: 0.15 });
     case 'yunze.ult': return D(u, t, 0.4, { note: 'per hit', acc: 0.1 });
-    case 'malakai.basic': return D(u, t, 0.9);
-    case 'malakai.skill': return bt(u, 'freeBargain') ? { txt: '⚔️▲ 💨▲ ✚' } : { txt: '⚔️▲ 💨▲' };
+    case 'malakai.basic': return D(u, t, 1.1, { note: mixOf(u).name + (mixSlot(u) === 2 ? ', on the house' : '') });
+    case 'malakai.skill': { const n = sellable(t).length; return { txt: (n ? '⚗️▸' + n + ' ' : '') + '⚔️▲ 💨▲' + (bt(u, 'freeBargain') ? ' ✚' : '') }; }
     case 'malakai.ult': return { txt: '⚗️ strip' };
     case 'lachlan.basic': return far ? D(u, t, 0.85, { acc: 0.05 }) : D(u, t, 0.65, { hits: 2 });
     case 'lachlan.skill': return D(u, t, 1.6);
@@ -1397,7 +1442,6 @@ async function heroAct(u, ch) {
       if (hitOK(hr) && isUp(e)) addStatus(e, 'sever', 99, { stacks: 1, silent: true });
     }
   }
-  if (kind === 'skill' && u.id === 'malakai' && rnd() < 0.5) { addSp(u, 1); HOOK.float(u, '🔷 SP REFUNDED', 'buff'); }
   if (kind !== 'ult') gainUlt(u, (kind === 'basic' ? 20 : 30) * (1 + u.mods.ultGain));
   else if (u.id !== 'harry') u.ult = Math.min(100, 5);
   if (u.id === 'chosen' && isUp(u)) addStatus(u, 'grace', 99, { stacks: 1, silent: true });
@@ -1442,7 +1486,12 @@ function aiChoose(u) {
         if (!mine.some(p => isUp(p) && has(p, 'guarded'))) { const o = al.filter(a => a !== u); if (o.length) return { kind: 'skill', target: lowest(o) }; }
         break;
       }
-      case 'malakai': { const c = al.filter(a => a !== u && !has(a, 'atkUp') && hpPct(a) > 0.4).sort((a, b) => stat(b, 'atk') - stat(a, 'atk'))[0]; if (c && sp >= 2) return { kind: 'skill', target: c }; break; }
+      case 'malakai': {
+        const pool = al.filter(a => a !== u && hpPct(a) > 0.4 && (sellable(a).length || !has(a, 'atkUp')));
+        const c = pool.sort((a, b) => (sellable(b).length - sellable(a).length) || (stat(b, 'atk') - stat(a, 'atk')))[0];
+        if (c && sp >= skillCost(u) + 1) return { kind: 'skill', target: c };
+        break;
+      }
       case 'yunze': return { kind: 'skill', target: tgtFor('skill') };
       case 'trigg': if (sp >= 1 && creaturesOf(u).length < (bt(u, 'creatureCap') || 2)) return { kind: 'skill', target: u }; break;
       case 'alfred': {

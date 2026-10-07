@@ -20,11 +20,13 @@ const STATUS = {
   defDown:   { name: 'DEF Down', icon: '🛡️', type: 'debuff', stat: 'def', neg: true, color: '#7fb2ff' },
   spdUp:     { name: 'SPD Up', icon: '💨', type: 'buff', stat: 'spd', color: '#7dffc4' },
   spdDown:   { name: 'SPD Down', icon: '💨', type: 'debuff', stat: 'spd', neg: true, color: '#7dffc4' },
+  critUp:    { name: 'Crit Up', icon: '💥', type: 'buff', stat: 'crit', color: '#ffd56b' },
   taunt:     { name: 'Taunting', icon: '🎯', type: 'buff', color: '#ff9a3c', desc: 'Enemies must aim single-target attacks at this unit, except moves marked as ignoring Taunt.' },
   regen:     { name: 'Regen', icon: '💚', type: 'buff', color: '#5dff8f', desc: 'Heals 5% max HP at the start of each turn.' },
   hunted:    { name: 'Hunted', icon: '👁️', type: 'debuff', color: '#4fb3ff', desc: 'Takes 25% more damage from the Yunze who marked it (40% with Reaper). Other attackers get no bonus.' },
   afterimage:{ name: 'Afterimage', icon: '👤', type: 'buff', color: '#9fd0ff', desc: 'Dodges the next attack completely.' },
   undying:   { name: 'Unbreakable', icon: '✨', type: 'buff', color: '#ffd36b', desc: 'Cannot fall below 1 HP.' },
+  spent:     { name: 'Spent', icon: '🕯', type: 'debuff', color: '#9a8f7a', desc: 'Gains no ultimate charge at all while it lasts.' },
   guarding:  { name: 'Guarding', icon: '🛡️', type: 'buff', color: '#c9d2e6', desc: 'Takes single-target hits aimed at the guarded ally, with 20% less damage.' },
   guarded:   { name: 'Guarded', icon: '🤝', type: 'buff', color: '#c9d2e6', desc: 'Single-target attacks against this unit hit the guardian instead.' },
   crystal:   { name: 'Crystal Sphere', icon: '💎', type: 'buff', color: '#ffe066', desc: 'Blocks the next hit completely.' },
@@ -65,9 +67,9 @@ const HEROES = {
     stats: { hp: 1620, atk: 108, def: 120, spd: 92, crit: 0.08, cdmg: 0.5 },
     look: { skin: '#e2b48c', hair: '#6b4428', hairStyle: 'short', eye: '#ff8a1e', body: 'armour', bodyColor: '#c58b4f', trim: '#f4c98a', aura: '#ff9a3c', bg: '#7a3d12', weapon: 'sword', brow: 'firm' },
     passive: { name: 'Unyielding Aura', desc: 'Takes 12% less damage. Heals 3% max HP at the start of each of his turns. His aura saps anyone who strikes him: they lose 6% ATK until the end of their next turn.' },
-    basic: { name: 'Steadfast Cut', icon: '🗡️', target: 'enemy', desc: 'Deal 115% ATK to one enemy.' },
+    basic: { name: 'Steadfast Cut', icon: '🗡️', target: 'enemy', desc: 'Deal 130% ATK to one enemy.' },
     skill: { name: 'Aura of Iron', icon: '🛡️', cost: 1, target: 'self', desc: 'Taunt all enemies for 2 turns. Gain a Shield worth 12% max HP and DEF +20% for 2 turns. Some boss moves ignore Taunt.' },
-    ult:   { name: 'Unbreakable', icon: '🔆', target: 'allEnemies', desc: 'Deal 145% ATK to all enemies. Angus cannot fall below 1 HP for 2 turns and all allies gain DEF +25% for 2 turns.' }
+    ult:   { name: 'Unbreakable', icon: '🔆', target: 'allEnemies', desc: 'Deal 160% ATK to all enemies. Angus cannot fall below 1 HP for 2 turns and all allies gain DEF +25% for 2 turns. Holding out like that costs him: he is Spent for 4 turns and gains no ultimate charge at all, so he cannot simply stand in it forever.' }
   },
   flynn: {
     id: 'flynn', name: 'Flynn', title: 'Stormcaller', eras: ['first'], role: 'Striker', color: '#6fd6ff',
@@ -100,10 +102,10 @@ const HEROES = {
     id: 'chosen', name: 'The Chosen', title: 'Hero of Myth', eras: ['second'], role: 'Champion', color: '#ffd56b',
     stats: { hp: 1450, atk: 122, def: 118, spd: 114, crit: 0.1, cdmg: 0.55 },
     look: { skin: '#f0d0b0', hair: '#f6d77a', hairStyle: 'long', eye: '#222', body: 'armour', bodyColor: '#d9a93a', trim: '#fff0b0', helm: 'winged', bg: '#5e4a12', weapon: 'lance' },
-    passive: { name: 'Gilded Myth', desc: 'Takes 12% less damage. Every action grants a Grace stack (max 5). Each stack gives +5% crit chance and 3% less damage taken.' },
+    passive: { name: 'Gilded Myth', desc: 'Takes 12% less damage. Every action grants a Grace stack (max 5). Each stack gives +5% crit chance and 2% less damage taken.' },
     basic: { name: 'Lance Thrust', icon: '🔱', target: 'enemy', desc: 'Deal 105% ATK to one enemy.' },
     skill: { name: 'Gilded Dance', icon: '💃', cost: 1, target: 'enemy', desc: 'Strike 3 times for 55% ATK each. Gain a Shield worth 10% of her max HP and an extra Grace stack.' },
-    ult:   { name: 'Judgement of Wings', icon: '🪽', target: 'enemy', desc: 'Dive from above for 260% ATK, +20% per Grace stack spent, then heal herself for 20% max HP. Spending Grace also spends its damage reduction.' }
+    ult:   { name: 'Judgement of Wings', icon: '🪽', target: 'enemy', desc: 'Dive from above for 260% ATK, +20% per Grace stack spent, then heal herself for 15% max HP. Spending Grace also spends its damage reduction.' }
   },
   elphi: {
     id: 'elphi', name: 'Elphi', title: 'The Light Bearer', eras: ['second'], role: 'Guardian', color: '#fff2a8',
@@ -118,7 +120,7 @@ const HEROES = {
     id: 'daniel', name: 'Danielle', title: 'The Crystal Duelist', eras: ['second'], role: 'Warden', color: '#ffe066',
     stats: { hp: 1320, atk: 116, def: 124, spd: 108, crit: 0.1, cdmg: 0.5 },
     look: { skin: '#ecc8a6', hair: '#6b4426', hairStyle: 'long', eye: '#5a3a20', body: 'coat', bodyColor: '#3c3550', trim: '#ffe066', bg: '#4d4212', weapon: 'crystal', lashes: true },
-    passive: { name: 'Riposte', desc: 'When a single-target attack hits her, 45% chance to answer with her rapier for 95% ATK. Ripostes cannot miss and have +25% crit chance. Evading an attack leaves nothing to answer, so evasion and riposte never both happen. If a Crystal Sphere blocks the hit she always ripostes. One riposte per attack, and area attacks never trigger it.' },
+    passive: { name: 'Riposte', desc: 'When a single-target attack hits her, 32% chance to answer with her rapier for 115% ATK. Ripostes cannot miss and have +25% crit chance. Evading an attack leaves nothing to answer, so evasion and riposte never both happen. If a Crystal Sphere blocks the hit she always ripostes. One riposte per attack, and area attacks never trigger it.' },
     basic: { name: 'Rapier Lunge', icon: '🤺', target: 'enemy', desc: 'Deal 110% ATK to one enemy with +20% crit chance.' },
     skill: { name: 'Crystal Ward', icon: '🔮', cost: 1, target: 'ally', desc: 'Give an ally a Shield worth 14% of Danielle\'s max HP and DEF +15% for 2 turns. Crystal Ward can\'t raise an ally\'s Shield above 35% of their max HP, so recasting tops it up rather than stacking.' },
     ult:   { name: 'Unbreakable Sphere', icon: '💎', target: 'enemy', desc: 'Every ally gains a Crystal Sphere that blocks the next hit within 2 turns. Then smash one enemy for 180% ATK and Stun it.' }
@@ -136,9 +138,9 @@ const HEROES = {
     id: 'malakai', name: 'Malakai', title: 'The Alchemist', eras: ['second', 'current'], role: 'Alchemist', color: '#ffb23d',
     stats: { hp: 1120, atk: 116, def: 72, spd: 112, crit: 0.1, cdmg: 0.5 },
     look: { skin: '#f0cdaa', hair: '#ff7a1f', hairStyle: 'swept', eye: '#ffd21f', body: 'robe', bodyColor: '#3b2a1a', trim: '#ffb23d', bg: '#5a3410', weapon: 'flask' },
-    passive: { name: 'Elite Clientele', desc: 'Each time he uses his skill, 50% chance to refund the SP.' },
-    basic: { name: 'Volatile Flask', icon: '🧪', target: 'enemy', desc: 'Deal 90% ATK to one enemy and apply a random debuff: Poison, ATK Down or DEF Down.' },
-    skill: { name: 'Elite Bargain', icon: '🤝', cost: 1, target: 'ally', desc: 'An ally pays 8% of current HP for ATK +35% and SPD +20% for 2 turns.' },
+    passive: { name: 'Elite Clientele', desc: 'He mixes in a fixed order and the badge above him shows which phial is next: Venom, Sedative, Solvent. Every third flask, the Solvent, is on the house: it splashes 55% ATK and the same debuff onto every other enemy, and hands the team an extra Skill Point.' },
+    basic: { name: 'Volatile Flask', icon: '🧪', target: 'enemy', desc: 'Deal 110% ATK to one enemy and apply whichever phial is next: Venom Poisons, Sedative lowers ATK by 22%, Solvent lowers DEF by 22%.' },
+    skill: { name: 'Elite Bargain', icon: '🤝', cost: 1, target: 'ally', desc: 'An ally pays 8% of current HP. Every debuff on them is sold on to the enemy with the highest ATK, and they gain ATK +30% and SPD +20% for 2 turns. If they had nothing to sell, that enemy is Poisoned instead.' },
     ult:   { name: 'Grand Transmutation', icon: '⚗️', target: 'allEnemies', desc: 'Strip every enemy buff and Shield, then Poison all enemies (2 stacks) and lower their DEF by 30%. Heal allies 20% max HP and cleanse their debuffs.' }
   },
   lachlan: {
@@ -545,7 +547,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.14';
+const GAME_VERSION = '0.4.15';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -579,16 +581,16 @@ const BUILDS = {
     { id: 'dawn', name: 'Dawnbreaker', icon: '🌟', desc: 'Radiant Arc deals 100% ATK and Blinds 85% of the time. DEF -10%, and he rises with only 20% of his max HP.', mods: { def: -0.1 }, tags: { arcMult: 1.0, blindCh: 0.85, riseHp: 0.2 } }
   ],
   daniel: [
-    { id: 'bastion', name: 'Bastion', icon: '🔮', desc: 'Crystal Ward Shields are 15% stronger and can reach 45% of the ally\'s max HP. Riposte chance drops from 45% to 30%.', tags: { wardMult: 1.15, wardCap: 0.45, counter: 0.3 } },
-    { id: 'duelist', name: 'Duelist', icon: '🤺', desc: 'ATK +12%. Riposte chance rises from 45% to 70% and ripostes deal 120% ATK. Crystal Ward Shields are 20% weaker and cap at 30% of the ally\'s max HP.', mods: { atk: 0.12 }, tags: { counter: 0.7, ripMult: 1.2, wardMult: 0.8, wardCap: 0.3 } }
+    { id: 'bastion', name: 'Bastion', icon: '🔮', desc: 'Crystal Ward Shields are 15% stronger and can reach 45% of the ally\'s max HP. Riposte chance drops from 32% to 22%.', tags: { wardMult: 1.15, wardCap: 0.45, counter: 0.22 } },
+    { id: 'duelist', name: 'Duelist', icon: '🤺', desc: 'ATK +12%. Riposte chance rises from 32% to 52% and ripostes deal 140% ATK. Crystal Ward Shields are 20% weaker and cap at 30% of the ally\'s max HP.', mods: { atk: 0.12 }, tags: { counter: 0.52, ripMult: 1.4, wardMult: 0.8, wardCap: 0.3 } }
   ],
   yunze: [
     { id: 'phantom', name: 'Phantom', icon: '👤', desc: 'Evasion +4%. Switch Hands leaves an Afterimage 20% of the time. ATK -12%.', mods: { eva: 0.04, atk: -0.12 }, tags: { basicImage: 0.2 } },
     { id: 'reaper', name: 'Reaper', icon: '💀', desc: 'Crit damage +40%. Hunted targets take 40% more damage from him instead of 25%. Evasion -8%.', mods: { cdmg: 0.4, eva: -0.08 }, tags: { hunt: 0.4 } }
   ],
   malakai: [
-    { id: 'apothecary', name: 'Apothecary', icon: '🍶', desc: 'Elite Bargain costs no HP and heals the ally for 5% max HP instead, but its ATK boost drops from +35% to +22%.', tags: { freeBargain: 1, bargainAtk: 0.22, bargainHeal: 0.05 } },
-    { id: 'toxin', name: 'Toxicologist', icon: '☠️', desc: 'Poison you apply deals 65% more damage. Volatile Flask always Poisons. Grand Transmutation heals allies for 14% instead of 20%.', mods: { dot: 0.65 }, tags: { alwaysPoison: 1, transHeal: 0.14 } }
+    { id: 'apothecary', name: 'Apothecary', icon: '🍶', desc: 'Elite Bargain costs no HP and heals the ally for 5% max HP instead, but its ATK boost drops from +30% to +22%.', tags: { freeBargain: 1, bargainAtk: 0.22, bargainHeal: 0.05 } },
+    { id: 'toxin', name: 'Toxicologist', icon: '☠️', desc: 'Poison you apply deals 65% more damage. Volatile Flask mixes Venom every time instead of following the order, though every third is still on the house. Grand Transmutation heals allies for 14% instead of 20%.', mods: { dot: 0.65 }, tags: { alwaysPoison: 1, transHeal: 0.14 } }
   ],
   lachlan: [
     { id: 'aegis', name: 'Aegis', icon: '🔵', desc: 'Azure Shield caps at 44% max HP and regenerates 8.5% per turn. ATK -10%.', mods: { atk: -0.1 }, tags: { shieldCap: 0.44, shieldRegen: 0.085 } },
@@ -614,6 +616,24 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.15', d: '2026-10-07', date: 'Malakai, Angus, Kingsley and four more passes', changes: [
+    { t: 'rework', kind: 'hero', who: 'malakai', what: 'Elite Clientele and Volatile Flask', text: 'What the flask does', from: 'a random one of three debuffs, and a 50% coin flip to refund the Skill Point', to: 'a fixed order of three phials with the next one on a badge, and every third flask splashes every enemy and pays the team a point', note: 'Both halves of him used to be invisible: nothing on screen said what you were about to get or what you had just got. Composite 48.0 to 53.6.' },
+    { t: 'buff', kind: 'hero', who: 'malakai', what: 'Volatile Flask', text: 'Damage', from: '90%', to: '110% ATK' },
+    { t: 'rework', kind: 'hero', who: 'malakai', what: 'Elite Bargain', text: 'What the deal is', from: 'the same ATK and SPD buff every time', to: 'every debuff on the ally is sold on to the strongest enemy, and the buff follows', note: 'ATK +35% to +30%. The deal now reads off the board, so it is a different spell in every fight, and the buyer always gets the worse end of it.' },
+    { t: 'nerf', kind: 'hero', who: 'angus', what: 'Unbreakable', text: 'How often he can stand in it', from: 'back before it ran out, so cycling it made him effectively immortal', to: 'Spent for 4 turns afterwards, gaining no ultimate charge at all', note: 'His invulnerable share of a fight falls from about a half to about a quarter.' },
+    { t: 'buff', kind: 'hero', who: 'angus', what: 'Steadfast Cut / Unbreakable', text: 'Damage, paying for the cycle nerf', from: '115% / 145%', to: '130% / 160% ATK', note: 'Composite 51.4 to 51.7, so he is as strong as he was and no longer unkillable.' },
+    { t: 'nerf', kind: 'hero', who: 'chosen', what: 'Gilded Myth', text: 'Damage reduction per Grace stack', from: '3%', to: '2%', note: 'At 5 stacks that is 22% off everything rather than 27%, on top of 118 DEF. Composite 55.4 to 51.9.' },
+    { t: 'nerf', kind: 'hero', who: 'chosen', what: 'Judgement of Wings', text: 'Self heal', from: '20%', to: '15% max HP' },
+    { t: 'nerf', kind: 'hero', who: 'daniel', what: 'Riposte', text: 'Chance', from: '45%', to: '32%', note: 'Bastion 30% to 22%, Duelist 70% to 52%. An answer on nearly every other hit was happening too often to follow.' },
+    { t: 'buff', kind: 'hero', who: 'daniel', what: 'Riposte', text: 'Damage, so each answer is worth watching', from: '95%', to: '115% ATK', note: 'Duelist 120% to 140%.' },
+    { t: 'new', kind: 'hero', who: 'kingsley', what: 'Borrowed Trinket', text: 'A fifth item in the bag: Loaded Dice, which pays the team 2 Skill Points and gives every ally Crit Up +12% for 2 turns', from: 'four items', to: 'five, and the one he pulled now shows above him' },
+    { t: 'buff', kind: 'hero', who: 'kingsley', what: 'Jaunty Tune and Encore', text: 'Tune damage and Song healing', from: '80% ATK / 6%', to: '95% ATK / 7% max HP', note: 'Virtuoso 8% to 9%, Collector 4% to 5%. Composite 49.6 to 50.6.' },
+    { t: 'adjust', kind: 'hero', who: 'alfred', what: 'The three tempos', text: 'What separates them', from: 'only a damage number, and two of the numbers printed on screen were not the ones the engine used', to: 'Allegro buys time, Andante cannot miss, Grave ignores 30% of the target DEF', note: 'The tempo tooltip claimed Grave hit for 140% when the engine has always used 130%, and ignored Wild Rhythm entirely. Broken Rhythm also cycled a Grave of 140% that exists nowhere else.' },
+    { t: 'nerf', kind: 'hero', who: 'vasco', what: 'Prank', text: 'Damage', from: '155%', to: '130% ATK', note: 'Asked for directly. 155% was the lift that got the jester off the floor in 0.4.13 and it lifted him too far for a basic that also pulls two debuffs and pays the team a point.' },
+    { t: 'adjust', kind: 'hero', who: 'soham', what: 'The Hex Shield on the health bar', text: 'Colour when it stacks with an ordinary Shield', from: 'both segments went yellow, so there was no telling where one ended', to: 'the ordinary Shield stays blue and his own stays yellow, in that order', note: 'A rule left over from before the hexshield had its own segment was repainting the ordinary Shield as well.' },
+    { t: 'harder', kind: 'stage', who: 'revels', text: 'Hero ATK / HP multipliers', from: '0.8× / 1.8×', to: '0.95× / 2.1×', note: 'The Prank nerf hit the boss version of Vasco too, and the stage fell to 100% against all four test teams. It is 83 to 100% now.' },
+    { t: 'adjust', kind: 'system', who: 'Info sheets', text: 'The in-battle sheet lost its Skill Point labels when it grew the two-faces view, and the gallery sheet had always printed +1 SP on every hero', from: 'Basic / Skill with no numbers, or a hardcoded +1 SP', to: 'one helper both sheets use, which says what each face really pays and costs', note: 'It was wrong for Yunze and for the Vessel, neither of which earns anything. npm run check:visual now asserts it on the rendered panel.' }
+  ] },
   { v: '0.4.14', d: '2026-10-07', date: 'Skills that cost two Skill Points', changes: [
     { t: 'nerf', kind: 'hero', who: 'harry', what: 'Crush', text: 'Price', from: '1 SP', to: '2 SP', note: 'No change to the damage. He was the strongest hero on the table and this is the lever that costs him tempo rather than power. Composite 60 to 55.4.' },
     { t: 'adjust', kind: 'hero', who: 'vasco', what: 'Wild Card', text: 'Price, and what the cards are worth', from: '1 SP', to: '2 SP, with every card stronger', note: 'The jester earns a point on every basic, so the card is his own loop: earn two, spend two. Diamonds hands both back.' },
@@ -984,6 +1004,16 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.15', d: '2026-10-07', items: [
+    'Malakai is countable now. He used to throw a random one of three debuffs and refund a Skill Point on a coin flip, and you could see neither. He mixes in a fixed order instead, Venom then Sedative then Solvent, with the next phial on a badge above him, and the flask hits for 110% rather than 90%. Every third one, the Solvent, is on the house: it splashes every other enemy with the same debuff and hands the team an extra Skill Point, which is the thing worth counting towards.',
+    'His deal changed too. Elite Bargain used to do the same thing every time. Now it takes every debuff off the ally and sells it on to the enemy with the highest ATK, and the ally still gets the attack and speed. It reads off the board, so it is never the same spell twice, and if there was nothing to sell the enemy is Poisoned anyway.',
+    'Angus can no longer stand inside Unbreakable forever. It came back faster than it ran out, which in a one against five made him effectively immortal. Holding out like that now leaves him Spent for 4 turns, gaining no ultimate charge at all. His sword pays for it: 115% to 130%, and the ultimate 145% to 160%, so he is as strong as he was and no longer unkillable.',
+    'Kingsley has a fifth thing in the bag, the Loaded Dice, which pays the team two Skill Points and sharpens everybody. The item he pulls out also appears above him now, so you can see which one it was instead of guessing from the colour.',
+    'Alfred\u2019s three tempos are three different things rather than three damage numbers. Allegro buys time, Andante cannot miss, and Grave goes through armour. The tooltip had also been claiming Grave hit for 140% when the engine has always used 130%.',
+    'The Chosen is slightly less tanky, Danielle ripostes less often but harder, and the jester\u2019s Prank comes down from 155% to 130%.',
+    'Soham’s Hex Shield reads apart from an ordinary one again. When both were on him the whole bar went yellow; the ordinary Shield is blue and sits first, his own is yellow and sits after it.',
+    'The info sheet says what each move costs and pays again. It had lost those labels when it grew the view that shows both of Vasco\u2019s faces, and the version in the gallery had always printed +1 SP on every hero, which was never true for Yunze or for the Vessel.'
+  ] },
   { v: '0.4.14', d: '2026-10-07', items: [
     'A skill can now cost two Skill Points instead of one, and two of them do. Crush is one: Harry loses no damage, he simply cannot throw it every turn. Wild Card is the other, and the cards are worth more for it, which makes the jester earning a point on every basic the point of him rather than a footnote.',
     'This gives the heroes who make Skill Points something real to make them for. Ethan, the jester and Malakai all matter more when the best skills cost more than a turn of attacking.',
@@ -1208,7 +1238,8 @@ Object.assign(STATUS, {
   silenced:  { name: 'Silenced', icon: '🖋', type: 'debuff', color: '#7a8ab0', desc: 'Sealed in ink. Heroes cannot use skills or ultimates; monsters can only use their basic attack.' },
   framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +15% crit chance.' },
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
-  song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 6% max HP and removes a debuff at the start of each of its turns.' },
+  song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 7% max HP and removes a debuff at the start of each of its turns.' },
+  mixture:   { name: 'Mixture', icon: '🧪', type: 'buff', fixed: true, color: '#ffb23d', desc: 'The phial Malakai has mixed next. Venom Poisons, Sedative lowers ATK, Solvent lowers DEF and comes on the house.' },
   vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, it takes 15% less damage, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
   pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
 });
@@ -1236,10 +1267,10 @@ Object.assign(HEROES, {
   alfred: { id: 'alfred', name: 'Alfred', title: 'The Blurred Blade', eras: ['second'], role: 'Marksman', color: '#9fb8ff',
     stats: { hp: 1560, atk: 138, def: 95, spd: 118, crit: 0.14, cdmg: 0.6, eva: 0.16, acc: 0.1 },
     look: { skin: '#e8c6a8', hair: '#141016', hairStyle: 'bun', eye: '#c8d4ff', body: 'coat', bodyColor: '#2a3046', trim: '#9fb8ff', bg: '#1a2238', weapon: 'katana', lines: true },
-    passive: { name: 'Blurred Sight', desc: 'He sees through blur: 16% evasion, he cannot be Blinded, and he ignores half of every target\'s evasion. His tempo changes every turn: Allegro (hits 80%, next turn 50% sooner), Andante (steady) or Grave (slow and crushing: hits 130%).' },
+    passive: { name: 'Blurred Sight', desc: 'He sees through blur: 16% evasion, he cannot be Blinded, and he ignores half of every target\'s evasion. His tempo changes every turn, and each one is good for something different: Allegro hits for 80% and brings his next turn 50% sooner, Andante hits for 100% and cannot miss, and Grave hits for 130% and ignores 30% of the target\'s DEF.' },
     basic: { name: 'Odd Cut', icon: '🗡️', target: 'enemy', desc: 'Cut one enemy for 112% ATK, shaped by his current tempo.' },
     skill: { name: 'Finger Frame', icon: '👌', cost: 1, target: 'enemy', desc: 'He frames an enemy through his fingers: 95% ATK, then it is Framed for 2 turns. Every ally\'s hits on it cannot miss and gain +15% crit chance, and his next hit on it is a certain crit.' },
-    ult: { name: 'Broken Rhythm', icon: '🎼', target: 'allEnemies', desc: '6 cuts of 75% ATK, each in a different tempo, favouring Framed enemies. Cuts on Framed enemies always crit.' } },
+    ult: { name: 'Broken Rhythm', icon: '🎼', target: 'allEnemies', desc: '6 cuts of 75% ATK, cycling his three tempos at their real strengths of 80%, 100% and 130%, favouring Framed enemies. Cuts on Framed enemies always crit.' } },
   ethan: { id: 'ethan', name: 'Ethan', title: 'The Merciful King', eras: ['current'], role: 'Sovereign', color: '#f0d070',
     stats: { hp: 1500, atk: 120, def: 100, spd: 102, crit: 0.08, cdmg: 0.5, eva: 0.04 },
     look: { skin: '#e8c8a8', hair: '#f2f2f6', hairStyle: 'long', eye: '#6a4426', body: 'armour', bodyColor: '#4a2a6a', trim: '#f0d070', bg: '#2a1a40', weapon: 'sword', crown: true },
@@ -1257,15 +1288,15 @@ Object.assign(HEROES, {
   kingsley: { id: 'kingsley', name: 'Kingsley', title: 'The Palace Bard', eras: ['current'], role: 'Bard', color: '#7ad06a',
     stats: { hp: 1200, atk: 110, def: 74, spd: 112, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#f0d0b4', hair: '#d8642a', hairStyle: 'messy', eye: '#3aa060', body: 'coat', bodyColor: '#2a4a2a', trim: '#f0c040', bg: '#183018', weapon: 'lute', hat: 'bard', smile: true },
-    passive: { name: 'Encore', desc: 'Allies with a Song heal 6% of their max HP and lose one debuff at the start of each of their turns. His heals on himself are 10% weaker.' },
-    basic: { name: 'Jaunty Tune', icon: '🎵', target: 'enemy', desc: 'Play at one enemy for 80% ATK. The ally with the lowest HP gains a Song for 2 turns. Playing again on an ally who already has one refreshes it back to 2 turns rather than adding a second.' },
-    skill: { name: 'Borrowed Trinket', icon: '🎁', cost: 1, target: 'self', desc: 'Pull one of Vasco\'s magic items at random: Lantern (heal all allies 14%), Mirror Charm (Shield the lowest ally for 22% of his max HP), Jester\'s Bell (Blind every enemy and a 50% chance to Stun one) or Spark Box (75% ATK to every enemy).' },
+    passive: { name: 'Encore', desc: 'Allies with a Song heal 7% of their max HP and lose one debuff at the start of each of their turns. His heals on himself are 10% weaker.' },
+    basic: { name: 'Jaunty Tune', icon: '🎵', target: 'enemy', desc: 'Play at one enemy for 95% ATK. The ally with the lowest HP gains a Song for 2 turns. Playing again on an ally who already has one refreshes it back to 2 turns rather than adding a second.' },
+    skill: { name: 'Borrowed Trinket', icon: '🎁', cost: 1, target: 'self', desc: 'Pull one of Vasco\'s five magic items at random, and the one he pulls out shows above him: Lantern (heal all allies 14%), Mirror Charm (Shield the lowest ally for 22% of his max HP), Jester\'s Bell (Blind every enemy and a 50% chance to Stun one), Spark Box (75% ATK to every enemy) or Loaded Dice (the team gains 2 Skill Points and every ally gains Crit Up, +12% crit chance, for 2 turns).' },
     ult: { name: 'Grand Finale', icon: '🎶', target: 'allAllies', desc: 'Every ally gains a Song for 3 turns and SPD +15% for 2 turns, and is cleansed.' } },
   vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',
     stats: { hp: 1360, atk: 124, def: 82, spd: 116, crit: 0.12, cdmg: 0.55, eva: 0.1 },
     look: { skin: '#e6c2a2', hair: '#6b4426', hairStyle: 'short', eye: '#141016', glowEye: '#ff2a3a', body: 'coat', bodyColor: '#5a1a6a', trim: '#f0c040', bg: '#24102e', weapon: 'cards', helm: 'jester' },
     passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, a card dealt for the whole team, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +15%, it takes 15% less damage, its hits heal him for 35% of the damage and tear through Shields at double rate, and it earns the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
-    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 155% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
+    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 130% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
     skill: { name: 'Wild Card', icon: '🃏', cost: 2, target: 'allAllies', desc: 'He deals one card for the whole team and nobody knows which until it turns over. It costs two Skill Points, and the jester is the one who earns them, a point at a time on every basic. Hearts heals every ally 13% of their max HP. Spades gives every ally ATK +22% for 2 turns. Clubs gives every ally a Shield worth 14% of his max HP. Diamonds hands both points straight back and charges his own switch by 35%. Roughly one draw in ten is the Joker, which does all four at 45% strength.' },
     ult:   { name: 'Curtain Call', icon: '🎪', target: 'self', desc: 'He takes the mask off. The thing behind him comes out and brings its own three moves, and he acts again at once with the new kit in hand, so changing face costs him nothing but the charge. It charges 80% faster than other ultimates, so he is meant to keep swapping.' },
     /* The second kit. Everything that reads an ability off a unit goes through abil(), which
@@ -1290,8 +1321,8 @@ Object.assign(BUILDS, {
     { id: 'packmaster', name: 'Packmaster', icon: '👹', desc: 'Commands up to 3 creatures, but they have 20% less HP.', tags: { creatureCap: 3, creatureHp: 0.8 } },
     { id: 'pyrebinder', name: 'Pyrebinder', icon: '🔥', desc: 'Whenever one of his creatures falls it bursts for 50% of his ATK to all enemies. Imps have 15% less ATK.', tags: { deathBurst: 0.5, impAtk: 0.85 } }],
   alfred: [BALANCED,
-    { id: 'steady', name: 'Steady Eye', icon: '👁️', desc: 'His tempo no longer swings to Grave, only Allegro or Andante. Finger Frame lasts 3 turns. ATK -8%.', mods: { atk: -0.08 }, tags: { noGrave: 1, frameTurns: 3 } },
-    { id: 'chaos', name: 'Wild Rhythm', icon: '🌀', desc: 'Allegro hits for 90% and Grave for 155%, but he never rests in Andante. Evasion -5%.', mods: { eva: -0.05 }, tags: { wild: 1 } }],
+    { id: 'steady', name: 'Steady Eye', icon: '👁️', desc: 'His tempo no longer swings to Grave, only Allegro or Andante, so he never pierces armour but never misses every other turn. Finger Frame lasts 3 turns. ATK -8%.', mods: { atk: -0.08 }, tags: { noGrave: 1, frameTurns: 3 } },
+    { id: 'chaos', name: 'Wild Rhythm', icon: '🌀', desc: 'Allegro hits for 90% and Grave for 155%, but he never rests in Andante, so he gives up the tempo that cannot miss. Evasion -5%.', mods: { eva: -0.05 }, tags: { wild: 1 } }],
   ethan: [BALANCED,
     { id: 'warking', name: 'War King', icon: '⚔️', desc: 'Royal Decree grants ATK +30% but no SPD. Treasury only fires below 2 SP.', tags: { decreeAtk: 0.3, decreeSpd: 0.001, treasuryBelow: 2 } },
     { id: 'patron', name: 'Patron', icon: '💰', desc: 'Treasury fires below 4 SP. Shelter Shields drop to 10%. ATK -10%.', mods: { atk: -0.1 }, tags: { treasuryBelow: 4, shelter: 0.1 } }],
@@ -1299,8 +1330,8 @@ Object.assign(BUILDS, {
     { id: 'schemer', name: 'Schemer', icon: '🕸️', desc: 'Sharp Word delays by 30% instead of 15%, but deals 80% ATK.', tags: { wordDelay: 0.3, wordMult: 0.8 } },
     { id: 'zealot', name: 'Zealous Aide', icon: '☝️', desc: 'Give the Order grants ATK +32% instead of 20%. Max HP -10%.', mods: { hp: -0.1 }, tags: { orderAtk: 0.32 } }],
   kingsley: [BALANCED,
-    { id: 'virtuoso', name: 'Virtuoso', icon: '🎶', desc: 'Songs heal 8% instead of 6%, but trinkets are 30% weaker.', tags: { songHeal: 0.08, trinket: 0.7 } },
-    { id: 'collector', name: 'Collector', icon: '🎁', desc: 'Trinkets are 35% stronger, but Songs heal only 4%.', tags: { songHeal: 0.04, trinket: 1.35 } }],
+    { id: 'virtuoso', name: 'Virtuoso', icon: '🎶', desc: 'Songs heal 9% instead of 7%, but trinkets are 30% weaker.', tags: { songHeal: 0.09, trinket: 0.7 } },
+    { id: 'collector', name: 'Collector', icon: '🎁', desc: 'Trinkets are 35% stronger, but Songs heal only 5%.', tags: { songHeal: 0.05, trinket: 1.35 } }],
   vasco: [BALANCED,
     { id: 'harlequin', name: 'Harlequin', icon: '🃏', desc: 'The jester half: Prank pulls all three tricks instead of two, but the Vessel only heals for 22% of its damage.', tags: { doubleTrick: 1, vesselSteal: 0.22 } },
     { id: 'hollow', name: 'Hollow', icon: '😈', desc: 'The other half: the Vessel heals for 48% of its damage, but Prank pulls no trick at all.', tags: { vesselSteal: 0.48, noTrick: 1 } }],
@@ -1331,7 +1362,7 @@ SYNERGIES.push(
   STAGES.splice(at('gate') + 1, 0,
     { id: 'kingtrial', era: 'current', name: 'The King\'s Trial', atk: 2.3, hp: 1.15, heroAtk: 1.0, heroHp: 2.6, enemies: ['sellsword', 'h:ethan', 'h:ben'], boss: true, reward: ['ethan', 'ben'],
       desc: 'Before he grants shelter, King Ethan tests the strength of Yousuf\'s guard. His advisor gives the orders the king will not.' },
-    { id: 'revels', era: 'current', name: 'The Palace Revels', atk: 2.0, hp: 1.1, heroAtk: 0.8, heroHp: 1.8, enemies: ['h:kingsley', 'h:vasco'], boss: true, reward: ['kingsley', 'vasco'],
+    { id: 'revels', era: 'current', name: 'The Palace Revels', atk: 2.0, hp: 1.1, heroAtk: 0.95, heroHp: 2.1, enemies: ['h:kingsley', 'h:vasco'], boss: true, reward: ['kingsley', 'vasco'],
       desc: 'A performance for the guests goes wrong. Push the jester too far and something darker looks out from behind his face.' },
     { id: 'archive', era: 'current', name: 'The Basement Archive', atk: 2.3, hp: 1.1, heroAtk: 0.95, heroHp: 2.7, enemies: ['inkwraith', 'h:aamay', 'inkwraith'], boss: true, reward: 'aamay',
       desc: 'Below the palace a scribe writes down everything that happens. The longer the fight, the longer his Chronicle.' });

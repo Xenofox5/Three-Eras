@@ -12,6 +12,7 @@
     "stages": "sh tools/stages.sh",
     "test:engine": "sh tools/engine_tests.sh",
     "check:desc": "sh tools/desc_check.sh",
+    "check:visual": "node tools/browser_visual.js",
     "test:smoke": "node tools/browser_smoke.js",
     "test:regression": "node tools/browser_regression.js 0 && node tools/browser_regression.js 1",
     "test:smoke:py": "python3 tools/browser_smoke.py",
