@@ -155,9 +155,9 @@ const HEROES = {
     stats: { hp: 1060, atk: 92, def: 68, spd: 116, crit: 0.12, cdmg: 0.5 },
     look: { skin: '#d9a77c', hair: '#8a6a3a', hairStyle: 'short', eye: '#3fbf6a', body: 'robe', bodyColor: '#e9e4d2', trim: '#5dff8f', bg: '#14452a', weapon: 'staff', young: true },
     passive: { name: 'Prodigy', desc: 'Healing cap: allies he heals are Mended for 2 turns, and his heals on a Mended ally are 25% weaker. ' + 'His heals can crit for 50% extra healing. Heals on himself are 10% weaker.' },
-    basic: { name: 'Staff Strike', icon: '🪄', target: 'enemy', desc: 'Deal 100% ATK to one enemy. The ally with the lowest HP heals for 45% of the damage.' },
-    skill: { name: 'Mending Light', icon: '✚', cost: 1, target: 'ally', desc: 'Heal an ally for 11% of their max HP + 100% ATK, cleanse 1 debuff and grant Regen for 2 turns.' },
-    ult:   { name: 'Prodigy\'s Blessing', icon: '🌿', target: 'allAllies', desc: 'Revive one fallen ally at 25% HP. Heal all allies 18% max HP, cleanse all debuffs and grant Regen for 2 turns.' }
+    basic: { name: 'Staff Strike', icon: '🪄', target: 'enemy', desc: 'Deal 100% ATK to one enemy. The ally with the lowest HP heals for 60% of the damage.' },
+    skill: { name: 'Mending Light', icon: '✚', cost: 1, target: 'ally', desc: 'Heal an ally for 13% of their max HP + 120% ATK, cleanse 1 debuff and grant Regen for 2 turns.' },
+    ult:   { name: 'Prodigy\'s Blessing', icon: '🌿', target: 'allAllies', desc: 'Revive one fallen ally at 35% HP. Heal all allies 22% max HP, cleanse all debuffs and grant Regen for 2 turns.' }
   },
   gemia: {
     id: 'gemia', name: 'Gemia', title: 'The Scarred Blade', eras: ['current'], role: 'Skirmisher', color: '#ff6f91',
@@ -545,7 +545,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.4.12';
+const GAME_VERSION = '0.4.13';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -614,6 +614,16 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.4.13', d: '2026-10-07', date: 'Wild Card, Vessel cut, Yousuf and Ben', changes: [
+    { t: 'rework', kind: 'hero', who: 'vasco', what: 'Mimicry becomes Wild Card', text: 'What the jester skill does', from: 'repeats the last attack an enemy used', to: 'deals one of five cards for the whole team', note: 'Copying was unreadable in play: you could not tell what you were about to get, and often the answer was nothing useful. Hearts heals, Spades sharpens, Clubs shields, Diamonds pays, and the Joker does all four at 40%.' },
+    { t: 'nerf', kind: 'hero', who: 'vasco', what: 'Hellmark / Gift of the Pit', text: 'Vessel damage, cut hard as asked', from: '150% / 130% to all', to: '115% / 82% to all' },
+    { t: 'nerf', kind: 'hero', who: 'vasco', what: 'The Vessel', text: 'ATK', from: '+35%', to: '+15%' },
+    { t: 'buff', kind: 'hero', who: 'vasco', what: 'The Vessel', text: 'Healing from its hits, so it survives on what it takes rather than out-damaging anyone', from: '25%', to: '35% of the damage' },
+    { t: 'buff', kind: 'hero', who: 'vasco', what: 'Prank', text: 'Damage', from: '95%', to: '155% ATK', note: 'Measured face against face over 110 fights each, the jester now wins 47.3% and the Vessel 40.0%, against 34.2% and 53.3% before the pass.' },
+    { t: 'buff', kind: 'hero', who: 'yousuf', what: 'Mending Light / Staff Strike / Blessing', text: 'Healing across the kit', from: '11% + 100% ATK / 45% / 18% and a 25% revive', to: '13% + 120% ATK / 60% / 22% and a 35% revive', note: 'Buffs to what he already does rather than a rework. His 3v3 rate was 33, the lowest on the table. Composite 41.0 to 47.5.' },
+    { t: 'nerf', kind: 'hero', who: 'ben', what: 'Give the Order', text: 'How often, and how much attack it hands out', from: 'every other turn, ATK +25%', to: 'once every three turns, ATK +20%', note: 'This was the part the owner called abusable.' },
+    { t: 'buff', kind: 'hero', who: 'ben', what: 'Cold Counsel / The Hard Decision', text: 'His own judgement pays for the nerf: more damage to a delayed target, and the ultimate now softens the whole room', from: '+40% and a delay', to: '+55%, and every enemy also loses 20% ATK for 2 turns', note: 'Composite 38.9 to 45.5, without touching his own attacks.' }
+  ] },
   { v: '0.4.12', d: '2026-10-07', date: 'Vasco: both faces lifted together', changes: [
     { t: 'buff', kind: 'hero', who: 'vasco', what: 'Prank / Hellmark / Gift of the Pit', text: 'Damage on both kits, raised together so the balance between them holds', from: '120% / 120% / 90%', to: '140% / 140% / 105% ATK' },
     { t: 'buff', kind: 'hero', who: 'vasco', what: 'The Vessel', text: 'ATK', from: '+20%', to: '+25%', note: 'Measured on their own over 110 fights each, the two faces now win 41.8% apiece, against 34.2% and 53.3% before this pass. Composite 44.5.' }
@@ -968,12 +978,18 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.4.13', d: '2026-10-07', items: [
+    'Mimicry is gone and the jester deals a Wild Card instead. Copying whatever an enemy last did never read well: there was no way to know what you were about to get, and often it was nothing worth having. He now turns over one of five cards for the whole team. Hearts heals, Spades sharpens, Clubs shields, Diamonds pays, and about one draw in ten is the Joker, which does all four at 40% strength. The card turns over on screen so you can see which one it was.',
+    'The Vessel hits far less hard. Hellmark drops from 150% to 115% ATK, Gift of the Pit from 130% to 82% against every enemy, and its ATK bonus from +35% to +15%. It gets that back as survival instead: its hits now heal him for 35% of the damage. Played on their own the two faces win 47.3% and 40.0% of fights, where the jester used to win a third and the Vessel over half.',
+    'Encircled now cuts where the halos already are. The damage each turn used to borrow the generic effect, which looked like something thrown from Seraphine rather than something closing in around the enemy it was already circling.',
+    'Yousuf heals more across the whole kit, and Ben trades some of Give the Order for sharper judgement: it comes once every three turns instead of every other, and in exchange he punishes a delayed enemy harder and his ultimate drops the attack of the whole room.'
+  ] },
   { v: '0.4.12', d: '2026-10-07', items: [
-    'Vasco&rsquo;s two faces are now worth the same. Played on their own they win 41.8% of fights each, where the jester used to win a third and the thing behind him over half. The first pass balanced them by pulling the Vessel down too far, so both have been raised together: Prank and Hellmark to 140% ATK and Gift of the Pit to 105%.'
+    'The two faces of Vasco are now worth the same. Played on their own they win 41.8% of fights each, where the jester used to win a third and the thing behind him over half. The first pass balanced them by pulling the Vessel down too far, so both have been raised together: Prank and Hellmark to 140% ATK and Gift of the Pit to 105%.'
   ] },
   { v: '0.4.11', d: '2026-10-07', items: [
     'Mimicry can copy an attack that hit the whole team. It never could: anything it borrowed came back as a single hit, whatever the original was. A wide move now comes back wide, at a lower rate for each enemy.',
-    'Vasco&rsquo;s two faces are closer together. Measured on their own, the jester won about a third of his fights and the thing behind him over half, dealing three times the damage. Prank now hits for 120% and pulls two tricks at 25% for 3 turns, while the Vessel loses ATK, lifesteal and damage, and Gift of the Pit no longer shatters every Shield outright.',
+    'The two faces of Vasco are closer together. Measured on their own, the jester won about a third of his fights and the thing behind him over half, dealing three times the damage. Prank now hits for 120% and pulls two tricks at 25% for 3 turns, while the Vessel loses ATK, lifesteal and damage, and Gift of the Pit no longer shatters every Shield outright.',
     'Both of his kits can be read wherever he is, in a fight or out of one, instead of only the one he happens to be holding.',
     'Team bonuses you have not reached yet can be listed on the team screen, so the pairings are discoverable instead of only showing once you already have them.'
   ] },
@@ -1181,7 +1197,7 @@ Object.assign(STATUS, {
   framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +15% crit chance.' },
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 6% max HP and removes a debuff at the start of each of its turns.' },
-  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.25 }, color: '#d1203a', desc: 'Peguicha\'s power wears Vasco\'s face: ATK +35%, hits heal him for 25% of their damage and deal double damage to Shields.' },
+  vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
   pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
 });
 Object.assign(ENEMIES, {
@@ -1222,10 +1238,10 @@ Object.assign(HEROES, {
   ben: { id: 'ben', name: 'Ben', title: 'The King\'s Advisor', eras: ['current'], role: 'Tactician', color: '#c8a070',
     stats: { hp: 1340, atk: 122, def: 95, spd: 124, crit: 0.12, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#e8c4a4', hair: '#6b4426', hairStyle: 'parted', eye: '#5a3a20', body: 'coat', bodyColor: '#5a1a26', trim: '#e8b830', bg: '#3a2418', weapon: 'scroll', glasses: true, chain: true },
-    passive: { name: 'Cold Counsel', desc: 'Deals 40% more damage to enemies whose turn has been delayed, or who are Stunned. He gives the orders a merciful king will not.' },
+    passive: { name: 'Cold Counsel', desc: 'Deals 55% more damage to enemies whose turn has been delayed, or who are Stunned. He gives the orders a merciful king will not.' },
     basic: { name: 'Sharp Word', icon: '🗯️', target: 'enemy', desc: '120% ATK to one enemy and its next turn comes 15% later.' },
-    skill: { name: 'Give the Order', icon: '☝️', cost: 0, target: 'ally', desc: 'Costs no SP, usable every other turn. Another ally acts immediately with ATK +25% for that turn and gains 20% ultimate charge.' },
-    ult: { name: 'The Hard Decision', icon: '⚖️', target: 'allEnemies', desc: 'Every enemy\'s next turn comes 40% later (20% for bosses), and the enemy with the highest ATK is Exposed (+50% damage taken) for 2 turns.' } },
+    skill: { name: 'Give the Order', icon: '☝️', cost: 0, target: 'ally', desc: 'Costs no SP, usable once every three turns. Another ally acts immediately with ATK +20% for that turn and gains 20% ultimate charge.' },
+    ult: { name: 'The Hard Decision', icon: '⚖️', target: 'allEnemies', desc: 'Every enemy\'s next turn comes 40% later (20% for bosses), and they all lose 20% ATK for 2 turns. The enemy with the highest ATK is also Exposed, taking 50% more damage, for 2 turns.' } },
   kingsley: { id: 'kingsley', name: 'Kingsley', title: 'The Palace Bard', eras: ['current'], role: 'Bard', color: '#7ad06a',
     stats: { hp: 1200, atk: 110, def: 74, spd: 112, crit: 0.1, cdmg: 0.5, eva: 0.08 },
     look: { skin: '#f0d0b4', hair: '#d8642a', hairStyle: 'messy', eye: '#3aa060', body: 'coat', bodyColor: '#2a4a2a', trim: '#f0c040', bg: '#183018', weapon: 'lute', hat: 'bard', smile: true },
@@ -1236,16 +1252,16 @@ Object.assign(HEROES, {
   vasco: { id: 'vasco', name: 'Vasco', title: 'The Jester', eras: ['current'], role: 'Trickster', color: '#a050d0',
     stats: { hp: 1360, atk: 124, def: 82, spd: 116, crit: 0.12, cdmg: 0.55, eva: 0.1 },
     look: { skin: '#e6c2a2', hair: '#6b4426', hairStyle: 'short', eye: '#141016', glowEye: '#ff2a3a', body: 'coat', bodyColor: '#5a1a6a', trim: '#f0c040', bg: '#24102e', weapon: 'cards', helm: 'jester' },
-    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, copied moves, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +25%, its hits heal him for 20% of the damage and tear through Shields at double rate, and it gives the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
-    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 140% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
-    skill: { name: 'Mimicry', icon: '🎭', cost: 1, target: 'enemy', desc: 'Repeat the last attack an enemy used on his team, at his own ATK and carrying the same effect. A move that hit the whole team comes back the same way, at a lower rate for each enemy. Nothing copied exceeds 200% ATK, or 115% when it goes wide, so copying a boss does not hand him a boss move.' },
+    passive: { name: 'Two Faces', desc: 'Two kits, and he chooses which one he is holding. The jester works the room: tricks, a card dealt for the whole team, and a Skill Point for the team on every basic. The thing behind him only feeds: ATK +15%, its hits heal him for 35% of the damage and tear through Shields at double rate, and it earns the team no Skill Points at all. Curtain Call is how he changes hands, and it charges quickly, so he is meant to keep moving between the two.' },
+    basic: { name: 'Prank', icon: '🃏', target: 'enemy', desc: 'Deal 155% ATK to one enemy and pull two tricks at random from Blind, ATK -25% and SPD -25%, each for 3 turns.' },
+    skill: { name: 'Wild Card', icon: '🃏', cost: 1, target: 'allAllies', desc: 'He deals one card for the whole team and nobody knows which until it turns over. Hearts heals every ally 11% of their max HP. Spades gives every ally ATK +20% for 2 turns. Clubs gives every ally a Shield worth 12% of his max HP. Diamonds hands the team a Skill Point and charges his own switch by 35%. Roughly one draw in ten is the Joker, which does all four at 40% strength.' },
     ult:   { name: 'Curtain Call', icon: '🎪', target: 'self', desc: 'He takes the mask off. The thing behind him comes out and brings its own three moves, and he acts again at once with the new kit in hand, so changing face costs him nothing but the charge. It charges 80% faster than other ultimates, so he is meant to keep swapping.' },
     /* The second kit. Everything that reads an ability off a unit goes through abil(), which
        swaps to this while the Vessel status is on him. */
     altWhen: 'vessel',
     alt: {
-      basic: { name: 'Hellmark', icon: '🔥', target: 'enemy', desc: 'Brand one enemy for 140% ATK and Burn it for 2 turns.' },
-      skill: { name: 'Gift of the Pit', icon: '😈', cost: 1, target: 'allEnemies', desc: '105% ATK to every enemy, and every buff any of them holds is torn off. The Vessel already tears through Shields at double rate.' },
+      basic: { name: 'Hellmark', icon: '🔥', target: 'enemy', desc: 'Brand one enemy for 115% ATK and Burn it for 2 turns.' },
+      skill: { name: 'Gift of the Pit', icon: '😈', cost: 1, target: 'allEnemies', desc: '82% ATK to every enemy, and every buff any of them holds is torn off. The Vessel already tears through Shields at double rate.' },
       ult:   { name: 'Nothing Left to Laugh At', icon: '🩸', target: 'self', desc: 'It has had enough and hands him back the room. The jester returns with his own three moves, and he acts again at once.' }
     } },
   aamay: { id: 'aamay', name: 'Aamay', title: 'The Basement Scribe', eras: ['current'], role: 'Chronicler', color: '#7a8ab0',
@@ -1269,13 +1285,13 @@ Object.assign(BUILDS, {
     { id: 'patron', name: 'Patron', icon: '💰', desc: 'Treasury fires below 4 SP. Shelter Shields drop to 10%. ATK -10%.', mods: { atk: -0.1 }, tags: { treasuryBelow: 4, shelter: 0.1 } }],
   ben: [BALANCED,
     { id: 'schemer', name: 'Schemer', icon: '🕸️', desc: 'Sharp Word delays by 30% instead of 15%, but deals 80% ATK.', tags: { wordDelay: 0.3, wordMult: 0.8 } },
-    { id: 'zealot', name: 'Zealous Aide', icon: '☝️', desc: 'Give the Order grants ATK +40% instead of 25%. Max HP -10%.', mods: { hp: -0.1 }, tags: { orderAtk: 0.4 } }],
+    { id: 'zealot', name: 'Zealous Aide', icon: '☝️', desc: 'Give the Order grants ATK +32% instead of 20%. Max HP -10%.', mods: { hp: -0.1 }, tags: { orderAtk: 0.32 } }],
   kingsley: [BALANCED,
     { id: 'virtuoso', name: 'Virtuoso', icon: '🎶', desc: 'Songs heal 8% instead of 6%, but trinkets are 30% weaker.', tags: { songHeal: 0.08, trinket: 0.7 } },
     { id: 'collector', name: 'Collector', icon: '🎁', desc: 'Trinkets are 35% stronger, but Songs heal only 4%.', tags: { songHeal: 0.04, trinket: 1.35 } }],
   vasco: [BALANCED,
-    { id: 'harlequin', name: 'Harlequin', icon: '🃏', desc: 'The jester half: Prank pulls all three tricks instead of two, but the Vessel only heals for 12% of its damage.', tags: { doubleTrick: 1, vesselSteal: 0.12 } },
-    { id: 'hollow', name: 'Hollow', icon: '😈', desc: 'The other half: the Vessel heals for 30% of its damage, but Prank pulls no trick at all.', tags: { vesselSteal: 0.3, noTrick: 1 } }],
+    { id: 'harlequin', name: 'Harlequin', icon: '🃏', desc: 'The jester half: Prank pulls all three tricks instead of two, but the Vessel only heals for 22% of its damage.', tags: { doubleTrick: 1, vesselSteal: 0.22 } },
+    { id: 'hollow', name: 'Hollow', icon: '😈', desc: 'The other half: the Vessel heals for 48% of its damage, but Prank pulls no trick at all.', tags: { vesselSteal: 0.48, noTrick: 1 } }],
   aamay: [BALANCED,
     { id: 'archivist', name: 'Archivist', icon: '📚', desc: 'The Chronicle starts at 26 Pages instead of 20, but Seal in Ink only Silences for 1 turn.', tags: { pageMax: 26, sealTurns: 1 } },
     { id: 'inquisitor', name: 'Inquisitor', icon: '🖋', desc: 'Ink Flick Silences 55% of the time. Each Page is worth 12% instead of 15%.', tags: { flickCh: 0.55, pageMult: 0.12 } }]

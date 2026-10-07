@@ -206,7 +206,23 @@ const FX = {
   light: async d => { await projectile(P(d.src), P(d.tgt), { color: '#fff2a8', size: 16, dur: 260 }); burst(P(d.tgt), { color: '#fffbe0', n: 8 }); },
   summon: async d => { SND.play('gain'); const a = P(d.src); ring(a, { color: '#ffb23d', size: 140, width: 5 }); burst(a, { color: '#ffb23d', n: 14, spread: 60 }); await W(300); },
   explode: async d => { SND.play('break'); const a = P(d.src); flash('#ffb23d', 0.25, 300); ring(a, { color: '#ffb23d', size: 200, width: 7 }); burst(a, { color: '#ff8a1f', n: 24, spread: 100 }); shakeArena(true); await W(260); },
-  dot: async d => { const p = P(d.tgt); burst(p, { color: d.color || '#ff7a2f', n: 7, spread: 26, up: 20, size: 6 }); await W(140); },
+  dot: async d => {
+    const p = P(d.tgt);
+    /* Encircled is the halos already circling that enemy, so the cut happens around them. It
+       used to borrow the generic damage-over-time burst, which read as something thrown from
+       Seraphine rather than something closing in where it already was. */
+    if (d.key === 'encircled') {
+      ring(p, { color: '#e8dcff', size: p.w * 1.55, from: 1.1, to: 0.5, dur: 380, width: 4 });
+      ring(p, { color: '#f0e6ff', size: p.w * 1.2, from: 0.5, to: 1.1, dur: 380, width: 3 });
+      later(() => { slashAt(p, { color: '#f0e6ff', angle: 24, len: p.w * 1.25, thick: 3, dur: 240 });
+        slashAt(p, { color: '#e8dcff', angle: -24, len: p.w * 1.25, thick: 3, dur: 240, off: 7 }); }, 160);
+      burst(p, { color: '#e8dcff', n: 7, spread: 30, size: 5 });
+      await W(260);
+      return;
+    }
+    burst(p, { color: d.color || '#ff7a2f', n: 7, spread: 26, up: 20, size: 6 });
+    await W(140);
+  },
   dodge: d => { const c = cardEl(d.tgt); if (c && c.animate && !REDUCED) c.animate([{ transform: 'none' }, { transform: 'translateX(22px) skewX(-8deg)', opacity: 0.4, offset: 0.4 }, { transform: 'none', opacity: 1 }], { duration: T(320), easing: 'ease-out' }); ghost(d.tgt, -20, 0, 300); },
   shieldbreak: d => { const p = P(d.tgt); burst(p, { color: '#8fd0ff', n: 16, spread: 60, size: 8 }); ring(p, { color: '#8fd0ff', size: p.w * 1.4, from: 1, to: 1.6, width: 4 }); },
   reflect: d => { if (!live()) return; const a = P(d.src), b = P(d.tgt); SND.play('shield'); projectile(a, b, { color: '#cfe8ff', size: 14, dur: 220, ease: 'linear' }); ring(a, { color: '#cfe8ff', size: a.w * 1.3, from: 0.9, to: 1.2, width: 3 }); },
@@ -301,6 +317,21 @@ const FX = {
   },
   cards: async d => { SND.play('whoosh'); const a = P(d.src), b = P(d.tgt); for (let k = 0; k < 3; k++) later(() => projectile(a, { x: b.x + (k - 1) * 10, y: b.y }, { color: '#f4f0e8', size: 10, dur: 220, ease: 'linear' }), k * 60); await W(300); burst(b, { color: '#a050d0', n: 8 }); },
   hellmark: d => melee(d, { color: '#d1203a', angle: 40, thick: 7, len: 1.4, extra: p => burst(p, { color: '#ff4a2a', n: 10, up: 20 }) }),
+  wildcard: async d => {
+    const col = { hearts: '#ff5a7a', spades: '#cfe8ff', clubs: '#7ad06a', diamonds: '#ffd56b', joker: '#c08cff' }[d.card] || '#fff';
+    const a = P(d.src);
+    SND.play('gain');
+    // The card turns over above him, then its colour washes over everyone it helps.
+    const c = fxEl('', { left: (a.x - 17) + 'px', top: (a.y - 60) + 'px', width: '34px', height: '48px', borderRadius: '5px',
+      background: 'linear-gradient(160deg,#fdfbf4,#e6e0d4)', border: '2px solid ' + col, boxShadow: '0 0 16px ' + col,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: col, fontWeight: '800' });
+    c.textContent = { hearts: '♥', spades: '♠', clubs: '♣', diamonds: '♦', joker: '🃏' }[d.card] || '?';
+    await anim(c, [{ transform: 'rotateY(90deg) scale(.6)', opacity: 0 }, { transform: 'rotateY(0) scale(1.15)', opacity: 1, offset: 0.45 }, { transform: 'rotateY(0) scale(1)', opacity: 1 }], 420);
+    await W(180);
+    for (const m of (d.tgts || [])) { const p = P(m); ring(p, { color: col, size: p.w * 1.25, from: 0.5, to: 1.15, dur: 420, width: 4 }); burst(p, { color: col, n: 7, spread: 32, up: 18 }); }
+    anim(c, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.7) translateY(-18px)' }], 260).then(() => c.remove());
+    await W(240);
+  },
   mimic: async d => { SND.play('whoosh'); ghost(d.src, 0, 0, 380, '#a050d0'); await projectile(P(d.src), P(d.tgt), { color: '#a050d0', size: 20, dur: 260 }); ring(P(d.tgt), { color: '#d8a8ff', size: 80 }); },
   gift: async d => { SND.play('break'); const p = P(d.tgt); beam(P(d.src), p, { color: '#d1203a', width: 16, dur: 420 }); await W(200); burst(p, { color: '#8fd0ff', n: 16, spread: 60, size: 8 }); burst(p, { color: '#d1203a', n: 10 }); shakeArena(false); },
   curtain: async d => { SND.play('ult'); flash('#3a0a3a', 0.45, 500); const a = P(d.src); ring(a, { color: '#d1203a', size: 220, from: 0.2, to: 1.8, dur: 560, width: 7 }); await W(300); allP(d).forEach(p => { burst(p, { color: '#d1203a', n: 16, spread: 60 }); ring(p, { color: '#a050d0', size: 110, width: 5 }); }); shakeArena(true); },

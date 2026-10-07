@@ -80,19 +80,6 @@ const took = u => B.st[u.uid].taken;
   ok('a surviving creature is credited at the end', B.st[t2.uid].taken > b2,
      `Trigg taken ${b2} -> ${B.st[t2.uid].taken}`);
 
-  // ---- 3. Vasco copies what actually happened ----
-  setupBattle({ team: ['vasco', 'angus', 'flynn'], enemies: [{ id: 'leo', hero: true }] });
-  const vasco = B.players[0], leo = B.enemies[0];
-  await heroAct(leo, { kind: 'basic', target: vasco });   // Flame Bolt: 100% ATK and Burn
-  const lh = B.lastHit && B.lastHit.player;
-  ok('an enemy hero action is recorded', !!lh, lh && lh.name + ' x' + lh.mult);
-  ok('the recorded multiplier is the real one', lh && lh.mult === 1, lh && lh.mult);
-  ok('the recorded move carries its status', !!(lh && lh.status && lh.status.key === 'burn'),
-     lh && lh.status && lh.status.key);
-  const hadBurn = has(leo, 'burn');
-  await KIT.vasco.skill(vasco, leo);
-  ok('Mimic applies the copied status', !hadBurn && has(leo, 'burn'));
-
   // ---- 4. Last Stand is gone ----
   setupBattle({ team: ["david", "flynn", "leo"], enemies: [{ id: "brute" }] });
   B.players[1].hp = 0; B.players[2].hp = 0;
@@ -196,27 +183,34 @@ const took = u => B.st[u.uid].taken;
   setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }] });
   ok("and he starts masked without either", !has(B.players[0], "vessel"));
 
-  // ---- 10. Mimicry copies a wide move as a wide move ----
-  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "bandit" }, { id: "archer" }, { id: "brute" }] });
-  const vm = B.players[0];
-  const volley = ENEMIES.archer.moves.find(m => m.target === "all");
-  await execMove(B.enemies[1], volley, null);
-  const rec = B.lastHit && B.lastHit.player;
-  ok("an area move is recorded as one", !!(rec && rec.aoe), rec && rec.name);
-  const hpBeforeCopy = B.enemies.filter(isUp).map(e => e.hp);
-  await KIT.vasco.skill(vm, B.enemies[0]);
-  const hurt = B.enemies.filter(isUp).filter((e, k) => e.hp < hpBeforeCopy[k]).length;
-  ok("copying it hits every enemy", hurt >= 2, `${hurt} of ${hpBeforeCopy.length} were hit`);
+  // ---- 10. Wild Card always helps, whichever card turns over ----
+  const suits = new Set();
+  let dud = -1;
+  for (let i = 0; i < 200; i++) {
+    setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }] });
+    const vc = B.players[0];
+    B.players.forEach(x => { x.hp = Math.round(x.maxHp * 0.6); });
+    const sp0 = B.sp, hp0 = B.players.map(x => x.hp), sh0 = B.players.map(x => x.shield);
+    await KIT.vasco.skill(vc, vc);
+    const healed = B.players.some((x, k) => x.hp > hp0[k]);
+    const shielded = B.players.some((x, k) => x.shield > sh0[k]);
+    const sharpened = B.players.some(x => has(x, "atkUp"));
+    const paid = B.sp > sp0;
+    if (healed) suits.add("hearts");
+    if (sharpened) suits.add("spades");
+    if (shielded) suits.add("clubs");
+    if (paid) suits.add("diamonds");
+    if (!(healed || shielded || sharpened || paid) && dud < 0) dud = i;
+  }
+  ok("every card helps somebody", dud < 0, dud < 0 ? "200 draws" : `draw ${dud} did nothing`);
+  ok("all four suits come up", suits.size === 4, [...suits].sort().join(","));
 
-  // A single-target move still comes back single-target.
-  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "bandit" }, { id: "archer" }, { id: "brute" }] });
-  const vm2 = B.players[0];
-  await execMove(B.enemies[0], ENEMIES.bandit.moves[0], B.players[1]);
-  const hpBeforeSingle = B.enemies.filter(isUp).map(e => e.hp);
-  await KIT.vasco.skill(vm2, B.enemies[0]);
-  const hurt2 = B.enemies.filter(isUp).filter((e, k) => e.hp < hpBeforeSingle[k]).length;
-  ok("copying a single hit stays single", hurt2 === 1, `${hurt2} were hit`);
-
-  console.log(`\n${pass}/${pass + fail} passed`);
+  // It supports the team rather than attacking, so it should never touch an enemy.
+  setupBattle({ team: ["vasco", "angus", "flynn"], enemies: [{ id: "brute" }, { id: "bandit" }] });
+  const vc2 = B.players[0];
+  const foeHp = B.enemies.map(e => e.hp);
+  await KIT.vasco.skill(vc2, vc2);
+  ok("it never touches the enemy", B.enemies.every((e, k) => e.hp === foeHp[k]));
+console.log(`\n${pass}/${pass + fail} passed`);
   process.exit(fail ? 1 : 0);
 })();

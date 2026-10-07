@@ -154,6 +154,20 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
   for the days before it. Development is taken to have started about 2 October 2026.
 - [x] **A rework must check everything that names the hero.** Written into CLAUDE.md after the
   Vasco rework touched two team bonuses. `npm run test:engine` asserts both Vasco pairings.
+
+### Owner feedback handled in v0.4.13
+
+- [x] **Mimicry replaced.** It was unreadable: you could not tell what you were about to get. The
+  jester deals a Wild Card for the team instead, one of five with a card that turns over on screen.
+- [x] **Vessel damage cut hard**, as asked: 150% to 115% and 130% to 82%, ATK +35% to +15%. It gets
+  the strength back as lifesteal, which is what it is for.
+- [x] **The two faces are close.** 47.3% against 40.0% played on their own, from 34.2% and 53.3%.
+- [x] **Encircled cuts around the enemy**, not from Seraphine.
+- [x] **The HTML entity in the changelog** that showed as Vasco&rsquo;s is gone.
+- [x] **Yousuf and Ben buffed** rather than reworked, as asked: Yousuf 41.0 to 47.5, Ben 38.9 to 45.5.
+  Give the Order also took the nerf the owner originally asked for.
+- [x] **Alfred left alone** on the owner's call. His composite reads low at 40.6 but his duel rate is
+  81, near the top, so he is a duellist rather than an underpowered hero.
 ## F. New heroes (this is what makes it v0.5.0)
 
 Three new heroes, from the owner on 2026-10-07. Under the versioning rule this is the only kind

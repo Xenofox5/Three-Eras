@@ -162,7 +162,7 @@ function dmgBonus(u, t) {
   if (u.isHero && u.id === 'leo' && has(t, 'burn')) m += 0.2;
   if (u.isHero && u.id === 'vehra' && hpPct(t) < 0.5) m += bt(u, 'bloodlust') || 0.3;
   if (u.side && u.id !== 'ethan' && sideList(u).some(p => isUp(p) && p.isHero && p.id === 'ethan')) m += 0.08;
-  if (u.isHero && u.id === 'ben' && (t.flags.delayed || has(t, 'stun'))) m += 0.4;
+  if (u.isHero && u.id === 'ben' && (t.flags.delayed || has(t, 'stun'))) m += 0.55;
   if (u.flags && u.flags.pact && t.statuses.some(x => STATUS[x.key].type === 'debuff')) m += 0.15;
   if (u.isHero && u.id === 'yunze') {
     const f = foesOf(u);
@@ -338,8 +338,6 @@ function resolveHit(u, t, mult, o = {}) {
      past David. strike() redirects before it gets here, and a guardian is never itself guarded,
      so this never fires twice for one hit. */
   if (!o.aoe && !o.reflected && u.side !== t.side) { t = interceptFor(t, u); if (!isUp(t)) return null; }
-  /* What Vasco copies: the biggest single multiplier this action actually used. */
-  if (!o.reflected && u.side !== t.side) B.actMult = Math.max(B.actMult || 0, mult);
   if (o.canMiss !== false && !o.sure) {
     if (has(t, 'afterimage') || has(t, 'airborne')) {
       removeStatus(t, has(t, 'afterimage') ? 'afterimage' : 'airborne');
@@ -406,7 +404,7 @@ function applyDamage(t, dmg, o = {}) {
     if (t.hp <= 0) ss.kills++;
   }
   if (absorbed > 0) tally(t, 'absorbed', absorbed);
-  if (o.src && has(o.src, 'vessel') && !o.dot && total > 0 && isUp(o.src)) heal(o.src, o.src, total * (bt(o.src, 'vesselSteal') || 0.2), { tick: true, noCrit: true });
+  if (o.src && has(o.src, 'vessel') && !o.dot && total > 0 && isUp(o.src)) heal(o.src, o.src, total * (bt(o.src, 'vesselSteal') || 0.35), { tick: true, noCrit: true });
   if (t.isHero && t.id === 'angus' && o.src && o.src.side !== t.side && !o.dot && isUp(o.src) && total > 0) addStatus(o.src, 'sapped', 1, { silent: true, src: t });
   if (t.isHero && t.hp > 0 && hpPct(t) < 0.3 && !t.flags.vowed) {
     const el = sideList(t).find(p => isUp(p) && p.isHero && p.id === 'elphi');
@@ -488,7 +486,6 @@ async function strike(u, t, mult, o = {}) {
   if (!isUp(t) || !isUp(u)) return null;
   if (t.side !== u.side && !o.aoe) t = interceptFor(t, u);
   await HOOK.fx(o.fx || 'slash', { src: u, tgt: t, color: o.color || u.color, i: o.i || 0 });
-  if (o.status) B.actStatus = o.status;
   const r = resolveHit(u, t, mult, o);
   if (r && !r.miss && !r.blocked && o.status) applyOnHit(u, t, o.status);
   const foeHit = r && t.isHero && t.side !== u.side && isUp(t) && isUp(u) && !o.noCounter;
@@ -512,14 +509,15 @@ async function strike(u, t, mult, o = {}) {
   return r;
 }
 const hitOK = r => r && !r.miss && !r.blocked;
-/* What Vasco gets for copying. A wide move comes back wide but weaker per enemy, and anything
-   borrowed from a boss is pulled down to something a hero could reasonably throw. */
-function mimicMult(u) {
-  const lh = B.lastHit && B.lastHit[u.side];
-  if (!lh) return 1.6;
-  const cap = lh.aoe ? (bt(u, 'mimicCapAoe') || 1.15) : (bt(u, 'mimicCap') || 2.0);
-  return Math.max(0.8, Math.min(cap, lh.mult * (lh.aoe ? 0.7 : 1)));
-}
+/* The jester deals one of these at random. Every card helps the whole team, so the gamble is
+   which kind of help arrives, never whether any arrives at all. */
+const WILDCARD = {
+  hearts:   { face: '♥ HEARTS',   what: 'the team is healed' },
+  spades:   { face: '♠ SPADES',   what: 'the team sharpens' },
+  clubs:    { face: '♣ CLUBS',    what: 'the team is shielded' },
+  diamonds: { face: '♦ DIAMONDS', what: 'the coffers open' },
+  joker:    { face: '🃏 THE JOKER', what: 'all four at once, at half' }
+};
 
 /* ---------- battle setup ---------- */
 function activeSynergies(team) { return SYNERGIES.filter(s => s.test(team)); }
@@ -805,14 +803,14 @@ const KIT = {
     async basic(u, t) { await strike(u, t, bt(u, 'wordMult') || 1.2, { fx: 'quill' }); if (isUp(t)) delayUnit(t, bt(u, 'wordDelay') || 0.15); },
     async skill(u, t) {
       await HOOK.fx('order', { src: u, tgt: t });
-      t.gauge = 0; addStatus(t, 'atkUp', 1, { value: bt(u, 'orderAtk') || 0.25 }); if (t.isHero) t.ult = Math.min(100, t.ult + 20);
+      t.gauge = 0; addStatus(t, 'atkUp', 1, { value: bt(u, 'orderAtk') || 0.2 }); if (t.isHero) t.ult = Math.min(100, t.ult + 20);
       if (u.flags.counsel) addSp(u, 1);
       HOOK.float(t, '☝️ ORDERED', 'buff');
     },
     async ult(u) {
       const f = foesOf(u);
       await HOOK.fx('decision', { src: u, tgts: f });
-      for (const e of f) delayUnit(e, e.def.boss ? 0.2 : 0.4);
+      for (const e of f) { delayUnit(e, e.def.boss ? 0.2 : 0.4); addStatus(e, 'atkDown', 2, { value: 0.2 }); }
       const top = f.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a), f[0]);
       if (top) addStatus(top, 'exposed', 2);
     }
@@ -839,8 +837,8 @@ const KIT = {
   },
   vasco: {
     async basic(u, t) {
-      if (has(u, 'vessel')) { await strike(u, t, 1.4, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
-      const r = await strike(u, t, 1.4, { fx: 'cards' });
+      if (has(u, 'vessel')) { await strike(u, t, 1.15, { fx: 'hellmark', status: { key: 'burn', turns: 2, dot: 0.3 } }); return; }
+      const r = await strike(u, t, 1.55, { fx: 'cards' });
       const n = bt(u, 'noTrick') ? 0 : (bt(u, 'doubleTrick') ? 3 : 2);
       if (hitOK(r) && isUp(t) && n) for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, n)) addStatus(t, k, 3, { value: 0.25 });
     },
@@ -849,23 +847,22 @@ const KIT = {
         const f = foesOf(u);
         await HOOK.fx('curtain', { src: u, tgts: f });
         for (const e of f) {
-          const r = resolveHit(u, e, 1.05, { aoe: true, acc: 0.05 });
+          const r = resolveHit(u, e, 0.82, { aoe: true, acc: 0.05 });
           if (hitOK(r) && isUp(e)) stripBuffs(e);
         }
         return;
       }
-      const lh = B.lastHit && B.lastHit[u.side];
-      HOOK.float(u, `🎭 ${lh ? lh.name.toUpperCase() : 'IMPROVISED'}`, 'special');
-      const mult = mimicMult(u);
-      if (lh && lh.aoe) {
-        const f = foesOf(u);
-        await HOOK.fx('mimic', { src: u, tgt: t, tgts: f });
-        for (const e of f) { const r = resolveHit(u, e, mult, { aoe: true, acc: 0.05 }); if (hitOK(r) && lh.status && isUp(e)) applyOnHit(u, e, lh.status); }
-        return;
-      }
-      await HOOK.fx('mimic', { src: u, tgt: t });
-      const r = resolveHit(u, t, mult, { acc: 0.05 });
-      if (hitOK(r) && lh && lh.status && isUp(t)) applyOnHit(u, t, lh.status);
+      const joker = rnd() < (bt(u, 'jokerCh') || 0.1);
+      const card = joker ? 'joker' : pick(['hearts', 'spades', 'clubs', 'diamonds']);
+      const mates = friendsOf(u);
+      HOOK.float(u, WILDCARD[card].face, 'special');
+      HOOK.log(`${u.name} deals ${WILDCARD[card].face.toLowerCase()}: ${WILDCARD[card].what}.`, 'p');
+      await HOOK.fx('wildcard', { src: u, card, tgts: mates });
+      const f = joker ? 0.5 : 1;
+      if (card === 'hearts' || joker) { for (const a of mates) heal(u, a, a.maxHp * 0.11 * f); HOOK.sfx('heal'); }
+      if (card === 'spades' || joker) for (const a of mates) addStatus(a, 'atkUp', 2, { value: 0.2 * f });
+      if (card === 'clubs' || joker) for (const a of mates) addShield(u, a, u.maxHp * 0.12 * f);
+      if (card === 'diamonds' || joker) { addSp(u, 1); gainUlt(u, 35); HOOK.float(u, '🔷 +1 SP', 'buff'); }
     },
     async ult(u) {
       await HOOK.fx('curtain', { src: u, tgts: foesOf(u) });
@@ -1199,18 +1196,18 @@ const KIT = {
     async basic(u, t) {
       const r = await strike(u, t, 1.0, { fx: 'staff' });
       const l = lowest(friendsOf(u));
-      if (hitOK(r) && l) { await HOOK.fx('healpulse', { tgt: l }); heal(u, l, r.dmg * (bt(u, 'staffHeal') || 0.45)); }
+      if (hitOK(r) && l) { await HOOK.fx('healpulse', { tgt: l }); heal(u, l, r.dmg * (bt(u, 'staffHeal') || 0.6)); }
     },
     async skill(u, t) {
       await HOOK.fx('healbeam', { src: u, tgt: t, color: '#5dff8f' });
-      heal(u, t, t.maxHp * 0.11 + stat(u, 'atk') * 1.0); cleanse(t, 1); addStatus(t, 'regen', 2, { value: 0.04, src: u });
+      heal(u, t, t.maxHp * 0.13 + stat(u, 'atk') * 1.2); cleanse(t, 1); addStatus(t, 'regen', 2, { value: 0.055, src: u });
       HOOK.sfx('heal');
     },
     async ult(u) {
       await HOOK.fx('blessing', { tgts: sideList(u), color: '#5dff8f' });
       const dead = sideList(u).find(p => !p.alive);
-      if (dead) { revive(dead, 0.25); await HOOK.revive(dead); }
-      for (const a of friendsOf(u)) { heal(u, a, a.maxHp * 0.18); cleanse(a); addStatus(a, 'regen', 2, { value: 0.04, src: u, silent: true }); }
+      if (dead) { revive(dead, 0.35); await HOOK.revive(dead); }
+      for (const a of friendsOf(u)) { heal(u, a, a.maxHp * 0.22); cleanse(a); addStatus(a, 'regen', 2, { value: 0.055, src: u, silent: true }); }
       HOOK.sfx('heal');
     }
   },
@@ -1296,8 +1293,8 @@ function previewFor(u, kind, t) {
     case 'kingsley.basic': return D(u, t, 0.8);
     case 'kingsley.skill': return { txt: '🎁 Random trinket' };
     case 'kingsley.ult': return { txt: '🎶 Song' };
-    case 'vasco.basic': return D(u, t, 1.4, { note: has(u, 'vessel') ? '+Burn' : '+ 2 random tricks' });
-    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 1.05, { note: 'every enemy, strips buffs' }); const lh = B.lastHit && B.lastHit[u.side]; return D(u, t, mimicMult(u), { acc: 0.05, note: lh ? (lh.aoe ? 'copies ' + lh.name + ', every enemy' : 'copies ' + lh.name) : 'improvised' }); }
+    case 'vasco.basic': return D(u, t, has(u, 'vessel') ? 1.15 : 1.55, { note: has(u, 'vessel') ? '+Burn' : '+ 2 random tricks' });
+    case 'vasco.skill': { if (has(u, 'vessel')) return D(u, t, 0.82, { note: 'every enemy, strips buffs' }); return { txt: '🃏 Deal a card' }; }
     case 'vasco.ult': return { txt: has(u, 'vessel') ? '🃏 Back to the jester' : '😈 Let it out' };
     case 'aamay.basic': return D(u, t, 0.85);
     case 'aamay.skill': return D(u, t, 0.55, { acc: 0.1, note: 'Silence, SPD and ATK down' });
@@ -1333,8 +1330,8 @@ function previewFor(u, kind, t) {
     case 'lachlan.skill': return D(u, t, 1.6);
     case 'lachlan.ult': return D(u, t, 2, { sure: true });
     case 'yousuf.basic': return D(u, t, 1);
-    case 'yousuf.skill': { const m = has(t, 'mended') ? 0.75 : 1; const r = { heal: Math.min(t.maxHp - t.hp, Math.round((t.maxHp * 0.11 + stat(u, 'atk') * 1.0) * (1 + u.mods.heal) * m)) }; if (m < 1) r.mended = true; return r; }
-    case 'yousuf.ult': return t.alive ? { heal: Math.min(t.maxHp - t.hp, Math.round(t.maxHp * 0.18 * (1 + u.mods.heal) * (has(t, 'mended') ? 0.75 : 1))), mended: has(t, 'mended') } : { txt: 'Revive' };
+    case 'yousuf.skill': { const m = has(t, 'mended') ? 0.75 : 1; const r = { heal: Math.min(t.maxHp - t.hp, Math.round((t.maxHp * 0.13 + stat(u, 'atk') * 1.2) * (1 + u.mods.heal) * m)) }; if (m < 1) r.mended = true; return r; }
+    case 'yousuf.ult': return t.alive ? { heal: Math.min(t.maxHp - t.hp, Math.round(t.maxHp * 0.22 * (1 + u.mods.heal) * (has(t, 'mended') ? 0.75 : 1))), mended: has(t, 'mended') } : { txt: 'Revive' };
     case 'gemia.basic': return has(u, 'flow') ? D(u, t, 0.6, { hits: 2, acc: 0.05, note: 'Flow' }) : D(u, t, 1.1, { acc: 0.05 });
     case 'gemia.skill': return D(u, t, 0.52, { hits: bt(u, 'flurryHits') || 4 });
     case 'gemia.ult': return D(u, t, 2.8 / (has(u, 'terrified') ? 0.7 : 1), { sure: true });
@@ -1375,19 +1372,14 @@ async function heroAct(u, ch) {
   const lone = u.id === 'yunze';
   const sustaining = u.id === 'leo' && kind === 'skill' && chanOf(u) && isUp(chanOf(u).target);
   if (u.id === 'leo' && kind !== 'skill' && chanOf(u)) endChannel(u, 'release');
-  if (kind === 'skill' && !sustaining) { if (lone) u.flags.skillCd = 3; else if (u.id === 'ben') u.flags.skillCd = 2; else addSp(u, -(a.cost || 1)); if (u.id === 'soham') u.flags.skillCd = 2; }
+  if (kind === 'skill' && !sustaining) { if (lone) u.flags.skillCd = 3; else if (u.id === 'ben') u.flags.skillCd = 3; else addSp(u, -(a.cost || 1)); if (u.id === 'soham') u.flags.skillCd = 2; }
   if (kind === 'basic' && !lone && !(u.id === 'vasco' && has(u, 'vessel'))) addSp(u, 1);
   tally(u, 'acts'); if (kind === 'ult') tally(u, 'ults');
   HOOK.log(`${u.name} uses ${sustaining ? 'Sustain Beam' : a.name}.`, 'p');
   if (kind === 'ult') { u.ult = 0; HOOK.update(); await HOOK.ult(u, a); }
   else { HOOK.actName(u, sustaining ? 'Sustain Beam' : a.name, kind); HOOK.update(); }
   bumpPages(u);
-  B.actMult = 0; B.actStatus = null;
   await KIT[u.id][kind](u, t);
-  if (a.target === 'enemy' || a.target === 'allEnemies') {
-    B.lastHit = B.lastHit || {};
-    B.lastHit[u.side === 'player' ? 'enemy' : 'player'] = { mult: B.actMult || 1, name: a.name, status: B.actStatus, aoe: a.target === 'allEnemies' };
-  }
   if (u.isHero && u.id === 'alfred' && isUp(u)) { const t0 = tempoOf(u); u.flags.advance = t0 === 'allegro' ? 0.5 : 0; shiftTempo(u); }
   if (u.isHero && u.id === 'seraphine' && isUp(u)) {
     for (let i = 0; i < 2; i++) {
@@ -1454,7 +1446,13 @@ function aiChoose(u) {
       case 'ethan': if (sp >= 1 && mine.filter(a => isUp(a) && a.isHero).some(a => !has(a, 'atkUp'))) return { kind: 'skill', target: u }; break;
       case 'ben': { const others = mine.filter(a => isUp(a) && a !== u && a.isHero); if (!(u.flags.skillCd > 0) && others.length) return { kind: 'skill', target: others.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a)) }; break; }
       case 'kingsley': if (sp >= 1 && hpPct(lowA) < 0.65) return { kind: 'skill', target: u }; break;
-      case 'vasco': if (sp >= 1 && (has(u, 'vessel') || (B.lastHit && B.lastHit[u.side]))) return { kind: 'skill', target: tgtFor('skill') }; break;
+      case 'vasco': {
+        if (sp < 1) break;
+        if (has(u, 'vessel')) return { kind: 'skill', target: tgtFor('skill') };
+        // A card is worth drawing when somebody could use any of the four.
+        if (hpPct(lowA) < 0.8 || sp >= 3 || al.some(x => !has(x, 'atkUp'))) return { kind: 'skill', target: u };
+        break;
+      }
       case 'aamay': { const t2 = en.filter(e => !has(e, 'silenced')); if (sp >= 1 && t2.length) return { kind: 'skill', target: taunter || (t2.includes(boss) ? boss : t2.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a))) }; break; }
       case 'peguicha': {
         if (sp >= 1 && u.flags.beads > 0) { const cap = bt(u, 'beadMax') || 3; const c = en.filter(e => { const x = getSt(e, 'cinder'); return !x || x.stacks < cap; }); if (c.length) { const pickT = taunter || (c.includes(boss) ? boss : c.reduce((a, b) => (b.hp > a.hp ? b : a))); return { kind: 'skill', target: pickT }; } }
@@ -1640,7 +1638,6 @@ const SPECIAL = {
   }
 };
 async function execMove(e, m, t) {
-  if (m.mult) { B.lastHit = B.lastHit || {}; B.lastHit[e.side === 'player' ? 'enemy' : 'player'] = { mult: m.mult * (m.hits || 1), name: m.name, status: m.status && m.status.key !== 'alch' ? m.status : null, aoe: m.target === 'all' }; }
   if (m.mult && !m.run) {
     if (m.target === 'all') {
       const ts = foesOf(e);
