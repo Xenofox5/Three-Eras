@@ -101,12 +101,16 @@ Nothing here is a balance number yet: every item in group D needs `npm run balan
 - [ ] **Danielle.** Riposte chance is too high.
 - [ ] **Alfred.** Verify the tempo multipliers do what the descriptions say, and make the three
   tempos feel more distinct from each other.
-- [ ] **Lachlan.** Nerf his max HP. He also sits top of the duel table at 93, which the owner
-  wants Peguicha, Yunze and Harry to hold, so this and group E point the same way.
+- [x] **Lachlan.** Max HP 1400 to 1290 in v0.4.4. Composite 55.1 to 48.3, duel 93 to 85. Still the
+  top duellist, so group E still points at him.
 - [ ] **Malakai.** Buff Living Bargain, rework the skill, and rework the passive so he plays less
   monotonously. Composite 46.1, near the bottom.
-- [ ] **Harry.** Nerf slightly: Crush damage. Composite 63.6, the only hero above the band.
-- [ ] **Low win rate heroes.** From the v0.3.8 table: Ben 35.1, Yousuf 32.5 in 3v3, Alfred 39.5,
+- [x] **Harry.** Crush 150% to 135% ATK in v0.4.4, Force build 220% to 200%. Composite 63.6 to
+  59.2, so he is inside the band for the first time. The Force build text also quoted a 175%
+  baseline that was never true.
+- [ ] **Low win rate heroes.** Current composites after v0.4.4: Alfred 37.8, Ben 39.5, Yousuf 41.7.
+  These are now the only three outside the 45 to 60 band and all three want a rework, not a nudged
+  number. Older v0.3.8 figures for reference: Ben 35.1, Yousuf 32.5 in 3v3, Alfred 39.5,
   Leo 39.8, Aamay 39.8, Flynn 40.4. Buff or rework rather than nudging one number.
 
 ## F. New heroes (this is what makes it v0.5.0)
