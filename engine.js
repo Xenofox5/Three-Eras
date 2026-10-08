@@ -174,7 +174,7 @@ function dmgBonus(u, t) {
   if (u.isHero && u.id === 'ephraim' && has(t, 'quarry')) m += bt(u, 'quarryDmg') || 0.16;
   /* Isaac only gets the ambush once per vanish: the first blow out of sight, not every blow
      while the status happens to still be on him. */
-  if (u.isHero && u.id === 'isaac' && has(u, 'invisible')) m += bt(u, 'ambush') || 0.25;
+  if (u.isHero && u.id === 'isaac' && has(u, 'invisible')) m += bt(u, 'ambush') || 0.18;
   if (u.flags && u.flags.pact && t.statuses.some(x => STATUS[x.key].type === 'debuff')) m += 0.15;
   if (u.isHero && u.id === 'yunze') {
     const f = foesOf(u);
@@ -244,8 +244,10 @@ const riseAt = u => u.flags.riseAt || bt(u, 'riseAt') || 0.35;
 function takeHold(u, t) {
   if (!isUp(t) || t.side === u.side) return;
   if (has(t, 'quarry')) return;
-  for (const e of foesOf(u)) removeStatus(e, 'quarry');
+  // He will not let go of something that is still standing, so a new grip needs the old one gone.
+  if (foesOf(u).some(e => isUp(e) && has(e, 'quarry'))) return;
   addStatus(t, 'quarry', 99, { src: u });
+  HOOK.float(t, '🦷 HE HAS HOLD', 'debuff');
 }
 function collapseBenjamin(u) {
   u.flags.bargainSpent = true;
@@ -1340,7 +1342,6 @@ const KIT = {
       const m = bt(u, 'knuckle') || 0.46;
       // Too close to miss, so the hits are sure rather than accurate.
       for (let i = 0; i < 3; i++) { if (!isUp(t)) break; await strike(u, t, m, { fx: 'knuckle', i, sure: true }); }
-      takeHold(u, t);
     },
     async skill(u, t) {
       const r = await strike(u, t, 1.12, { fx: 'seize', status: { key: 'bleed', turns: 3, dot: 0.3 } });
@@ -1351,11 +1352,9 @@ const KIT = {
     },
     async ult(u, t) {
       await HOOK.fx('wontlet', { src: u, tgt: t });
-      takeHold(u, t);
       for (let i = 0; i < 5; i++) {
-        let e = isUp(t) ? t : foesOf(u).find(x => has(x, 'quarry')) || foesOf(u)[0];
+        let e = isUp(t) ? t : foesOf(u).find(x => isUp(x) && has(x, 'quarry')) || foesOf(u)[0];
         if (!e) break;
-        if (e !== t) takeHold(u, e);
         const r = await strike(u, e, 0.62, { fx: 'knuckle', i, sure: true, pierce: 0.4 });
         if (hitOK(r)) heal(u, u, u.maxHp * 0.03, { noCrit: true });
       }

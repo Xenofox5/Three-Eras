@@ -103,9 +103,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--goldhi);ou
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
 .rc{position:relative;border:2px solid transparent;border-radius:12px;background:var(--panel);box-shadow:var(--shadow);padding:0;overflow:hidden;text-align:left}
 .rc .p{aspect-ratio:1;width:100%}
-.rc .meta{padding:4px 6px 6px}
-.rc b{display:block;font-size:13.5px;line-height:1.15}
-.rc small{display:block;font-size:11.5px;color:var(--tx2)}
+.rc .meta{padding:4px 6px 6px;padding-right:34px;min-height:38px}
+.rc b{display:block;font-size:13.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc small{display:block;font-size:11.5px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rc .dots{position:absolute;top:5px;left:5px;display:flex;gap:3px}
 .rc .dots i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(0,0,0,.4)}
 .rc .leg{position:absolute;top:4px;right:4px;font-size:10.5px;font-weight:700;background:#0d0c20d0;color:var(--goldhi);border-radius:6px;padding:1px 5px}
@@ -665,6 +665,26 @@ body.reduced .card.tgt .por,body.reduced .card.aloft .por::before{animation:none
   .scr-battle .res{z-index:50}
 }
 
+/* Hero grids on a computer. The 560px column is there for a phone; on a wide window it turns
+   twenty-seven heroes into five across and six rows of scrolling for no reason. */
+@media (min-width:900px){
+  #app:has(.roster){max-width:1180px}
+  .slots{max-width:620px;margin-left:auto;margin-right:auto}
+  .slots.five{max-width:860px}
+  .roster{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+  .rc b{font-size:14.5px}
+  .rc small{font-size:12px}
+  .era-h{font-size:22px}
+}
+@media (min-width:1400px){
+  #app:has(.roster){max-width:1360px}
+  .roster{grid-template-columns:repeat(auto-fill,minmax(146px,1fr))}
+}
+/* Nothing in a menu should ever scroll sideways, whatever a child decides it needs. */
+#app, .scr{max-width:100%}
+.roster{min-width:0}
+.rc{min-width:0}
+
 /* A 104px logo is too tall when the window is short. */
 @media (max-height:720px){ .logo{font-size:clamp(44px,14vw,72px)} .title{gap:12px} .tagline{font-size:14px} }
 
@@ -677,6 +697,10 @@ body.reduced .card.tgt .por,body.reduced .card.aloft .por::before{animation:none
    enemies in the Shadows stage, which are the same idea. */
 .card.afterimg .pi{opacity:.5;filter:saturate(.75)}
 .card.afterimg .por{border-style:dashed}
+/* Invisible is the whole of Isaac, so it has to be the first thing you notice about his card
+   rather than a small badge among five others. */
+.card.invis .pi{opacity:.3;filter:saturate(.35) contrast(.85)}
+.card.invis .por{border-style:dashed;box-shadow:0 0 0 2px #4fd1c555,0 0 18px #4fd1c544}
 
 /* The number an update used to carry, before the renumbering. */
 .wasv{font-style:normal;font-size:11px;font-weight:600;color:var(--tx3);margin-left:4px}

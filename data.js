@@ -547,7 +547,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.5.1';
+const GAME_VERSION = '0.5.2';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -616,6 +616,14 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.5.2', d: '2026-10-08', date: 'Withered fixed, the grip made plain, and the menu on a computer', changes: [
+    { t: 'rework', kind: 'hero', who: 'hbenjamin', what: 'Withered', text: 'Whether it can be cleansed', from: 'an ordinary debuff, so any cleanse lifted it', to: 'it cannot be lifted at all and only runs out', note: 'It did not work, and the reason was a fix made for it one version ago: every heal that also cleanses was changed to cleanse first, so Yousuf, Kingsley, Malakai and every Song tick simply took the mark off and then healed through it. The anti-healer is an anti-healer now. Composite 45.7 to 49.6.' },
+    { t: 'rework', kind: 'hero', who: 'ephraim', what: 'Lockjaw', text: 'What moves the grip', from: 'anything he hit became his Quarry, so punching something else silently moved it', to: 'only Drag Down takes hold, and he will not let go while it is still standing', note: 'The owner could not tell why he kept letting go. One button takes hold and nothing else moves it, which is also what a pitbull is meant to do. Composite 55.7 to 54.1.' },
+    { t: 'nerf', kind: 'hero', who: 'isaac', what: 'Invisible', text: 'Evasion and the ambush', from: '+40% evasion, +25% damage', to: '+28% evasion, +18% damage', note: 'Asked for directly. Composite 51.7 to 49.6.' },
+    { t: 'adjust', kind: 'hero', who: 'isaac', what: 'Invisible on the battle screen', text: 'How you can tell', from: 'a badge among five others', to: 'his card fades out and takes a dashed outline, the way an Afterimage does', note: 'The whole of him is whether he is visible, so it should be the first thing you notice about his card.' },
+    { t: 'adjust', kind: 'hero', who: 'hbenjamin', what: 'Gravekeeper', text: 'What it costs', from: 'Marrow Draw takes half the damage back', to: '70% of it', note: 'It trailed his other two builds by 12 points.' },
+    { t: 'adjust', kind: 'system', who: 'Hero grids', text: 'How wide the Heroes, team and custom screens are on a computer', from: 'a 560px phone column: five heroes across and six rows of scrolling', to: 'up to 1360px: eight or nine across', note: 'Twenty-seven heroes do not fit a phone column. The roster card also let long names run underneath the info button, which is why H. Benjamin, Seraphine and The Chosen were all cut off.' }
+  ] },
   { v: '0.5.1', d: '2026-10-08', date: 'The three new heroes reworked on owner feedback', changes: [
     { t: 'rework', kind: 'hero', who: 'hbenjamin', what: 'The Oldest Bargain', text: 'What happens when he goes down', from: 'a stack of Skulls on a badge, each one spent to survive a killing blow', to: 'he comes apart: a Corpse with its own three moves and two Skulls that fight on their own', note: 'A number on a badge is not a feature anyone can see. The Corpse keeps acting at 25% of his max HP, takes 55% less damage, and mending it to 35% puts him back together. He only has the one bargain.' },
     { t: 'nerf', kind: 'hero', who: 'hbenjamin', what: 'His ultimate', text: 'What it does', from: 'The Second Breath: two turns of Unbreakable for the whole team and three Skulls back', to: 'The Long Rot: every enemy Withered for 3 turns and down 25% ATK and 25% DEF', note: 'He could stand at 1 HP and keep handing the team immortality, the same loop Angus had. He is a debuffer, so the ultimate debuffs.' },
@@ -1044,6 +1052,12 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.5.2', d: '2026-10-08', items: [
+    'Withered actually stops healing now. It never did, and the reason was a fix made for it one version ago: every heal that also cleanses was changed to cleanse first so a healer would stop wasting heals into a block, which meant Yousuf, Kingsley, Malakai and every Song tick took the mark straight back off and healed anyway. Withered cannot be lifted at all any more. It only runs out.',
+    'Ephraim no longer lets go for no reason. Anything he punched used to become his Quarry, so aiming somewhere else silently moved the grip and it looked arbitrary. Drag Down is the only thing that takes hold now, and he will not let go of something that is still standing. One button, one target, and it stays until the thing falls, which is what a pitbull is for.',
+    'Isaac is easier to read and weaker. His card fades out with a dashed outline while he is Invisible, the same language the Afterimage enemies use, so you can see at a glance whether he is hidden. Invisible gives +28% evasion rather than +40%, and the blow out of sight hits 18% harder rather than 25%.',
+    'The Heroes, team and custom screens use the whole window on a computer. Twenty-seven heroes in a 560px phone column was five across and a lot of scrolling, with nine hundred pixels going spare either side. It is eight or nine across now, and long names no longer run underneath the info button.'
+  ] },
   { v: '0.5.1', d: '2026-10-08', items: [
     'H. Benjamin comes apart instead of dying. The Skulls were a number on a badge, which is not something anyone can see, so they are units now: the first time a blow would finish him he collapses into a Corpse and two Skulls rise beside him. The Corpse has its own three weaker moves, takes 55% less damage and keeps debuffing; the Skulls take their own turns and bite. Mend the Corpse back to 35% of his max HP and he stands up, and the Skulls crumble with him. He only gets the one bargain. He is frailer than he was on his feet and hits harder, and his ultimate is a debuff rather than two turns of handing the whole team immortality, which he could do over and over from 1 HP.',
     'Withered is a team mark now. It blocked healing outright and gave him 20% more damage, and it gave the rest of the team nothing at all, so bringing a debuffer bought you a heal block and no reason to have him. Everyone else on his side hits a Withered enemy 12% harder.',
@@ -1301,10 +1315,10 @@ Object.assign(STATUS, {
   framed:    { name: 'Framed', icon: '👌', type: 'debuff', color: '#9fb8ff', desc: 'Seen clearly through Alfred\'s finger frame. Hits on it cannot miss and have +15% crit chance.' },
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 7% max HP and removes a debuff at the start of each of its turns.' },
-  withered:  { name: 'Withered', icon: '🥀', type: 'debuff', color: '#8fd6b4', desc: 'Marked by H. Benjamin. It cannot be healed at all while this lasts, and it takes 20% more damage from him and 12% more from the rest of his side.' },
+  withered:  { name: 'Withered', icon: '🥀', type: 'debuff', fixed: true, color: '#8fd6b4', desc: 'Marked by H. Benjamin. It cannot be healed at all while this lasts, no cleanse will take the mark off, and it takes 20% more damage from him and 12% more from the rest of his side. It only runs out.' },
   corpse:    { name: 'Corpse', icon: '💀', type: 'buff', fixed: true, color: '#b8e0c8', desc: 'He has come apart. He keeps acting with a weaker set of moves, takes 40% less damage, and his Skulls fight on their own. Mend him to 40% of his max HP and he gets back up.' },
-  quarry:    { name: 'Quarry', icon: '🦷', type: 'debuff', fixed: true, color: '#e0603a', desc: 'Ephraim has hold of this one. He deals 16% more damage to it and takes 12% less from everything else, and he can only have hold of one thing at a time.' },
-  invisible: { name: 'Invisible', icon: '🫥', type: 'buff', mods: { eva: 0.4 }, color: '#4fd1c5', desc: 'Nobody can see where he is: +40% evasion, and his next blow lands out of sight. Striking gives him away.' },
+  quarry:    { name: 'Quarry', icon: '🦷', type: 'debuff', fixed: true, color: '#e0603a', desc: 'Ephraim has hold of this one and will not let go while it stands. He deals 16% more damage to it and takes 12% less from everything else, and he cannot take hold of anything else until this one falls.' },
+  invisible: { name: 'Invisible', icon: '🫥', type: 'buff', mods: { eva: 0.28 }, color: '#4fd1c5', desc: 'Nobody can see where he is, so attacks aimed at him mostly miss: +28% evasion. His next blow lands unseen, and striking gives him away.' },
   mixture:   { name: 'Mixture', icon: '🧪', type: 'buff', fixed: true, color: '#ffb23d', desc: 'The phial Malakai has mixed next. Venom Poisons, Sedative lowers ATK, Solvent lowers DEF and comes on the house.' },
   vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
   pages:     { name: 'Chronicle', icon: '📖', type: 'buff', fixed: true, max: 40, color: '#7a8ab0', desc: 'Pages written about what the enemy has done. The Last Page spends them all for 15% ATK each against every enemy.' },
@@ -1396,7 +1410,7 @@ Object.assign(HEROES, {
     altLookWhen: 'corpse',
     altLook: { skin: '#cfc8b2', hair: '#101410', hairStyle: 'bald', eye: '#3f8f72', glowEye: '#3f8f72', body: 'robe', bodyColor: '#0b100c', trim: '#4a7a62', bg: '#050a08', skull: true, collapsed: true },
     passive: { name: 'The Oldest Bargain', desc: 'He is frail and he does not die properly. The first time a blow would finish him he comes apart instead: he drops to 25% of his max HP as a Corpse, takes 55% less damage, keeps acting with his own weaker three moves, and two Skulls rise beside him and fight on their own. Mend the Corpse to 35% of his max HP and he gets back up, and the Skulls crumble. He only has the one bargain: after that, a fall is a fall.' },
-    basic: { name: 'Grave Whisper', icon: '🦴', target: 'enemy', desc: 'Deal 130% ATK to one enemy and Wither it for 2 turns: it cannot be healed at all, it takes 20% more damage from him, and 12% more from everyone else on his side.' },
+    basic: { name: 'Grave Whisper', icon: '🦴', target: 'enemy', desc: 'Deal 130% ATK to one enemy and Wither it for 2 turns. Nothing can mend a Withered enemy and no cleanse will lift it, it takes 20% more damage from him, and 12% more from everyone else on his side.' },
     skill: { name: 'Marrow Draw', icon: '💀', cost: 1, target: 'enemy', desc: 'Deal 150% ATK and take half the damage back as his own health. Against an enemy that is already Withered he takes all of it. The target is Withered for 2 turns either way.' },
     ult: { name: 'The Long Rot', icon: '🥀', target: 'allEnemies', desc: 'Every enemy is Withered for 3 turns, so nothing on their side can be mended at all, and they each lose 25% ATK and 25% DEF for 3 turns.' },
     /* What is left of him after the bargain. Everything that reads an ability off a unit goes
@@ -1410,27 +1424,27 @@ Object.assign(HEROES, {
   ephraim: { id: 'ephraim', name: 'Ephraim', title: 'The Pitbull', eras: ['first'], role: 'Brawler', color: '#e0603a',
     stats: { hp: 1420, atk: 126, def: 98, spd: 104, crit: 0.1, cdmg: 0.55, eva: 0.04 },
     look: { skin: '#c98a52', hair: '#111116', hairStyle: 'short', eye: '#111116', body: 'bare', bodyColor: '#c98a52', trim: '#e8dcc8', bg: '#3a1409', weapon: 'knuckles', scars: true, brow: 'firm', bandana: '#b8322a', big: true },
-    passive: { name: 'Lockjaw', desc: 'Whatever he hits he takes hold of, and he can only hold one thing at a time. He deals 16% more damage to his Quarry and takes 12% less from everything that is not it. Below half health nothing can Stun him at all. When his Quarry goes down he mends 10% of his max HP and takes hold of the next thing he hits. On top of that, the more of him is gone the harder he bites: +1% ATK for every 2% of his max HP that is missing, so +50% on his last point.' },
-    basic: { name: 'Worry', icon: '🥊', target: 'enemy', desc: '3 hits of 46% ATK on one enemy, which take hold of it. He fights too close to miss, so they always land.' },
-    skill: { name: 'Drag Down', icon: '🦷', cost: 1, target: 'enemy', desc: '112% ATK, the target Bleeds for 3 turns, and he hauls it back so its next turn comes 35% later (18% for bosses). It becomes his Quarry.' },
+    passive: { name: 'Lockjaw', desc: 'Drag Down is how he takes hold of something, and he will not let go of it while it is still standing: nothing else he does moves the grip. He deals 16% more damage to his Quarry and takes 12% less from everything that is not it. When the Quarry finally goes down he mends 10% of his max HP and is free to take hold of something else. Below half health nothing can Stun him, and the more of him is gone the harder he bites: +1% ATK for every 2% of his max HP that is missing, so +50% on his last point.' },
+    basic: { name: 'Worry', icon: '🥊', target: 'enemy', desc: '3 hits of 46% ATK on one enemy. He fights too close to miss, so they always land. This does not change what he has hold of.' },
+    skill: { name: 'Drag Down', icon: '🦷', cost: 1, target: 'enemy', desc: '112% ATK, the target Bleeds for 3 turns, and he hauls it back so its next turn comes 35% later (18% for bosses). He takes hold of it, and will not let go while it is still standing, so he cannot take hold of anything else until this one falls.' },
     ult: { name: 'Shake', icon: '🩸', target: 'enemy', desc: 'He takes his Quarry in his teeth: 5 hits of 62% ATK that always land and ignore 40% of its DEF, each mending him 3% of his max HP. If it goes down early the rest land on whatever he grabs next.' } },
   isaac: { id: 'isaac', name: 'Isaac', title: 'The Watcher', eras: ['current'], role: 'Scout', color: '#4fd1c5',
     stats: { hp: 1180, atk: 124, def: 76, spd: 132, crit: 0.16, cdmg: 0.55, eva: 0.14, acc: 0.06 },
     look: { skin: '#dfb189', hair: '#0c0c10', hairStyle: 'wild', eye: '#4fd1c5', body: 'coat', bodyColor: '#122020', trim: '#4fd1c5', bg: '#061212', weapon: 'glass', scarf: '#1d3a38', cloak: '#0e1c1b', young: true },
-    passive: { name: 'Never Seen Coming', desc: 'He starts the battle Invisible, and nobody can aim properly at something they cannot see: +40% evasion while it lasts, whether there are three of them left or only him. Striking gives him away. Every blow he lands while Invisible deals 25% more damage and is always a critical.' },
+    passive: { name: 'Never Seen Coming', desc: 'He starts the battle Invisible: his card fades out and attacks aimed at him mostly miss, +28% evasion, whether there are three of them left or only him. Striking gives him away and the card comes back. Every blow he lands while Invisible deals 18% more damage and is always a critical.' },
     basic: { name: 'Quick Word', icon: '🗡', target: 'enemy', desc: '100% ATK to one enemy. While he is Invisible it cannot fail to crit, and landing it gives him away.' },
     skill: { name: 'Slipping Away', icon: '🫥', cost: 1, target: 'self', desc: 'No attack. He goes Invisible again and gains SPD +30% for 2 turns, and he passes on what he has seen: the enemy with the highest ATK is Exposed, taking 50% more damage, for 2 turns. He can only do this every other turn.' },
     ult: { name: 'Everything He Saw', icon: '📜', target: 'allEnemies', desc: 'He delivers the lot. Every enemy is Exposed for 2 turns, every ally gains Crit Up +20% for 2 turns, and he puts 200% ATK into the enemy with the highest ATK without being seen to do it. Then he is Invisible again.' } }
 });
 BUILDS.hbenjamin = [BALANCED,
-  { id: 'gravekeeper', name: 'Gravekeeper', icon: '🪦', desc: 'The Corpse takes 68% less damage instead of 55% and stands up at 26% of his max HP instead of 35%, but Marrow Draw only ever takes half the damage back.', tags: { corpseDR: 0.68, riseAt: 0.26, drawSteal: 0.5 } },
+  { id: 'gravekeeper', name: 'Gravekeeper', icon: '🪦', desc: 'The Corpse takes 68% less damage instead of 55% and stands up at 26% of his max HP instead of 35%, but Marrow Draw only ever takes 70% of the damage back instead of all of it.', tags: { corpseDR: 0.68, riseAt: 0.26, drawSteal: 0.7 } },
   { id: 'plaguebearer', name: 'Plaguebearer', icon: '🧫', desc: 'Grave Whisper Withers every enemy instead of one, but it deals 86% ATK.', tags: { witherAll: 1, whisperMult: 0.86 } }];
 BUILDS.ephraim = [BALANCED,
   { id: 'mongrel', name: 'Mongrel', icon: '🐕', desc: 'The ATK he gains doubles to +1% for every 1% of max HP missing, so +85% on his last point. DEF -18%.', mods: { def: -0.18 }, tags: { rageRate: 0.85 } },
   { id: 'ironjaw', name: 'Iron Jaw', icon: '🦴', desc: 'He takes 24% less from everything that is not his Quarry instead of 12%, but only deals 7% more to it instead of 16%.', tags: { offQuarryDR: 0.24, quarryDmg: 0.07 } }];
 BUILDS.isaac = [BALANCED,
-  { id: 'courier', name: 'Courier', icon: '✉️', desc: 'Slipping Away also gives every other ally SPD +10%, but Invisible he only hits 12% harder instead of 25%.', tags: { courier: 1, ambush: 0.12 } },
-  { id: 'ghostwalk', name: 'Ghostwalk', icon: '🫥', desc: 'Invisible he hits 44% harder instead of 25%, but Slipping Away no longer Exposes anyone: he keeps what he sees to himself.', tags: { ambush: 0.44, noMark: 1 } }];
+  { id: 'courier', name: 'Courier', icon: '✉️', desc: 'Slipping Away also gives every other ally SPD +10%, but Invisible he only hits 9% harder instead of 18%.', tags: { courier: 1, ambush: 0.09 } },
+  { id: 'ghostwalk', name: 'Ghostwalk', icon: '🫥', desc: 'Invisible he hits 32% harder instead of 18%, but Slipping Away no longer Exposes anyone: he keeps what he sees to himself.', tags: { ambush: 0.32, noMark: 1 } }];
 SYNERGIES.push(
   { id: 'oldestdebt', name: 'The Oldest Debt', icon: '💀', color: '#8fd6b4', desc: 'H. Benjamin with Harry or Yunze. His Corpse stands up at 27% of his max HP instead of 35%, and Yunze is lent the same one-time refusal to die that Harry already has.',
     test: t => t.includes('hbenjamin') && (t.includes('harry') || t.includes('yunze')),

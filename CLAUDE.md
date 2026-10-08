@@ -107,6 +107,9 @@ Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026
   v0.5.0 and silently removed a whole mechanic from the Balanced build of two heroes, and it hides:
   raising the default does nothing at all, because the default is never reached. `npm run test:engine`
   now fails on any `bt(...)` on the same line as `??`.
+- **A debuff that blocks healing has to be `fixed: true`.** Every healer cleanses before it heals,
+  so an ordinary heal-blocking debuff is removed by the same action it was meant to stop and does
+  nothing at all. `withered` shipped cleansable in v0.5.0 and silently did not work.
 - **Cleanse before you heal.** Every heal that also cleanses must cleanse first. It did not matter
   while `mended` was the only debuff touching healing, since that merely reduces it, but `withered`
   blocks healing outright, and three healers were removing the thing that had just eaten the heal.

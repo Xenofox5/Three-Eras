@@ -159,6 +159,58 @@ const starsFor = ids => Object.fromEntries(ids.map(id => [id, 1]));
       return st ? st.stacks : 0;
     })()`);
     R.check('two marks land as two', marked, 2);
+
+    /* Isaac being invisible has to be the first thing you notice about his card, not a badge
+       among five others, so the card itself fades and takes a dashed outline. */
+    await s.setSave(fastSave({ team: ['isaac', 'ephraim', 'hbenjamin'], stars }));
+    await s.eval("showTeam({ mode: 'campaign', idx: 0 }); true");
+    await s.click('#fight');
+    await s.waitForExpr('typeof B === "object" && B && B.players && B.players.length === 3', 10000);
+    const inv = await s.eval(`(() => {
+      const is = B.players.find(p => p.id === 'isaac');
+      HOOK.update();
+      const card = UI.cards[is.uid];
+      const faded = getComputedStyle(card.querySelector('.pi')).opacity;
+      const onCard = card.classList.contains('invis');
+      removeStatus(is, 'invisible'); HOOK.update();
+      const seen = getComputedStyle(card.querySelector('.pi')).opacity;
+      return { onCard, faded: Number(faded), seen: Number(seen) };
+    })()`);
+    R.ok('an invisible hero is marked on his card', inv.onCard === true);
+    R.ok('and his portrait fades out', inv.faded < inv.seen - 0.3, `${inv.faded} invisible against ${inv.seen} seen`);
+
+    /* H. Benjamin is the anti-healer, and the thing that broke him was that every healer in the
+       game cleanses before it heals, so the mark came straight back off. */
+    const wither = await s.eval(`(() => {
+      const hb = B.players.find(p => p.id === 'hbenjamin');
+      const foe = B.enemies.find(e => e.alive);
+      addStatus(foe, 'withered', 3, { src: hb });
+      cleanse(foe);
+      const after = foe.statuses.some(x => x.key === 'withered');
+      foe.hp = Math.round(foe.maxHp * 0.5);
+      const before = foe.hp;
+      heal(hb, foe, 1000);
+      return { survivesCleanse: after, healed: foe.hp - before };
+    })()`);
+    R.ok('a cleanse does not lift Withered', wither.survivesCleanse === true);
+    R.check('and nothing mends a Withered enemy', wither.healed, 0);
+
+    /* Twenty-seven heroes in a phone-width column is five across on a desktop window with nine
+       hundred pixels going spare, and nothing in a menu should scroll sideways at any size. */
+    for (const [w, h, least] of [[1440, 900, 7], [1024, 800, 5], [390, 844, 3]]) {
+      await s.viewport(w, h);
+      await s.eval('showHeroes(); true');
+      await new Promise(r => setTimeout(r, 250));
+      const grid = await s.eval(`(() => {
+        const r = document.querySelector('.roster');
+        const cols = getComputedStyle(r).gridTemplateColumns.split(' ').length;
+        const d = document.documentElement;
+        return { cols, sideways: d.scrollWidth > d.clientWidth + 1 };
+      })()`);
+      R.ok(`the hero grid fits ${least}+ across at ${w}px`, grid.cols >= least, `${grid.cols} columns`);
+      R.ok(`and nothing scrolls sideways at ${w}px`, grid.sideways === false);
+    }
+    await s.viewport(430, 900);
   } finally {
     await s.close();
     host.close();
