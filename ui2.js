@@ -1,6 +1,8 @@
 /* ================= UI: effects map ================= */
 const W = ms => new Promise(r => setTimeout(r, T(ms)));
 const allP = (d) => (d.tgts || []).map(P);
+// Who is currently leaning into someone, and how to put them back.
+const LUNGES = new Map();
 const FX = {
   slash: d => melee(d, {}),
   katana: d => melee(d, { color: '#e8f6ff', n: 2, angle: -20, thick: 3, len: 1.35 }),
@@ -358,6 +360,13 @@ const FX = {
     allP(d).forEach(p => { ring(p, { color: '#b8e0c8', size: p.w * 1.3, width: 4, dur: 460 }); burst(p, { color: '#e8e4d2', n: 10, spread: 40, up: 26 }); });
     await W(240);
   },
+  /* A lunge held across a whole action. `hold` walks him in and keeps him there, `release`
+     walks him back, so a three hit combo is one approach instead of three. */
+  lunge: async d => {
+    if (d.release) { const back = LUNGES.get(d.src); if (back) { LUNGES.delete(d.src); back(); } return; }
+    const back = await lungeIn(d.src, d.tgt, 0.5, 190);
+    LUNGES.set(d.src, back);
+  },
   // Ephraim: short, flat, repeated, and landing in the same place every time.
   knuckle: async d => {
     SND.play('crush');
@@ -365,7 +374,7 @@ const FX = {
     const dir = p.x >= a.x ? 1 : -1;
     // The only thing that changes between hits is high or low, so a combo reads as a combo.
     const dy = ((d.i || 0) % 2) ? 8 : -8;
-    const reach = p.w * 0.5;
+    const reach = p.w * 0.34;
     const fist = fxEl('', { left: (p.x - dir * reach - 10) + 'px', top: (p.y + dy - 10) + 'px',
       width: '20px', height: '20px', borderRadius: '6px', background: '#e8c9a0',
       border: '2px solid #8a5a2a', boxShadow: '0 0 12px #e0a060' });

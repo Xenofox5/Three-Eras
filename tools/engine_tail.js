@@ -317,12 +317,28 @@ const took = u => B.st[u.uid].taken;
   const fb = B.players[0], fresh = B.enemies[1];
   fb.mods.acc = 5;
   fb.hp = Math.round(fb.maxHp * 0.5);
-  const fed = fb.hp;
   await KIT.hbenjamin.basic(fb, fresh);
-  ok("marking something new feeds him", fb.hp > fed, `${fed} to ${fb.hp}`);
-  const again = fb.hp;
+  ok("marking something new hands him a Skull", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
   await KIT.hbenjamin.basic(fb, fresh);
-  ok("but marking the same one again does not", fb.hp === again, `${again} to ${fb.hp}`);
+  ok("but marking the same one again does not", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
+  // Anything that dies anywhere belongs to him, which is the necromancy doing something.
+  B.enemies[0].flags.lastHitBy = fb; B.enemies[0].hp = 0;
+  await processDeaths();
+  ok("and so does anything that falls", (getSt(fb, "skulls") || {}).stacks === 2, (getSt(fb, "skulls") || {}).stacks);
+  // What he is carrying mends him every turn, which is the whole of his sustain.
+  const carried = fb.hp;
+  turnStart(fb);
+  ok("the Skulls mend him on his turn", fb.hp > carried, `${carried} to ${fb.hp}`);
+
+  // A blow that never lands must not mark anything or feed him: the drain was guarded, the mark was not.
+  setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const mb = B.players[0], mf = B.enemies[0];
+  addStatus(mf, 'afterimage', 2);  // a guaranteed dodge, so this never comes down to a roll
+  B.sp = 5;
+  const mbHp = mb.hp;
+  await KIT.hbenjamin.skill(mb, mf);
+  ok("a dodged Marrow Draw Withers nothing", !has(mf, "withered"));
+  ok("and feeds him nothing", !getSt(mb, "skulls") && mb.hp === mbHp, `hp ${mbHp} to ${mb.hp}`);
   // The mark has to survive a cleanse, or every healer in the game simply undoes it first.
   cleanse(hbFoe);
   ok("and no cleanse takes the mark off", has(hbFoe, "withered"));
@@ -337,14 +353,14 @@ const took = u => B.st[u.uid].taken;
   ok("he comes apart instead", has(hb, "corpse"));
   // The Skulls are his, not extra cards in the team row.
   ok("and nothing else joins the board", sideList(hb).length === unitsBefore, `${unitsBefore} to ${sideList(hb).length}`);
-  ok("the Corpse uses his other three moves", abil(hb, "basic").name === "Clutch", abil(hb, "basic").name);
+  ok("the Corpse uses his other three moves", abil(hb, "basic").name === "Gnaw", abil(hb, "basic").name);
   ok("and it wears a different face", lookOf(hb).collapsed === true);
   // Hard to finish off: the same blow lands for far less while he is down.
   const asCorpse = takenMult(hb, hbFoe);
   removeStatus(hb, "corpse");
   const standing = takenMult(hb, hbFoe);
   addStatus(hb, "corpse", 99, { silent: true });
-  ok("a Corpse takes 55% less", Math.abs(asCorpse / standing - 0.45) < 0.01, (asCorpse / standing).toFixed(3));
+  ok("a Corpse takes 65% less", Math.abs(asCorpse / standing - 0.35) < 0.01, (asCorpse / standing).toFixed(3));
 
   // Mended far enough, he stands up and the Skulls go with him.
   hb.hp = Math.round(hb.maxHp * 0.45);
@@ -371,20 +387,20 @@ const took = u => B.st[u.uid].taken;
   ok("and anything can stun him", addStatus(ep, "stun", 1));
   removeStatus(ep, "stun");
   // Under half he is Riled, and the badge arrives the moment the bar crosses.
-  ep.hp = Math.round(ep.maxHp * 0.45); rageCheck(ep);
-  ok("under half health he is Riled", has(ep, "riled") && !has(ep, "rabid"));
+  ep.hp = Math.round(ep.maxHp * 0.6); rageCheck(ep);
+  ok("under 65% health he is Riled", has(ep, "riled") && !has(ep, "rabid"));
   ok("Riled is 22% more ATK", Math.abs(stat(ep, "atk") / calm - 1.22) < 0.02, (stat(ep, "atk") / calm).toFixed(3));
   ok("and nothing stuns him while he is", !addStatus(ep, "stun", 1));
   // Under a quarter it changes again, and only one of the two is ever on him.
-  ep.hp = Math.round(ep.maxHp * 0.2); rageCheck(ep);
-  ok("under a quarter he is Rabid", has(ep, "rabid"));
+  ep.hp = Math.round(ep.maxHp * 0.25); rageCheck(ep);
+  ok("under 30% he is Rabid", has(ep, "rabid"));
   ok("and never both at once", !has(ep, "riled"));
   ok("Rabid is 42% more", Math.abs(stat(ep, "atk") / calm - 1.42) < 0.02, (stat(ep, "atk") / calm).toFixed(3));
   // Mend him and it goes away again, so the badge always matches the bar.
   ep.hp = ep.maxHp; rageCheck(ep);
   ok("mended back up he calms down", !has(ep, "riled") && !has(ep, "rabid"));
   // He mends himself while he is worked up, which is the only sustain he has.
-  ep.hp = Math.round(ep.maxHp * 0.3); rageCheck(ep);
+  ep.hp = Math.round(ep.maxHp * 0.4); rageCheck(ep);
   const epBefore = ep.hp;
   turnStart(ep);
   ok("Riled mends him on his own turn", ep.hp > epBefore, `${epBefore} to ${ep.hp}`);
@@ -410,6 +426,47 @@ const took = u => B.st[u.uid].taken;
   ok("and marks the hardest hitter", has(isFoe, "exposed"));
   is.flags.skillCd = 2;
   ok("he cannot vanish twice running", !canUse(is, "skill"));
+
+  // ---- the things that say "at random" are ----
+  {
+    const N = 6000, tol = 0.035;
+    const share = (counts, key) => (counts[key] || 0) / N;
+
+    // Kingsley pulls one of five trinkets. Each should come up a fifth of the time.
+    setupBattle({ team: ["kingsley", "flynn", "leo"], enemies: [{ id: "brute" }] });
+    const kg = B.players[0];
+    const trinkets = {};
+    for (let i = 0; i < N; i++) {
+      const item = pick(['lantern', 'mirror', 'bell', 'spark', 'dice']);
+      trinkets[item] = (trinkets[item] || 0) + 1;
+    }
+    const tOff = ['lantern', 'mirror', 'bell', 'spark', 'dice'].map(k => Math.abs(share(trinkets, k) - 0.2));
+    ok("each of the five trinkets comes up a fifth of the time", Math.max(...tOff) < tol,
+      ['lantern', 'mirror', 'bell', 'spark', 'dice'].map(k => k + ' ' + (share(trinkets, k) * 100).toFixed(1) + '%').join(', '));
+
+    // Vasco draws a Joker a tenth of the time and otherwise one of four suits evenly.
+    setupBattle({ team: ["vasco", "flynn", "leo"], enemies: [{ id: "brute" }] });
+    const vs = B.players[0];
+    const cards = {};
+    for (let i = 0; i < N; i++) {
+      const joker = rnd() < (bt(vs, 'jokerCh') || 0.1);
+      const card = joker ? 'joker' : pick(['hearts', 'spades', 'clubs', 'diamonds']);
+      cards[card] = (cards[card] || 0) + 1;
+    }
+    ok("the Joker is about one draw in ten", Math.abs(share(cards, "joker") - 0.1) < 0.02, (share(cards, "joker") * 100).toFixed(1) + "%");
+    const sOff = ['hearts', 'spades', 'clubs', 'diamonds'].map(k => Math.abs(share(cards, k) - 0.225));
+    ok("and the four suits split the rest evenly", Math.max(...sOff) < tol,
+      ['hearts', 'spades', 'clubs', 'diamonds'].map(k => k + ' ' + (share(cards, k) * 100).toFixed(1) + '%').join(', '));
+
+    // Vasco pulls two of three tricks on a Prank, so each trick should appear two thirds of the time.
+    const tricks = {};
+    for (let i = 0; i < N; i++) {
+      for (const k of shuffle(['blind', 'atkDown', 'spdDown']).slice(0, 2)) tricks[k] = (tricks[k] || 0) + 1;
+    }
+    const kOff = ['blind', 'atkDown', 'spdDown'].map(k => Math.abs(share(tricks, k) - 2 / 3));
+    ok("Prank picks its two tricks evenly", Math.max(...kOff) < tol,
+      ['blind', 'atkDown', 'spdDown'].map(k => k + ' ' + (share(tricks, k) * 100).toFixed(1) + '%').join(', '));
+  }
 
   // Every new hero has to be reachable, priced and described.
   ["hbenjamin", "ephraim", "isaac"].forEach(id => {

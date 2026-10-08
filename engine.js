@@ -187,7 +187,7 @@ function takenMult(t, u) {
   if (t.isHero && t.id === 'chosen') { const g = getSt(t, 'grace'); if (g) m *= 1 - 0.02 * g.stacks; }
   if (has(t, 'stone')) m *= 1 - (bt(t, 'stoneDr') || 0.5);
   // Frail on his feet and stubborn once he is down, which is the whole shape of him.
-  if (has(t, 'corpse')) m *= 1 - (t.flags.corpseDR || bt(t, 'corpseDR') || 0.55);
+  if (has(t, 'corpse')) m *= 1 - (t.flags.corpseDR || bt(t, 'corpseDR') || 0.65);
   /* The thing wearing him is harder to put down than he is. Locked into it the Vessel fell in
      75% of fights against the jester 50%, and the owner asked for its damage cut, not its
      survival, so the gap closes here. */
@@ -231,7 +231,7 @@ function returnBeads(victim) {
 const wallMax = u => Math.round(u.maxHp * 0.55);
 const witherTurns = u => (u.def && u.def.boss) ? 1 : 2;
 // How far he has to be mended before he can stand up again.
-const riseAt = u => u.flags.riseAt || bt(u, 'riseAt') || 0.35;
+const riseAt = u => u.flags.riseAt || bt(u, 'riseAt') || 0.45;
 /* The first fall is not one. He comes apart into a Corpse that keeps acting with a weaker set
    of moves and two Skulls that fight on their own, and mending the Corpse puts him back
    together. It happens once: after he stands up, the next fall is a real one. */
@@ -241,7 +241,7 @@ const riseAt = u => u.flags.riseAt || bt(u, 'riseAt') || 0.35;
 function rageCheck(u) {
   if (!u.isHero || u.id !== 'ephraim' || !isUp(u)) return;
   const pct = u.hp / u.maxHp;
-  const want = pct <= (bt(u, 'rabidAt') || 0.25) ? 'rabid' : pct <= (bt(u, 'riledAt') || 0.5) ? 'riled' : null;
+  const want = pct <= (bt(u, 'rabidAt') || 0.3) ? 'rabid' : pct <= (bt(u, 'riledAt') || 0.65) ? 'riled' : null;
   for (const k of ['riled', 'rabid']) if (k !== want && has(u, k)) removeStatus(u, k);
   if (want && !has(u, want)) {
     addStatus(u, want, 99, { silent: true });
@@ -250,7 +250,7 @@ function rageCheck(u) {
 }
 function collapseBenjamin(u) {
   u.flags.bargainSpent = true;
-  u.hp = Math.max(1, Math.round(u.maxHp * 0.25));
+  u.hp = Math.max(1, Math.round(u.maxHp * 0.18));
   addStatus(u, 'corpse', 99, { silent: true });
   HOOK.float(u, '\u{1F480} HE COMES APART', 'special');
   HOOK.log(`${u.name} falls apart, and the pieces keep moving.`, 'i');
@@ -263,16 +263,27 @@ function riseBenjamin(u, pct) {
   HOOK.float(u, '\u{1F56F} HE GETS UP', 'buff');
   HOOK.fx('secondbreath', { src: u, tgts: [u] });
 }
-/* The skulls at his hands are the thing his art has always shown, so that is what they do:
-   they feed on whatever he has just marked and hand it back to him. One per mark, so it pays
-   for doing the thing he is for rather than for standing still. */
-function skullFeed(u, t) {
-  if (!isUp(u) || !t) return;
-  const back = Math.round(u.maxHp * (u.def.boss ? 0.025 : (bt(u, 'feedPct') || 0.07)));
-  if (back <= 0) return;
-  HOOK.fx('skullfeed', { src: t, tgt: u });
-  heal(u, u, back, { noCrit: true });
+/* The skulls at his hands are what his art has always shown, so they are a thing you can count:
+   a badge with a number on it. He collects them from what he marks and from anything that dies,
+   on either side, and each one mends him a little at the start of his turn. */
+const skullCap = u => bt(u, 'skullCap') || 4;
+function giveSkull(u, t) {
+  if (!isUp(u) || !u.isHero || u.id !== 'hbenjamin') return;
+  const st = getSt(u, 'skulls');
+  if (st && st.stacks >= skullCap(u)) return;
+  if (t) HOOK.fx('skullfeed', { src: t, tgt: u });
+  if (st) st.stacks = Math.min(skullCap(u), st.stacks + 1);
+  else addStatus(u, 'skulls', 99, { stacks: 1, silent: true });
+  HOOK.float(u, '\u{1F480} +1', 'buff');
 }
+// What the carried dead are worth, every turn, which is the whole of his sustain.
+function skullTick(u) {
+  const st = getSt(u, 'skulls');
+  if (!st || !st.stacks) return;
+  const per = u.def.boss ? 0.015 : (bt(u, 'skullMend') || 0.05);
+  heal(u, u, u.maxHp * per * st.stacks, { noCrit: true });
+}
+const skullFeed = (u, t) => giveSkull(u, t);
 function giveHex(src, t, amt, hits) {
   if (!isUp(t)) return;
   const before = t.shield;
@@ -727,7 +738,10 @@ async function turnStart(u) {
     if (m) heal(u, u, u.maxHp * m * (bt(u, 'rageMend') || 1) * (u.flags.kennel ? 1.33 : 1), { noCrit: true });
   }
   // Mended far enough, he puts himself back together at the start of his own turn.
-  if (u.isHero && u.id === 'hbenjamin' && has(u, 'corpse') && u.hp >= u.maxHp * riseAt(u)) riseBenjamin(u, u.hp / u.maxHp);
+  if (u.isHero && u.id === 'hbenjamin') {
+    skullTick(u);
+    if (has(u, 'corpse') && u.hp >= u.maxHp * riseAt(u)) riseBenjamin(u, u.hp / u.maxHp);
+  }
   u.flags.delayed = false;
   if (u.isHero && u.id === 'ethan' && spOf(u) < (bt(u, 'treasuryBelow') || 3)) { addSp(u, 1); HOOK.float(u, '💰 +1 SP', 'buff'); }
   const sg = getSt(u, 'song'); if (sg) { cleanse(u, 1); heal(sg.src || u, u, u.maxHp * (sg.value || 0.06), { tick: true, noCrit: true }); }
@@ -780,6 +794,8 @@ async function processDeaths() {
         u.alive = false; u.statuses = []; u.shield = 0; u.intents = [];
         if (u.side === 'player' && u.isHero) B.kos++;
         tally(u, 'falls');
+        // He is the oldest thing here and everything that dies belongs to him, either side.
+        for (const b of B.units) if (isUp(b) && b.isHero && b.id === 'hbenjamin' && b !== u) giveSkull(b, u);
         HOOK.log(`${u.name} falls.`, 'ko');
         HOOK.sfx('ko');
         await HOOK.ko(u);
@@ -1308,38 +1324,44 @@ const KIT = {
      has marked can be mended at all. */
   hbenjamin: {
     async basic(u, t) {
+      // Gnaw. It hurts almost nothing; what it is for is the mark and the skull that follows.
       if (has(u, 'corpse')) {
-        const cr = await strike(u, t, 0.6, { fx: 'whisper' });
-        if (hitOK(cr) && isUp(cr.target) && !has(cr.target, 'withered')) { addStatus(cr.target, 'withered', witherTurns(u), { src: u }); skullFeed(u, cr.target); }
+        const cr = await strike(u, t, 0.25, { fx: 'whisper' });
+        if (hitOK(cr) && isUp(cr.target) && !has(cr.target, 'withered')) { addStatus(cr.target, 'withered', witherTurns(u), { src: u }); giveSkull(u, cr.target); }
         return;
       }
       const all = bt(u, 'witherAll');
-      const r = await strike(u, t, bt(u, 'whisperMult') || 1.3, { fx: 'whisper' });
-      if (hitOK(r) && isUp(r.target) && !has(r.target, 'withered')) { addStatus(r.target, 'withered', witherTurns(u), { src: u }); skullFeed(u, r.target); }
-      if (all) for (const e of foesOf(u)) if (e !== r.target && !has(e, 'withered')) { addStatus(e, 'withered', witherTurns(u), { src: u }); skullFeed(u, e); }
+      const r = await strike(u, t, bt(u, 'whisperMult') || 1.15, { fx: 'whisper' });
+      if (hitOK(r) && isUp(r.target) && !has(r.target, 'withered')) { addStatus(r.target, 'withered', witherTurns(u), { src: u }); giveSkull(u, r.target); }
+      if (all && hitOK(r)) for (const e of foesOf(u)) if (e !== r.target && !has(e, 'withered')) { addStatus(e, 'withered', witherTurns(u), { src: u }); giveSkull(u, e); }
     },
     async skill(u, t) {
       await HOOK.fx('marrow', { src: u, tgt: t });
-      // Feed: weaker, but it takes back far more, because it is how he gets off the floor.
+      /* Gather the Dead. No attack at all: he spends everything he is carrying to pull himself
+         back together, which is the route up that does not need a healer. */
       if (has(u, 'corpse')) {
-        const cr = resolveHit(u, t, 0.8, { acc: 0.05 });
-        if (hitOK(cr)) heal(u, u, Math.round(cr.dmg * 1.1), { noCrit: true });
-        if (isUp(t) && !has(t, 'withered')) { addStatus(t, 'withered', witherTurns(u), { src: u }); skullFeed(u, t); }
+        const st = getSt(u, 'skulls'), n = st ? st.stacks : 0;
+        if (n) {
+          removeStatus(u, 'skulls');
+          HOOK.float(u, `\u{1F480} \u00d7${n} SPENT`, 'special');
+          heal(u, u, u.maxHp * 0.09 * n, { noCrit: true });
+        } else HOOK.float(u, 'NOTHING LEFT', 'info');
         return;
       }
       const dry = has(t, 'withered');
-      const r = resolveHit(u, t, 1.5, { acc: 0.05 });
+      const r = resolveHit(u, t, 1.4, { acc: 0.05 });
+      // A blow that never landed marks nothing and feeds him nothing.
       if (hitOK(r)) {
         const take = Math.round(r.dmg * (bt(u, 'drawSteal') || 1) * (dry ? 1 : 0.5));
-        if (take > 0) { heal(u, u, take, { noCrit: true }); }
+        if (take > 0) heal(u, u, take, { noCrit: true });
+        if (isUp(t) && !dry) { addStatus(t, 'withered', witherTurns(u), { src: u }); giveSkull(u, t); }
       }
-      if (isUp(t) && !has(t, 'withered')) { addStatus(t, 'withered', witherTurns(u), { src: u }); skullFeed(u, t); }
     },
     /* The old one handed the whole team two turns of not dying and gave him his Skulls back,
        which he could then do again. He is a debuffer, so it takes the room apart instead. */
     async ult(u) {
       // The Corpse spends its ultimate hauling itself upright instead.
-      if (has(u, 'corpse')) { riseBenjamin(u, 0.35); return; }
+      if (has(u, 'corpse')) { riseBenjamin(u, 0.45); return; }
       const f = foesOf(u);
       await HOOK.fx('secondbreath', { src: u, tgts: f });
       for (const e of f) {
@@ -1355,24 +1377,30 @@ const KIT = {
      is nothing to count and nothing he can lose by being hit. */
   ephraim: {
     async basic(u, t) {
-      const m = bt(u, 'knuckle') || 0.48;
-      // Too close to miss, so the hits are sure rather than accurate.
+      const m = bt(u, 'knuckle') || 0.44;
+      // He walks in, throws the lot, and walks back. Too close to miss, so the hits are sure.
+      await HOOK.fx('lunge', { src: u, tgt: t });
       for (let i = 0; i < 3; i++) { if (!isUp(t)) break; await strike(u, t, m, { fx: 'knuckle', i, sure: true }); }
+      await HOOK.fx('lunge', { src: u, release: true });
     },
     async skill(u, t) {
-      const r = await strike(u, t, 1.12, { fx: 'seize', status: { key: 'bleed', turns: 3, dot: 0.3 } });
+      await HOOK.fx('lunge', { src: u, tgt: t });
+      const r = await strike(u, t, 1.0, { fx: 'seize', status: { key: 'bleed', turns: 3, dot: 0.3 } });
       // He bites down and drags it back rather than letting it act.
       if (hitOK(r) && isUp(t)) delayUnit(t, t.def.boss ? 0.18 : (bt(u, 'dragDelay') || 0.35));
+      await HOOK.fx('lunge', { src: u, release: true });
       return r;
     },
     async ult(u, t) {
       await HOOK.fx('wontlet', { src: u, tgt: t });
+      await HOOK.fx('lunge', { src: u, tgt: t });
       for (let i = 0; i < 5; i++) {
         let e = isUp(t) ? t : foesOf(u).find(x => isUp(x)) || foesOf(u)[0];
         if (!e) break;
-        const r = await strike(u, e, 0.62, { fx: 'knuckle', i, sure: true, pierce: 0.4 });
+        const r = await strike(u, e, 0.56, { fx: 'knuckle', i, sure: true, pierce: 0.4 });
         if (hitOK(r)) heal(u, u, u.maxHp * 0.03, { noCrit: true });
       }
+      await HOOK.fx('lunge', { src: u, release: true });
     }
   },
   /* Isaac. The other two who hide are passive about it: Aamay is covered while a hero stands and
@@ -1563,13 +1591,14 @@ function previewFor(u, kind, t) {
     case 'yunze.basic': return D(u, t, 0.4, { hits: 2, acc: 0.05 });
     case 'yunze.skill': return D(u, t, 1.25, { acc: 0.15 });
     case 'yunze.ult': return D(u, t, 0.4, { note: 'per hit', acc: 0.1 });
-    case 'hbenjamin.basic': return has(u, 'corpse') ? D(u, t, 0.6, { note: '+Withered' }) : D(u, t, bt(u, 'whisperMult') || 1.3, { note: '+Withered' });
-    case 'hbenjamin.skill': return has(u, 'corpse') ? D(u, t, 0.8, { acc: 0.05, note: 'mends him 110%' })
-      : D(u, t, 1.5, { acc: 0.05, note: has(t, 'withered') ? 'drains it all' : 'drains half' });
+    case 'hbenjamin.basic': return has(u, 'corpse') ? D(u, t, 0.25, { note: '+Withered, +💀' }) : D(u, t, bt(u, 'whisperMult') || 1.15, { note: '+Withered, +💀' });
+    case 'hbenjamin.skill': { const sk = getSt(u, 'skulls'), n = sk ? sk.stacks : 0;
+      return has(u, 'corpse') ? { txt: n ? `💀 ×${n} → ${Math.round(9 * n)}% HP` : 'Nothing to spend' }
+        : D(u, t, 1.4, { acc: 0.05, note: has(t, 'withered') ? 'drains it all' : 'drains half' }); }
     case 'hbenjamin.ult': return has(u, 'corpse') ? { txt: '🕯 get up' } : { txt: '🥀 rot the room' };
-    case 'ephraim.basic': return D(u, t, bt(u, 'knuckle') || 0.48, { sure: true, hits: 3 });
-    case 'ephraim.skill': return D(u, t, 1.12, { note: '+Bleed, delays' });
-    case 'ephraim.ult': return D(u, t, 0.62, { sure: true, hits: 5, pierce: 0.4 });
+    case 'ephraim.basic': return D(u, t, bt(u, 'knuckle') || 0.44, { sure: true, hits: 3 });
+    case 'ephraim.skill': return D(u, t, 1.0, { note: '+Bleed, delays' });
+    case 'ephraim.ult': return D(u, t, 0.56, { sure: true, hits: 5, pierce: 0.4 });
     case 'isaac.basic': return D(u, t, 1.0, { forceCrit: has(u, 'invisible'), note: has(u, 'invisible') ? 'unseen' : undefined });
     case 'isaac.skill': return { txt: '🫥 vanish, 💨▲' };
     case 'isaac.ult': return D(u, t, 2.0, { sure: true, note: 'on the hardest hitter' });
@@ -1619,6 +1648,14 @@ function canUse(u, kind) {
 /* ---------- hero action ---------- */
 async function heroAct(u, ch) {
   const kind = ch.kind; let t = ch.target;
+  if (kind === 'hold') {
+    HOOK.float(u, '\u{1F6E1} HOLDS', 'info');
+    HOOK.log(`${u.name} holds.`, 'i');
+    gainUlt(u, 10 * (1 + u.mods.ultGain));
+    tally(u, 'acts');
+    await wait(220);
+    return;
+  }
   const a = abil(u, kind);
   if (!canUse(u, kind)) return heroAct(u, { kind: 'basic', target: foesOf(u)[0] });
   const vt = validTargets(u, kind);
@@ -1690,7 +1727,11 @@ function aiChoose(u) {
       }
       // Wither first, then drain: the draw takes everything from something already marked.
       case 'hbenjamin': {
-        if (has(u, 'corpse')) { if (sp >= skillCost(u)) return { kind: 'skill', target: tgtFor('skill') }; break; }
+        if (has(u, 'corpse')) {
+          const sk = getSt(u, 'skulls');
+          if (sk && sk.stacks >= 3 && sp >= skillCost(u)) return { kind: 'skill', target: u };
+          break;
+        }
         const dry = en.filter(e => has(e, 'withered'));
         if (sp >= skillCost(u) && (dry.length || hpPct(u) < 0.6)) return { kind: 'skill', target: dry.length ? lowest(dry) : tgtFor('skill') };
         break;

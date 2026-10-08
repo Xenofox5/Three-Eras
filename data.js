@@ -547,7 +547,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.5.3';
+const GAME_VERSION = '0.5.4';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -616,6 +616,18 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.5.4', d: '2026-10-08', date: 'Holding a turn, the Corpse given its own kit, and a lifesteal that was paying out on misses', changes: [
+    { t: 'new', kind: 'system', who: 'Hold', text: 'A fourth button on the action bar: take no action at all', from: 'you had to attack with something', to: 'Hold costs nothing, earns no Skill Points, and charges the ultimate 10%', note: 'Against a riposte, a counter-attacker or anyone who only punishes you for swinging, the best move is sometimes not to move. Only the player can take it; nothing in the AI ever does.' },
+    { t: 'fix', kind: 'hero', who: 'hbenjamin', what: 'Marrow Draw', text: 'What a dodged one does', from: 'the drain was checked but the mark that follows it was not, so a dodge still Withered the target and still paid him', to: 'a blow that never lands does nothing at all', note: 'This is the lifesteal-on-a-dodge the owner spotted. Plaguebearer had the same hole: a missed flask still Withered the whole room.' },
+    { t: 'rework', kind: 'hero', who: 'hbenjamin', what: 'The Skulls', text: 'What they are and what they do', from: 'an invisible 7% heal whenever he Withered something', to: 'a counted badge, up to 4, taken from every fresh mark and from every unit that falls anywhere on the field, each mending him 5% of his max HP a turn', note: 'The owner wanted the lifesteal kept and the skulls made visible, and wanted him to have something to do with the dead. The badge is on his card and the count is in the tooltip.' },
+    { t: 'rework', kind: 'hero', who: 'hbenjamin', what: 'The Corpse', text: 'Its three moves', from: 'his own kit at a discount', to: 'Gnaw at 25% ATK, Gather the Dead which spends every Skull for 9% max HP each, and The Second Breath', note: 'A corpse should be trying to get up, not trying to fight. It hurts almost nothing and takes 65% less damage instead of 55%, and standing up needs 45% of his max HP rather than 35%.' },
+    { t: 'nerf', kind: 'hero', who: 'hbenjamin', text: 'Max HP, DEF, Grave Whisper and Marrow Draw', from: '1180 HP, 74 DEF, 130% and 150% ATK', to: '1010 HP, 60 DEF, 115% and 140% ATK', note: 'Paying for a tankier Corpse, as asked. He comes apart at 18% of his max HP rather than 25%.' },
+    { t: 'nerf', kind: 'hero', who: 'ephraim', text: 'Max HP and ATK', from: '1420 / 118', to: '1280 / 120, with Knuckle Down 48% to 44%, Seize 112% to 100% and the ultimate 62% to 56%', note: 'Asked for again and significant this time: composite 54.0 to 45.7 across two versions, and his duel rate 96 to 70.' },
+    { t: 'adjust', kind: 'hero', who: 'ephraim', what: 'Riled and Rabid', text: 'When they start', from: '50% and 25% health', to: '65% and 30%', note: 'They began so late that for most of a fight he had no bonus of any kind, which took him to 38.5 once the grip was gone.' },
+    { t: 'adjust', kind: 'hero', who: 'ephraim', what: 'Knuckle Down, Seize and the ultimate on screen', text: 'How he reaches the enemy', from: 'no approach at all after the shared melee effect was dropped', to: 'he lunges in, throws the whole action from there, and walks back', note: 'One approach for the action rather than one per hit, which is what made the shared effect look like teleporting.' },
+    { t: 'fix', kind: 'system', who: 'Card portraits', text: 'A hero whose portrait changes with a status', from: 'the repaint looked for def.heroId, which only hero bosses have, so H. Benjamin stayed upright on screen while the engine had him in a heap', to: 'it resolves the hero on either side' },
+    { t: 'adjust', kind: 'hero', who: 'hbenjamin', what: 'His boss version', text: 'What a carried Skull mends', from: '5% of max HP each', to: '1.5%', note: 'Four skulls on a 3000 health pool is 600 a turn and nothing in the game kills that. The Oldest Grave went to 0% against the test team that brings a healer.' }
+  ] },
   { v: '0.5.3', d: '2026-10-08', date: 'Ephraim reworked again, the Skulls put back where they belong', changes: [
     { t: 'rework', kind: 'hero', who: 'ephraim', what: 'Lockjaw becomes Pitbull', text: 'What drives him', from: 'a hidden grip on one enemy paying out through two modifiers you could not see', to: 'two states off his own health bar, each with its own badge', note: 'Even with the rules right the grip read as him letting go for no reason, because nothing on screen showed it moving. Under half health he is Riled, ATK +22% and a 5% mend a turn; under a quarter he is Rabid, ATK +42% and 7%. Nothing hidden and nothing to track.' },
     { t: 'nerf', kind: 'hero', who: 'ephraim', text: 'ATK, and what the two states give', from: '126 ATK, +16% to a Quarry, 12% off everything else', to: '118 ATK, +22% and +42% only when he is already hurt', note: 'Asked for twice. Composite 55.7 to 50.8 and his duel rate 96 to 80, so he is no longer near the top of a table he had no business being on.' },
@@ -1062,6 +1074,14 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.5.4', d: '2026-10-08', items: [
+    'You can hold a turn. There is a fourth button under the three abilities that does nothing at all: no attack, no Skill Point, 10% ultimate charge. Against Danielle, or anyone who only punishes you for swinging, or a duel where every move you have makes things worse, not moving is a real answer and until now the game would not let you give it.',
+    'H. Benjamin was lifestealing off attacks that missed. The drain on Marrow Draw was checked properly but the mark that follows it was not, so a dodged skill still Withered the target and still paid him for it. A blow that never lands now does nothing at all, and the Plaguebearer build had the same hole.',
+    'His Skulls are a thing you can count again, and they are what keeps him alive. He carries up to 4, shown as a number on his card, and he takes one for every enemy he Withers fresh and one for every unit that falls anywhere on the field, his own side included. Each one mends him 5% of his max HP at the start of his turn. He is much frailer to pay for it: 1010 health and 60 armour, the lowest of either in the game.',
+    'The Corpse is its own thing rather than his kit at a discount. It barely hurts anything, takes 65% less damage, and all three of its moves are about getting up: Gnaw marks and feeds, Gather the Dead spends every Skull he is carrying for 9% of his max HP each, and The Second Breath hauls him upright. Getting up needs 45% of his max HP now rather than 35%.',
+    'Ephraim is significantly weaker and he reaches people properly. His health and his damage both come down, and his duel rate falls from 96 to 70. Riled and Rabid start earlier, at 65% and 30% health, because starting at half meant most of a fight went by with no bonus at all. All three of his attacks now lunge in, throw the whole action from there, and walk back.',
+    'A hero whose portrait changes with a status now actually repaints, which is why the Corpse never appeared.'
+  ] },
   { v: '0.5.3', d: '2026-10-08', items: [
     'Ephraim is driven by his own health bar and nothing else. The grip is gone: it was a hidden relationship between him and one enemy, set by one button and paying out through two numbers you could never see, and even once the rules were right it still read as him letting go for no reason. Hurt him instead and he changes, twice, with a badge for each. Under half health he is Riled: ATK +22%, nothing can Stun him, and he mends 5% of his max HP each turn. Under a quarter he is Rabid: ATK +42% and 7%. Both come and go with the bar you are already looking at, so there is nothing to keep track of.',
     'His punches land in the same place now. Knuckle Down and Seize both went through the shared melee effect, which rotates the slash by 38 degrees for every hit in a combo and throws his card 42% of the way across the board and back on each one. Three hits meant three angles and three round trips, which is what looked random and ugly. The fist comes in on one axis and the impact lands on one spot; the bite is two jaws closing from fixed points. Nothing moves his card at all.',
@@ -1334,9 +1354,10 @@ Object.assign(STATUS, {
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 7% max HP and removes a debuff at the start of each of its turns.' },
   withered:  { name: 'Withered', icon: '🥀', type: 'debuff', fixed: true, color: '#8fd6b4', desc: 'Marked by H. Benjamin. It cannot be healed at all while this lasts, no cleanse will take the mark off, and it takes 20% more damage from him and 12% more from the rest of his side. It only runs out.' },
-  corpse:    { name: 'Corpse', icon: '💀', type: 'buff', fixed: true, color: '#b8e0c8', desc: 'He has come apart. He keeps acting with a weaker set of moves, takes 40% less damage, and his Skulls fight on their own. Mend him to 40% of his max HP and he gets back up.' },
-  riled:     { name: 'Riled', icon: '😤', type: 'buff', fixed: true, mods: { atk: 0.22 }, color: '#e0603a', desc: 'Hurt and getting worse for it: ATK +22%, nothing can Stun him, and he mends 5% of his max HP at the start of each of his turns. It lasts while he is under half health.' },
-  rabid:     { name: 'Rabid', icon: '🩸', type: 'buff', fixed: true, mods: { atk: 0.42 }, color: '#ff3b3b', desc: 'Past caring: ATK +42%, nothing can Stun him, and he mends 7% of his max HP at the start of each of his turns. It lasts while he is under a quarter health.' },
+  skulls:    { name: 'Skulls', icon: '💀', type: 'buff', fixed: true, max: 4, color: '#b8e0c8', desc: 'The dead he is carrying, up to 4. Each one mends him 5% of his max HP at the start of his turn. He takes one for every enemy he Withers fresh and one for every unit that falls, on either side.' },
+  corpse:    { name: 'Corpse', icon: '🪦', type: 'buff', fixed: true, color: '#8fd6b4', desc: 'He has come apart. He takes 65% less damage but barely hurts anything, and his three moves are about putting himself back together. Mend him to 45% of his max HP, or spend the Skulls, and he gets back up.' },
+  riled:     { name: 'Riled', icon: '😤', type: 'buff', fixed: true, mods: { atk: 0.22 }, color: '#e0603a', desc: 'Hurt and getting worse for it: ATK +22%, nothing can Stun him, and he mends 5% of his max HP at the start of each of his turns. It lasts while he is under 65% health.' },
+  rabid:     { name: 'Rabid', icon: '🩸', type: 'buff', fixed: true, mods: { atk: 0.42 }, color: '#ff3b3b', desc: 'Past caring: ATK +42%, nothing can Stun him, and he mends 7% of his max HP at the start of each of his turns. It lasts while he is under 30% health.' },
   invisible: { name: 'Invisible', icon: '🫥', type: 'buff', mods: { eva: 0.28 }, color: '#4fd1c5', desc: 'Nobody can see where he is, so attacks aimed at him mostly miss: +28% evasion. His next blow lands unseen, and striking gives him away.' },
   mixture:   { name: 'Mixture', icon: '🧪', type: 'buff', fixed: true, color: '#ffb23d', desc: 'The phial Malakai has mixed next. Venom Poisons, Sedative lowers ATK, Solvent lowers DEF and comes on the house.' },
   vessel:    { name: 'The Vessel', icon: '😈', type: 'buff', fixed: true, mods: { atk: 0.15 }, color: '#d1203a', desc: 'The power of Peguicha wearing the face of Vasco: ATK +15%, its hits heal him for 35% of the damage and deal double damage to Shields, and his basics earn the team no Skill Points while it is out.' },
@@ -1417,31 +1438,31 @@ Object.assign(HEROES, {
 /* ================= v0.5.0: the oldest name, the brawler and the watcher ================= */
 Object.assign(HEROES, {
   hbenjamin: { id: 'hbenjamin', name: 'H. Benjamin', title: 'The Oldest Name', eras: ['first'], role: 'Necromancer', color: '#8fd6b4',
-    stats: { hp: 1180, atk: 136, def: 74, spd: 94, crit: 0.08, cdmg: 0.5 },
+    stats: { hp: 1010, atk: 128, def: 60, spd: 94, crit: 0.08, cdmg: 0.5 },
     look: { skin: '#e4decb', hair: '#101410', hairStyle: 'bald', eye: '#6fe0b0', glowEye: '#6fe0b0', body: 'robe', bodyColor: '#101610', trim: '#8fd6b4', bg: '#060e0b', weapon: 'skulls', skull: true, helm: 'cowl' },
     /* What is left once the first death has happened: the same skull, tipped over, in a heap of
        the same robe. Keyed to the status so the card repaints the moment he goes down. */
     altLookWhen: 'corpse',
     altLook: { skin: '#cfc8b2', hair: '#101410', hairStyle: 'bald', eye: '#3f8f72', glowEye: '#3f8f72', body: 'robe', bodyColor: '#0b100c', trim: '#4a7a62', bg: '#050a08', skull: true, collapsed: true },
-    passive: { name: 'The Oldest Bargain', desc: 'The skulls at his hands feed on whatever he marks: every time he Withers an enemy that was not Withered already, one of them takes 7% of his max HP back for him. He is frail, and he does not die properly either. The first blow that would finish him does not: he comes apart into a Corpse at 25% of his max HP, takes 55% less damage and keeps acting with his own weaker three moves. Mend him to 35% of his max HP and he gets back up. He only has the one bargain: after that, a fall is a fall.' },
-    basic: { name: 'Grave Whisper', icon: '🦴', target: 'enemy', desc: 'Deal 130% ATK to one enemy and Wither it for 2 turns. Nothing can mend a Withered enemy and no cleanse will lift it, it takes 20% more damage from him, and 12% more from everyone else on his side.' },
-    skill: { name: 'Marrow Draw', icon: '💀', cost: 1, target: 'enemy', desc: 'Deal 150% ATK and take half the damage back as his own health. Against an enemy that is already Withered he takes all of it. The target is Withered for 2 turns either way.' },
+    passive: { name: 'The Oldest Bargain', desc: 'He carries the dead at his hands, up to 4 Skulls, and the badge says how many. He takes one for every enemy he Withers that was not Withered already, and one for every unit that falls anywhere on the field, his own side included. Each Skull he is carrying mends him 5% of his max HP at the start of his turn. He is very frail and dies easily, except for the first time: the first blow that would finish him drops him to 18% of his max HP as a Corpse instead, which barely hurts anything, takes 65% less damage, and has its own three moves for putting him back together. Mend him to 45% and he stands up. One bargain a battle.' },
+    basic: { name: 'Grave Whisper', icon: '🦴', target: 'enemy', desc: 'Deal 115% ATK to one enemy and Wither it for 2 turns, which hands him a Skull. Nothing can mend a Withered enemy and no cleanse will lift it, it takes 20% more damage from him, and 12% more from everyone else on his side.' },
+    skill: { name: 'Marrow Draw', icon: '💀', cost: 1, target: 'enemy', desc: 'Deal 140% ATK and take half the damage back as his own health. Against an enemy that is already Withered he takes all of it. The target is Withered for 2 turns either way.' },
     ult: { name: 'The Long Rot', icon: '🥀', target: 'allEnemies', desc: 'Every enemy is Withered for 3 turns, so nothing on their side can be mended at all, and they each lose 25% ATK and 25% DEF for 3 turns.' },
     /* What is left of him after the bargain. Everything that reads an ability off a unit goes
        through abil(), which swaps to this while the Corpse status is on him. */
     altWhen: 'corpse',
     alt: {
-      basic: { name: 'Clutch', icon: '🖐', target: 'enemy', desc: 'What is left of him takes hold of one enemy for 60% ATK and Withers it for 2 turns.' },
-      skill: { name: 'Feed', icon: '💀', cost: 1, target: 'enemy', desc: 'Deal 80% ATK and take 110% of it back as his own health. This is how he gets off the floor: mend him to 35% of his max HP and he stands up.' },
-      ult: { name: 'The Second Breath', icon: '🕯', target: 'self', desc: 'He hauls himself upright without waiting to be mended, and stands at 35% of his max HP.' }
+      basic: { name: 'Gnaw', icon: '🦴', target: 'enemy', desc: 'What is left of him bites at one enemy for 25% ATK. It barely hurts, but it still Withers for 2 turns and the Skull still comes to him.' },
+      skill: { name: 'Gather the Dead', icon: '💀', cost: 1, target: 'self', desc: 'No attack. He spends every Skull he is carrying and each one pulls 9% of his max HP back into him, so four of them is 36%. This is the route up that does not need a healer: reach 45% and he stands.' },
+      ult: { name: 'The Second Breath', icon: '🕯', target: 'self', desc: 'He hauls himself upright without waiting for any of it, and stands at 45% of his max HP.' }
     } },
   ephraim: { id: 'ephraim', name: 'Ephraim', title: 'The Pitbull', eras: ['first'], role: 'Brawler', color: '#e0603a',
-    stats: { hp: 1420, atk: 118, def: 98, spd: 104, crit: 0.1, cdmg: 0.55, eva: 0.04 },
+    stats: { hp: 1280, atk: 120, def: 94, spd: 104, crit: 0.1, cdmg: 0.55, eva: 0.04 },
     look: { skin: '#c98a52', hair: '#111116', hairStyle: 'short', eye: '#111116', body: 'bare', bodyColor: '#c98a52', trim: '#e8dcc8', bg: '#3a1409', weapon: 'knuckles', scars: true, brow: 'firm', bandana: '#b8322a', big: true },
-    passive: { name: 'Pitbull', desc: 'Hurting him makes him worse, and you can see exactly when. Under half health he is Riled: ATK +22%, nothing can Stun him, and he mends 5% of his max HP at the start of each of his turns. Under a quarter he is Rabid instead: ATK +42% and he mends 7%. Both show as a badge on his card and both come and go with the health bar, so there is nothing else to keep track of.' },
-    basic: { name: 'Knuckle Down', icon: '🥊', target: 'enemy', desc: '3 hits of 48% ATK on one enemy. He fights too close to miss, so they always land.' },
-    skill: { name: 'Seize', icon: '🦷', cost: 1, target: 'enemy', desc: 'He bites down: 112% ATK, the target Bleeds for 3 turns, and he hauls it back so its next turn comes 35% later (18% for bosses).' },
-    ult: { name: 'Won\u2019t Let Go', icon: '🩸', target: 'enemy', desc: 'He takes one enemy in his teeth and does not stop: 5 hits of 62% ATK that always land and ignore 40% of its DEF, each mending him 3% of his max HP. If it goes down early the rest land on whoever is next.' } },
+    passive: { name: 'Pitbull', desc: 'Hurting him makes him worse, and you can see exactly when. Under 65% health he is Riled: ATK +22%, nothing can Stun him, and he mends 5% of his max HP at the start of each of his turns. Under 30% he is Rabid instead: ATK +42% and he mends 7%. Both show as a badge on his card and both come and go with the health bar, so there is nothing else to keep track of.' },
+    basic: { name: 'Knuckle Down', icon: '🥊', target: 'enemy', desc: 'He wades in and throws three: 3 hits of 44% ATK on one enemy. He fights too close to miss, so they always land.' },
+    skill: { name: 'Seize', icon: '🦷', cost: 1, target: 'enemy', desc: 'He bites down: 100% ATK, the target Bleeds for 3 turns, and he hauls it back so its next turn comes 35% later (18% for bosses).' },
+    ult: { name: 'Won\u2019t Let Go', icon: '🩸', target: 'enemy', desc: 'He takes one enemy in his teeth and does not stop: 5 hits of 56% ATK that always land and ignore 40% of its DEF, each mending him 3% of his max HP. If it goes down early the rest land on whoever is next.' } },
   isaac: { id: 'isaac', name: 'Isaac', title: 'The Watcher', eras: ['current'], role: 'Scout', color: '#4fd1c5',
     stats: { hp: 1180, atk: 124, def: 76, spd: 132, crit: 0.16, cdmg: 0.55, eva: 0.14, acc: 0.06 },
     look: { skin: '#dfb189', hair: '#0c0c10', hairStyle: 'wild', eye: '#4fd1c5', body: 'coat', bodyColor: '#122020', trim: '#4fd1c5', bg: '#061212', weapon: 'glass', scarf: '#1d3a38', cloak: '#0e1c1b', young: true },
@@ -1451,11 +1472,11 @@ Object.assign(HEROES, {
     ult: { name: 'Everything He Saw', icon: '📜', target: 'allEnemies', desc: 'He delivers the lot. Every enemy is Exposed for 2 turns, every ally gains Crit Up +20% for 2 turns, and he puts 200% ATK into the enemy with the highest ATK without being seen to do it. Then he is Invisible again.' } }
 });
 BUILDS.hbenjamin = [BALANCED,
-  { id: 'gravekeeper', name: 'Gravekeeper', icon: '🪦', desc: 'The Corpse takes 68% less damage instead of 55% and stands up at 26% of his max HP instead of 35%, but the skulls only feed him 4% a mark instead of 7%.', tags: { corpseDR: 0.68, riseAt: 0.26, feedPct: 0.04 } },
+  { id: 'gravekeeper', name: 'Gravekeeper', icon: '🪦', desc: 'He carries 6 Skulls instead of 4 and the Corpse stands up at 36% of his max HP instead of 45%, but each Skull only mends him 3.5% a turn instead of 5%.', tags: { skullCap: 6, riseAt: 0.36, skullMend: 0.035 } },
   { id: 'plaguebearer', name: 'Plaguebearer', icon: '🧫', desc: 'Grave Whisper Withers every enemy instead of one, but it deals 86% ATK.', tags: { witherAll: 1, whisperMult: 0.86 } }];
 BUILDS.ephraim = [BALANCED,
-  { id: 'mongrel', name: 'Mongrel', icon: '🐕', desc: 'Riled starts at 62% health and Rabid at 35%, so he spends far more of a fight worked up. DEF -18%.', mods: { def: -0.18 }, tags: { riledAt: 0.62, rabidAt: 0.35 } },
-  { id: 'ironjaw', name: 'Iron Jaw', icon: '🦴', desc: 'Riled and Rabid mend him half again as much, but Knuckle Down drops to 3 hits of 44%.', tags: { rageMend: 1.5, knuckle: 0.44 } }];
+  { id: 'mongrel', name: 'Mongrel', icon: '🐕', desc: 'Riled starts at 80% health and Rabid at 45%, so he is worked up almost from the first hit. DEF -18%.', mods: { def: -0.18 }, tags: { riledAt: 0.8, rabidAt: 0.45 } },
+  { id: 'ironjaw', name: 'Iron Jaw', icon: '🦴', desc: 'Riled and Rabid mend him half again as much, but Knuckle Down drops to 3 hits of 40%.', tags: { rageMend: 1.5, knuckle: 0.4 } }];
 BUILDS.isaac = [BALANCED,
   { id: 'courier', name: 'Courier', icon: '✉️', desc: 'Slipping Away also gives every other ally SPD +10%, but Invisible he only hits 9% harder instead of 18%.', tags: { courier: 1, ambush: 0.09 } },
   { id: 'ghostwalk', name: 'Ghostwalk', icon: '🫥', desc: 'Invisible he hits 32% harder instead of 18%, but Slipping Away no longer Exposes anyone: he keeps what he sees to himself.', tags: { ambush: 0.32, noMark: 1 } }];

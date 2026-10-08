@@ -414,7 +414,8 @@ function statusLine(st, u) {
   if (st.key === 'pages') desc = `${st.stacks} of ${u ? pageCap(u) : '?'} Pages. The Last Page spends them all: ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.15) : 0.15) * 100)}% ATK to every enemy right now.`;
   if (st.key === 'vengeance') desc = `${st.stacks} stored. Next Spear Thrust: +${st.stacks * 12}% damage and heals ${st.stacks * 2}% max HP.`;
   if (st.key === 'mixture') desc = ['Venom: the next flask Poisons for 2 turns.', 'Sedative: the next flask lowers ATK by 22%.', 'Solvent: the next flask lowers DEF by 22%, splashes every other enemy for 55% ATK, and pays the team a Skill Point.'][st.value || 0];
-  if (st.key === 'corpse') desc = `He has come apart. He acts with his own weaker three moves, takes ${Math.round((u ? ((u.flags && u.flags.corpseDR) || bt(u, 'corpseDR') || 0.4) : 0.4) * 100)}% less damage, and his Skulls fight on their own. Mend him to ${Math.round((u ? ((u.flags && u.flags.riseAt) || bt(u, 'riseAt') || 0.4) : 0.4) * 100)}% of his max HP and he gets back up.`;
+  if (st.key === 'skulls') desc = `${st.stacks} of ${u ? skullCap(u) : 4} carried. Each one mends him ${Math.round((u ? (bt(u, 'skullMend') || 0.03) : 0.03) * 100)}% of his max HP at the start of his turn, and the Corpse can spend the lot at once.`;
+  if (st.key === 'corpse') desc = `He has come apart. He barely hurts anything, takes ${Math.round((u ? ((u.flags && u.flags.corpseDR) || bt(u, 'corpseDR') || 0.65) : 0.65) * 100)}% less damage, and his three moves are about putting himself back together. Mend him to ${Math.round((u ? ((u.flags && u.flags.riseAt) || bt(u, 'riseAt') || 0.45) : 0.45) * 100)}% of his max HP and he gets up.`;
   if (st.key === 'hunted') desc = `Takes ${pctTxt(st.value || 0.25)} more damage from the Yunze who marked it.`;
   const extra = [];
   if (d.max && st.stacks > 1) extra.push(`×${st.stacks}`);

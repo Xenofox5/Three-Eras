@@ -113,6 +113,16 @@ Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026
 - **Cleanse before you heal.** Every heal that also cleanses must cleanse first. It did not matter
   while `mended` was the only debuff touching healing, since that merely reduces it, but `withered`
   blocks healing outright, and three healers were removing the thing that had just eaten the heal.
+- **`u.def.heroId` is only set on hero bosses.** For a hero on the player side `u.def` is the hero
+  itself and `heroId` is undefined, so any lookup written as `u.def.heroId ? HEROES[...] : null`
+  silently skips every hero in the player's team. It has now caused two bugs: `lookOf` and the card
+  portrait repaint. Write `u.def.heroId ? HEROES[u.def.heroId] : (u.isHero ? HEROES[u.id] : null)`.
+- **Guard the whole ability behind the hit, not just the damage.** A miss returns `{miss:true}` with
+  no `dmg`, so a drain guarded by `hitOK` reads as correct while the `addStatus` on the next line
+  still fires. Marrow Draw was Withering and paying out on dodges for three versions.
+- **Anything a boss sustains with needs its own number.** A percentage of max HP that is fair on a
+  hero is enormous on a boss carrying three times the pool. Both of H. Benjamin's heals needed a
+  `u.def.boss` branch before The Oldest Grave was winnable.
 - **`melee()` rotates and lunges, so it is wrong for a combo.** It adds `k * 55 + d.i * 38` degrees
   to the slash angle and moves the card 42% toward the target and back on every call, so a three
   hit basic is three different angles and three round trips. That reads as the effect landing in a

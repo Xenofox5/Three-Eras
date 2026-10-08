@@ -210,6 +210,37 @@ const starsFor = ids => Object.fromEntries(ids.map(id => [id, 1]));
       R.ok(`the hero grid fits ${least}+ across at ${w}px`, grid.cols >= least, `${grid.cols} columns`);
       R.ok(`and nothing scrolls sideways at ${w}px`, grid.sideways === false);
     }
+
+    /* Coming apart changes his card, which the repaint used to miss entirely because it looked
+       for def.heroId and only hero bosses have one. And holding has to be a button you can see. */
+    await s.viewport(430, 940);
+    await s.setSave(fastSave({ team: ['hbenjamin', 'ephraim', 'isaac'], stars }));
+    await s.eval("showTeam({ mode: 'campaign', idx: 0 }); true");
+    await s.click('#fight');
+    await s.waitForExpr('typeof B === "object" && B && B.players && B.players.length === 3', 10000);
+    const corpse = await s.eval(`(() => {
+      const hb = B.players.find(p => p.id === 'hbenjamin');
+      const foe = B.enemies.find(e => e.alive);
+      const card = UI.cards[hb.uid];
+      const upright = card.querySelector('.pi').innerHTML;
+      hb.hp = 30; applyDamage(hb, 9999, { src: foe }); HOOK.update();
+      return { changed: card.querySelector('.pi').innerHTML !== upright,
+               collapsed: lookOf(hb).collapsed === true,
+               moves: [abil(hb, 'basic').name, abil(hb, 'skill').name] };
+    })()`);
+    R.ok('the Corpse wears a different portrait', corpse.collapsed === true);
+    R.ok('and the card actually repaints', corpse.changed === true);
+    R.check('with its own three moves', corpse.moves, ['Gnaw', 'Gather the Dead']);
+    const held = await s.eval(`(async () => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < 20000) {
+        const b = document.querySelector('.ab.hold');
+        if (b) return { there: true, label: b.innerText.replace(/\s+/g, ' ').trim() };
+        await new Promise(r => setTimeout(r, 60));
+      }
+      return { there: false };
+    })()`);
+    R.ok('holding the turn is an option on the action bar', held.there === true, held.label || 'never appeared');
     await s.viewport(430, 900);
   } finally {
     await s.close();

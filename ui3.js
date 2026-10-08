@@ -126,6 +126,7 @@ function badge(st) {
   else if (st.key === 'hexshield') num = st.hits + '✦';
   else if (st.key === 'tempo') { icon = (TEMPO[st.value] || TEMPO.andante).icon; num = ''; }
   else if (st.key === 'mixture') { icon = MIXTURE[st.value || 0].icon; num = ''; }
+  else if (st.key === 'skulls') num = st.stacks;
   else if (d.max && st.stacks > 1) num = '×' + st.stacks;
   else if (st.turns < 99) num = st.turns;
   return `<span class="sb ${d.type}" style="--c:${d.color}">${icon}${num !== '' ? `<b>${num}</b>` : ''}</span>`;
@@ -161,7 +162,8 @@ function updateUnit(u) {
   if (u.isHero) c.classList.toggle('ready', up && u.ult >= 100);
   const glow = !!u.flags.glow || has(u, 'unsealed') || has(u, 'vessel');
   // A second look keyed to a status counts as a repaint too, not just a change of eye glow.
-  const form = glow + '|' + ((u.def.heroId && HEROES[u.def.heroId].altLookWhen && has(u, HEROES[u.def.heroId].altLookWhen)) ? 'alt' : '');
+  const hd = u.def.heroId ? HEROES[u.def.heroId] : (u.isHero ? HEROES[u.id] : null);
+  const form = glow + '|' + ((hd && hd.altLookWhen && has(u, hd.altLookWhen)) ? 'alt' : '');
   if (c._glow !== form) { if (c._glow !== undefined) c.querySelector('.pi').innerHTML = unitPortrait(u); c._glow = form; }
   const hpP = Math.max(0, u.hp / u.maxHp * 100), shP = Math.min(100, u.shield / u.maxHp * 100);
   const f = c.querySelector('.hp .f'), g = c.querySelector('.hp .g'), s = c.querySelector('.hp .s'), b = c.querySelector('.hp b');
@@ -287,7 +289,9 @@ function showActions() {
     const cost = skillCost(u);
     const sub = hexCd ? `Ready in ${u.flags.skillCd}` : noBeads ? 'No beads' : k === 'skill' && chan ? `Free, ×${Math.min(beamRamp(u).length, chan.value + 1)}` : k === 'basic' ? (basicPays(u) ? '+1 SP' : 'No SP') : k === 'skill' ? (lone ? (ok ? 'Free, ready' : `Ready in ${u.flags.skillCd}`) : (ok ? `Costs ${cost} SP` : `Need ${cost} SP`)) : (u.ult >= 100 ? 'Ready' : Math.floor(u.ult) + '%');
     return `<button class="ab ${k === 'ult' ? 'ul' : ''} ${k === 'ult' && ok ? 'rdy' : ''} ${k === 'skill' && chan ? 'sustain' : ''} ${p.kind === k ? 'sel' : ''}" data-k="${k}" ${ok ? '' : 'disabled'} style="--c:${u.color}"><span class="i">${ab.icon}</span><b>${esc(ab.name)}</b><small>${sub}</small></button>`;
-  }).join('');
+  }).join('') +
+    // Doing nothing is sometimes the best move, so it is a button rather than a thing you cannot do.
+    `<button class="ab hold ${p.kind === 'hold' ? 'sel' : ''}" data-k="hold" style="--c:#8a90a8"><span class="i">\u{1F6E1}</span><b>Hold</b><small>Do nothing</small></button>`;
   const bd = u.build && u.build.id !== 'balanced' ? u.build.name : HEROES[u.id].role;
   a.innerHTML = `<div class="who" style="--c:${u.color}"><div class="p">${miniPortrait(u)}</div><div class="wn"><b>${esc(u.name)}</b> <small>${esc(bd)}</small></div>${spHTML()}</div><div class="abtn">${btns}</div><div class="descrow" id="descrow"></div>`;
   $$('.ab', a).forEach(bt => bt.onclick = () => selectKind(bt.dataset.k));
@@ -295,7 +299,9 @@ function showActions() {
   renderDesc(); markTargets();
 }
 function selectKind(k) {
-  const p = UI.pending; if (!p || !canUse(p.u, k)) return;
+  const p = UI.pending; if (!p) return;
+  if (k === 'hold') { UI.pending = null; clearTargets(); actIdle(); SND.play('click'); p.res({ kind: 'hold' }); return; }
+  if (!canUse(p.u, k)) return;
   if (p.kind === k) { const tt = abil(p.u, k).target; if (tt !== 'enemy' && tt !== 'ally') { confirmAoE(); return; } }
   p.kind = k; SND.play('select');
   $$('#act .ab').forEach(b => b.classList.toggle('sel', b.dataset.k === k));
