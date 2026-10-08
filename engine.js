@@ -250,6 +250,9 @@ function rageCheck(u) {
 }
 function collapseBenjamin(u) {
   u.flags.bargainSpent = true;
+  // Whatever he was carrying goes into holding himself together.
+  const had = getSt(u, 'skulls');
+  if (had && had.stacks) { removeStatus(u, 'skulls'); HOOK.float(u, `\u{1F480} \u00d7${had.stacks} GONE`, 'debuff'); }
   u.hp = Math.max(1, Math.round(u.maxHp * 0.18));
   addStatus(u, 'corpse', 99, { silent: true });
   HOOK.float(u, '\u{1F480} HE COMES APART', 'special');
@@ -276,12 +279,26 @@ function giveSkull(u, t) {
   else addStatus(u, 'skulls', 99, { stacks: 1, silent: true });
   HOOK.float(u, '\u{1F480} +1', 'buff');
 }
-// What the carried dead are worth, every turn, which is the whole of his sustain.
+/* A mark only ever pays once per enemy. Without this he re-marks the same one every time it
+   wears off and the skulls cost him nothing at all. */
+function markSkull(u, t) {
+  if (!t || !u.isHero || u.id !== 'hbenjamin') return;
+  u.flags.marked = u.flags.marked || {};
+  if (u.flags.marked[t.uid]) return;
+  u.flags.marked[t.uid] = 1;
+  giveSkull(u, t);
+}
+/* One is spent at the start of each of his turns, and that is where the mend comes from. The
+   carrying is the cost: stand still and the pile runs out. */
 function skullTick(u) {
   const st = getSt(u, 'skulls');
   if (!st || !st.stacks) return;
-  const per = u.def.boss ? 0.015 : (bt(u, 'skullMend') || 0.05);
-  heal(u, u, u.maxHp * per * st.stacks, { noCrit: true });
+  const per = u.def.boss ? 0.04 : (bt(u, 'skullMend') || 0.14);
+  st.stacks--;
+  if (st.stacks <= 0) removeStatus(u, 'skulls');
+  HOOK.fx('skullfeed', { src: u, tgt: u });
+  HOOK.float(u, '\u{1F480} SPENT', 'heal');
+  heal(u, u, u.maxHp * per, { noCrit: true });
 }
 const skullFeed = (u, t) => giveSkull(u, t);
 function giveHex(src, t, amt, hits) {
@@ -1327,13 +1344,13 @@ const KIT = {
       // Gnaw. It hurts almost nothing; what it is for is the mark and the skull that follows.
       if (has(u, 'corpse')) {
         const cr = await strike(u, t, 0.25, { fx: 'whisper' });
-        if (hitOK(cr) && isUp(cr.target) && !has(cr.target, 'withered')) { addStatus(cr.target, 'withered', witherTurns(u), { src: u }); giveSkull(u, cr.target); }
+        if (hitOK(cr) && isUp(cr.target) && !has(cr.target, 'withered')) { addStatus(cr.target, 'withered', witherTurns(u), { src: u }); markSkull(u, cr.target); }
         return;
       }
       const all = bt(u, 'witherAll');
       const r = await strike(u, t, bt(u, 'whisperMult') || 1.15, { fx: 'whisper' });
-      if (hitOK(r) && isUp(r.target) && !has(r.target, 'withered')) { addStatus(r.target, 'withered', witherTurns(u), { src: u }); giveSkull(u, r.target); }
-      if (all && hitOK(r)) for (const e of foesOf(u)) if (e !== r.target && !has(e, 'withered')) { addStatus(e, 'withered', witherTurns(u), { src: u }); giveSkull(u, e); }
+      if (hitOK(r) && isUp(r.target) && !has(r.target, 'withered')) { addStatus(r.target, 'withered', witherTurns(u), { src: u }); markSkull(u, r.target); }
+      if (all && hitOK(r)) for (const e of foesOf(u)) if (e !== r.target && !has(e, 'withered')) { addStatus(e, 'withered', witherTurns(u), { src: u }); markSkull(u, e); }
     },
     async skill(u, t) {
       await HOOK.fx('marrow', { src: u, tgt: t });
@@ -1354,7 +1371,7 @@ const KIT = {
       if (hitOK(r)) {
         const take = Math.round(r.dmg * (bt(u, 'drawSteal') || 1) * (dry ? 1 : 0.5));
         if (take > 0) heal(u, u, take, { noCrit: true });
-        if (isUp(t) && !dry) { addStatus(t, 'withered', witherTurns(u), { src: u }); giveSkull(u, t); }
+        if (isUp(t) && !dry) { addStatus(t, 'withered', witherTurns(u), { src: u }); markSkull(u, t); }
       }
     },
     /* The old one handed the whole team two turns of not dying and gave him his Skulls back,
@@ -1367,7 +1384,7 @@ const KIT = {
       for (const e of f) {
         const fresh = !has(e, 'withered');
         addStatus(e, 'withered', u.def.boss ? 1 : 3, { src: u });
-        if (fresh) skullFeed(u, e);
+        if (fresh) markSkull(u, e);
         addStatus(e, 'atkDown', 3, { value: 0.25 });
         addStatus(e, 'defDown', 3, { value: 0.25 });
       }

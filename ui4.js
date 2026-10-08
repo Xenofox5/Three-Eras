@@ -414,7 +414,7 @@ function statusLine(st, u) {
   if (st.key === 'pages') desc = `${st.stacks} of ${u ? pageCap(u) : '?'} Pages. The Last Page spends them all: ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.15) : 0.15) * 100)}% ATK to every enemy right now.`;
   if (st.key === 'vengeance') desc = `${st.stacks} stored. Next Spear Thrust: +${st.stacks * 12}% damage and heals ${st.stacks * 2}% max HP.`;
   if (st.key === 'mixture') desc = ['Venom: the next flask Poisons for 2 turns.', 'Sedative: the next flask lowers ATK by 22%.', 'Solvent: the next flask lowers DEF by 22%, splashes every other enemy for 55% ATK, and pays the team a Skill Point.'][st.value || 0];
-  if (st.key === 'skulls') desc = `${st.stacks} of ${u ? skullCap(u) : 4} carried. Each one mends him ${Math.round((u ? (bt(u, 'skullMend') || 0.03) : 0.03) * 100)}% of his max HP at the start of his turn, and the Corpse can spend the lot at once.`;
+  if (st.key === 'skulls') desc = `${st.stacks} of ${u ? skullCap(u) : 4} carried. One is spent at the start of each of his turns and mends him ${Math.round((u ? (bt(u, 'skullMend') || 0.14) : 0.09) * 100)}% of his max HP. The Corpse can spend the lot at once, and coming apart costs him all of them.`;
   if (st.key === 'corpse') desc = `He has come apart. He barely hurts anything, takes ${Math.round((u ? ((u.flags && u.flags.corpseDR) || bt(u, 'corpseDR') || 0.65) : 0.65) * 100)}% less damage, and his three moves are about putting himself back together. Mend him to ${Math.round((u ? ((u.flags && u.flags.riseAt) || bt(u, 'riseAt') || 0.45) : 0.45) * 100)}% of his max HP and he gets up.`;
   if (st.key === 'hunted') desc = `Takes ${pctTxt(st.value || 0.25)} more damage from the Yunze who marked it.`;
   const extra = [];
@@ -593,7 +593,8 @@ const BTYPE = {
   new:    { icon: '✦', label: 'New',      color: '#3b9cff', desc: 'New rule or mechanic' },
   harder: { icon: '▲', label: 'Harder',   color: '#f97316', desc: 'Stage got tougher' },
   easier: { icon: '▼', label: 'Easier',   color: '#14b8a6', desc: 'Stage got gentler' },
-  adjust: { icon: '◆', label: 'Adjusted', color: '#d4a017', desc: 'Neutral or mixed change' }
+  adjust: { icon: '◆', label: 'Adjusted', color: '#d4a017', desc: 'Neutral or mixed change' },
+  fix:    { icon: '✓', label: 'Fixed',    color: '#0ea5e9', desc: 'Something that was not working' }
 };
 const BPORT = {};
 function bcWho(c) {
@@ -609,7 +610,7 @@ function bcWho(c) {
   return { name, pic };
 }
 function bcRow(c, showWho = true) {
-  const T = BTYPE[c.t], w = bcWho(c);
+  const T = BTYPE[c.t] || BTYPE.adjust, w = bcWho(c);
   const nums = c.from != null ? ` <span class="ft"><span class="fr">${esc(c.from)}</span><span class="ar">→</span><b>${esc(c.to)}</b></span>` : '';
   return `<div class="bc" style="--bc:${T.color}">
 <div class="bct"><span class="btag"><i>${T.icon}</i>${T.label}</span>${showWho ? `<span class="bwho"><span class="bp">${w.pic}</span>${esc(w.name)}</span>` : ''}${c.what ? `<span class="bwhat">${esc(c.what)}</span>` : ''}</div>

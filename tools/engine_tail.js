@@ -318,17 +318,24 @@ const took = u => B.st[u.uid].taken;
   fb.mods.acc = 5;
   fb.hp = Math.round(fb.maxHp * 0.5);
   await KIT.hbenjamin.basic(fb, fresh);
-  ok("marking something new hands him a Skull", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
+  ok("marking an enemy for the first time hands him a Skull", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
+  // The reapply loop: let the mark lapse and hit the same one again. It must pay nothing.
+  removeStatus(fresh, "withered");
   await KIT.hbenjamin.basic(fb, fresh);
-  ok("but marking the same one again does not", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
-  // Anything that dies anywhere belongs to him, which is the necromancy doing something.
+  ok("but the same enemy never pays twice", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
+  // Anything that dies anywhere belongs to him, which is what makes a death worth something.
   B.enemies[0].flags.lastHitBy = fb; B.enemies[0].hp = 0;
   await processDeaths();
-  ok("and so does anything that falls", (getSt(fb, "skulls") || {}).stacks === 2, (getSt(fb, "skulls") || {}).stacks);
-  // What he is carrying mends him every turn, which is the whole of his sustain.
+  ok("and anything that falls does pay", (getSt(fb, "skulls") || {}).stacks === 2, (getSt(fb, "skulls") || {}).stacks);
+  // One is spent every turn, so the pile runs down on its own and the mend is what it buys.
   const carried = fb.hp;
   turnStart(fb);
-  ok("the Skulls mend him on his turn", fb.hp > carried, `${carried} to ${fb.hp}`);
+  ok("a Skull is spent on his turn", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
+  ok("and spending it mends him", fb.hp > carried, `${carried} to ${fb.hp}`);
+  // And coming apart costs him everything he was still carrying.
+  fb.hp = 20;
+  applyDamage(fb, 9999, { src: B.enemies[1] || fresh });
+  ok("the bargain spends the whole pile", !getSt(fb, "skulls"), (getSt(fb, "skulls") || {}).stacks);
 
   // A blow that never lands must not mark anything or feed him: the drain was guarded, the mark was not.
   setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }] });

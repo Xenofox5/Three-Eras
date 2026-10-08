@@ -113,6 +113,11 @@ Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026
 - **Cleanse before you heal.** Every heal that also cleanses must cleanse first. It did not matter
   while `mended` was the only debuff touching healing, since that merely reduces it, but `withered`
   blocks healing outright, and three healers were removing the thing that had just eaten the heal.
+- **A `BALANCE` entry's `t` must exist in `BTYPE` (`ui4.js`).** The allowed values are buff, nerf,
+  rework, new, harder, easier, adjust and fix. An unknown one used to throw out of `bcRow`, which
+  killed the entire Balance screen and the sheet of every hero named in that entry, and nothing
+  failed until a human tapped it. `npm run check:visual` now opens every hero sheet and the
+  Balance screen, so this cannot ship again.
 - **`u.def.heroId` is only set on hero bosses.** For a hero on the player side `u.def` is the hero
   itself and `heroId` is undefined, so any lookup written as `u.def.heroId ? HEROES[...] : null`
   silently skips every hero in the player's team. It has now caused two bugs: `lookOf` and the card

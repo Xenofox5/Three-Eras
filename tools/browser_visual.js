@@ -241,6 +241,28 @@ const starsFor = ids => Object.fromEntries(ids.map(id => [id, 1]));
       return { there: false };
     })()`);
     R.ok('holding the turn is an option on the action bar', held.there === true, held.label || 'never appeared');
+
+    /* Every change in the balance log has to have a row style, and every hero sheet has to open.
+       One entry with a `t` the renderer did not know took out the Balance screen and the sheet of
+       every hero named in it, and nothing failed until it was clicked. */
+    const logs = await s.eval(`(() => {
+      const types = new Set();
+      BALANCE.forEach(v => (v.changes || []).forEach(c => types.add(c.t)));
+      const unknown = [...types].filter(t => !BTYPE[t]);
+      const broken = [];
+      for (const id of HERO_ORDER) {
+        try { heroSheet(id); closeSheet(); } catch (e) { broken.push(id + ": " + e.message); }
+      }
+      let balanceScreen = "ok";
+      try { balanceBody(); } catch (e) { balanceScreen = e.message; }
+      let updatesScreen = "ok";
+      try { showGuide("balance"); closeSheet(); } catch (e) { updatesScreen = e.message; }
+      return { unknown, broken, balanceScreen, updatesScreen, types: [...types] };
+    })()`);
+    R.ok('every balance entry has a row style', logs.unknown.length === 0, logs.unknown.join(',') || logs.types.join(','));
+    R.ok('every hero sheet opens', logs.broken.length === 0, logs.broken.slice(0, 3).join(' | '));
+    R.check('the Balance screen renders', logs.balanceScreen, 'ok');
+    R.check('the Guide opens on the balance tab', logs.updatesScreen, 'ok');
     await s.viewport(430, 900);
   } finally {
     await s.close();
