@@ -113,6 +113,14 @@ Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026
 - **Cleanse before you heal.** Every heal that also cleanses must cleanse first. It did not matter
   while `mended` was the only debuff touching healing, since that merely reduces it, but `withered`
   blocks healing outright, and three healers were removing the thing that had just eaten the heal.
+- **`melee()` rotates and lunges, so it is wrong for a combo.** It adds `k * 55 + d.i * 38` degrees
+  to the slash angle and moves the card 42% toward the target and back on every call, so a three
+  hit basic is three different angles and three round trips. That reads as the effect landing in a
+  random place. Hand-build any effect that fires more than once per action.
+- **`node sim-results/st.js` runs a stale bundle.** `npm run stages` and `sh tools/stages.sh` rebuild
+  it from source first; calling the file directly does not, so you measure the last build. Two
+  rounds of stage tuning in v0.5.3 were made against stale numbers before this was spotted. The same
+  applies to every generated file under `sim-results/`.
 - **Half the `look` flags take a colour, not `true`.** `cloak`, `beard`, `bandana` and `scarf` are
   drawn with `fill="${L.x}"`, so passing `true` renders `fill="true"` and draws nothing at all.
   `gaunt`, `scars`, `big`, `young`, `skull`, `noBody` and `collapsed` are the boolean ones. All three

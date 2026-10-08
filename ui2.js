@@ -331,6 +331,18 @@ const FX = {
     burst(b, { color: '#6a8a74', n: 14, spread: 46 });
     ring(a, { color: '#b8e0c8', size: a.w * 1.2, from: 1.1, to: 0.6, dur: 420, width: 4 });
   },
+  skullfeed: async d => {
+    const a = P(d.src), b = P(d.tgt);
+    // A skull drifts off what he marked and back to him, which is what his portrait shows.
+    const sk = fxEl('', { left: (a.x - 9) + 'px', top: (a.y - 9) + 'px', width: '18px', height: '18px',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px',
+      filter: 'drop-shadow(0 0 7px #8fd6b4)' });
+    sk.textContent = '\u{1F480}';
+    anim(sk, [{ transform: 'translate(0,0) scale(.6)', opacity: 0 },
+      { transform: `translate(${(b.x - a.x) * 0.5}px,${(b.y - a.y) * 0.5 - 14}px) scale(1)`, opacity: 1, offset: 0.5 },
+      { transform: `translate(${b.x - a.x}px,${b.y - a.y}px) scale(.7)`, opacity: 0 }], 460).then(() => sk.remove());
+    await W(260);
+  },
   skullspend: d => {
     if (!live()) return;
     SND.play('break');
@@ -346,22 +358,43 @@ const FX = {
     allP(d).forEach(p => { ring(p, { color: '#b8e0c8', size: p.w * 1.3, width: 4, dur: 460 }); burst(p, { color: '#e8e4d2', n: 10, spread: 40, up: 26 }); });
     await W(240);
   },
-  // Ephraim: short, flat, repeated. No reach and no flourish.
-  knuckle: d => melee(d, { color: '#e0a060', angle: 6 + ((d.i || 0) % 2) * -14, len: 0.9, thick: 9, sfx: 'crush',
-    extra: p => burst(p, { color: '#ffd0a0', n: 7, spread: 26 }) }),
+  // Ephraim: short, flat, repeated, and landing in the same place every time.
+  knuckle: async d => {
+    SND.play('crush');
+    const a = P(d.src), p = P(d.tgt);
+    const dir = p.x >= a.x ? 1 : -1;
+    // The only thing that changes between hits is high or low, so a combo reads as a combo.
+    const dy = ((d.i || 0) % 2) ? 8 : -8;
+    const reach = p.w * 0.5;
+    const fist = fxEl('', { left: (p.x - dir * reach - 10) + 'px', top: (p.y + dy - 10) + 'px',
+      width: '20px', height: '20px', borderRadius: '6px', background: '#e8c9a0',
+      border: '2px solid #8a5a2a', boxShadow: '0 0 12px #e0a060' });
+    await anim(fist, [{ transform: 'translateX(0)', opacity: 0 }, { transform: `translateX(${dir * reach * 0.8}px)`, opacity: 1 }], 110);
+    fist.remove();
+    ring({ x: p.x, y: p.y + dy, w: p.w, h: p.h }, { color: '#ffd0a0', size: p.w * 0.7, from: 0.2, to: 1, dur: 240, width: 5 });
+    burst({ x: p.x, y: p.y + dy, w: p.w, h: p.h }, { color: '#ffd0a0', n: 8, spread: 24 });
+    await W(80);
+  },
+  // Two jaws closing on it from fixed points. Nothing crosses, nothing rotates, nothing moves.
   seize: async d => {
     SND.play('crush');
     const p = P(d.tgt);
-    lungeIn(d.src, d.tgt);
-    await W(160);
-    // Two jaws closing on it rather than a cut across it.
-    slashAt(p, { color: '#fff', angle: -70, len: p.w * 0.9, thick: 7, dur: 300 });
-    slashAt(p, { color: '#fff', angle: 70, len: p.w * 0.9, thick: 7, dur: 300 });
-    burst(p, { color: '#e0603a', n: 14, spread: 44 });
+    const jaw = side => {
+      const e = fxEl('', { left: (p.x + side * p.w * 0.46 - 11) + 'px', top: (p.y - 16) + 'px',
+        width: '22px', height: '32px', borderRadius: side < 0 ? '16px 0 0 16px' : '0 16px 16px 0',
+        background: side < 0 ? 'linear-gradient(90deg,#fff,#e0603a)' : 'linear-gradient(270deg,#fff,#e0603a)',
+        boxShadow: '0 0 14px #e0603a' });
+      return anim(e, [{ transform: 'translateX(0)', opacity: 0 },
+        { transform: `translateX(${-side * p.w * 0.1}px)`, opacity: 1, offset: 0.3 },
+        { transform: `translateX(${-side * p.w * 0.3}px)`, opacity: 1 }], 280).then(() => e.remove());
+    };
+    await Promise.all([jaw(-1), jaw(1)]);
+    ring(p, { color: '#e0603a', size: p.w * 0.95, from: 1.1, to: 0.5, dur: 300, width: 6 });
+    burst(p, { color: '#ff7a4a', n: 12, spread: 32 });
     shakeArena(false);
-    await W(200);
+    await W(140);
   },
-  wontlet: async d => { SND.play('ult'); flash('#3a1008', 0.35, 420); ghost(d.src, 0, 0, 320, '#e0603a'); shakeArena(true); await W(240); },
+  wontlet: async d => { SND.play('ult'); flash('#3a1008', 0.35, 420); const p = P(d.tgt); ring(p, { color: '#e0603a', size: p.w * 1.6, from: 1.4, to: 0.6, dur: 420, width: 7 }); shakeArena(true); await W(240); },
   // Isaac: he is only visible in the instant he commits to something.
   quickword: async d => {
     SND.play('whoosh');

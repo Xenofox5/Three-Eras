@@ -312,6 +312,17 @@ const took = u => B.st[u.uid].taken;
   const hbHp = hbFoe.hp;
   heal(hb, hbFoe, 500);
   ok("a Withered enemy cannot be mended at all", hbFoe.hp === hbHp, `${hbHp} to ${hbFoe.hp}`);
+  // Marking something new feeds him, which is the whole of what the skulls do.
+  setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
+  const fb = B.players[0], fresh = B.enemies[1];
+  fb.mods.acc = 5;
+  fb.hp = Math.round(fb.maxHp * 0.5);
+  const fed = fb.hp;
+  await KIT.hbenjamin.basic(fb, fresh);
+  ok("marking something new feeds him", fb.hp > fed, `${fed} to ${fb.hp}`);
+  const again = fb.hp;
+  await KIT.hbenjamin.basic(fb, fresh);
+  ok("but marking the same one again does not", fb.hp === again, `${again} to ${fb.hp}`);
   // The mark has to survive a cleanse, or every healer in the game simply undoes it first.
   cleanse(hbFoe);
   ok("and no cleanse takes the mark off", has(hbFoe, "withered"));
@@ -319,12 +330,13 @@ const took = u => B.st[u.uid].taken;
   ok("so it still cannot be mended after a cleanse", hbFoe.hp === hbHp, `${hbHp} to ${hbFoe.hp}`);
 
   // The first fall is not one: he comes apart and the pieces keep going.
-  const skullsBefore = sideList(hb).filter(x => x.owner === hb).length;
+  const unitsBefore = sideList(hb).length;
   hb.hp = 40;
   applyDamage(hb, 9999, { src: hbFoe });
   ok("the first killing blow does not kill him", isUp(hb) && hb.hp > 1, `hp ${hb.hp}`);
   ok("he comes apart instead", has(hb, "corpse"));
-  ok("and two Skulls rise", sideList(hb).filter(x => x.owner === hb && isUp(x)).length === skullsBefore + 2);
+  // The Skulls are his, not extra cards in the team row.
+  ok("and nothing else joins the board", sideList(hb).length === unitsBefore, `${unitsBefore} to ${sideList(hb).length}`);
   ok("the Corpse uses his other three moves", abil(hb, "basic").name === "Clutch", abil(hb, "basic").name);
   ok("and it wears a different face", lookOf(hb).collapsed === true);
   // Hard to finish off: the same blow lands for far less while he is down.
@@ -338,7 +350,7 @@ const took = u => B.st[u.uid].taken;
   hb.hp = Math.round(hb.maxHp * 0.45);
   turnStart(hb);
   ok("mended past 40% he gets back up", !has(hb, "corpse"), `hp ${Math.round(hb.hp / hb.maxHp * 100)}%`);
-  ok("and the Skulls crumble with him", sideList(hb).filter(x => x.owner === hb && isUp(x)).length === skullsBefore);
+  ok("and still nothing else is on the board", sideList(hb).length === unitsBefore);
   // He only had the one bargain.
   hb.hp = 40;
   applyDamage(hb, 9999, { src: hbFoe });
@@ -351,36 +363,33 @@ const took = u => B.st[u.uid].taken;
   ok("The Long Rot rots the whole room", B.enemies.every(e => has(e, "withered") && has(e, "atkDown") && has(e, "defDown")));
   ok("and hands out no immortality at all", !B.players.some(a => has(a, "undying")));
 
-  // ---- Ephraim: one thing at a time ----
-  setupBattle({ team: ["ephraim", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
-  const ep = B.players[0], q1 = B.enemies[0], q2 = B.enemies[1];
-  const full = stat(ep, "atk");
-  ep.hp = Math.round(ep.maxHp * 0.5);
-  ok("half gone is a quarter more ATK", Math.abs(stat(ep, "atk") / full - 1.25) < 0.02, (stat(ep, "atk") / full).toFixed(3));
-  ep.hp = ep.maxHp;
-  B.sp = 5;
-  await KIT.ephraim.basic(ep, q1);
-  ok("punching something does not take hold of it", !has(q1, "quarry"));
-  await KIT.ephraim.skill(ep, q1);
-  ok("Drag Down is what takes hold", has(q1, "quarry"));
-  ok("he can be stunned at full health, hold or no hold", addStatus(ep, "stun", 1));
-  removeStatus(ep, "stun"); ep.hp = Math.round(ep.maxHp * 0.4);
-  ok("but below half nothing stops him", !addStatus(ep, "stun", 1));
-  ep.hp = ep.maxHp;
-  B.sp = 5;
-  await KIT.ephraim.skill(ep, q2);
-  ok("he will not let go of one still standing", has(q1, "quarry") && !has(q2, "quarry"));
-  q1.hp = 0; q1.alive = false; removeStatus(q1, "quarry");
-  B.sp = 5;
-  await KIT.ephraim.skill(ep, q2);
-  ok("once it falls he takes hold of the next", has(q2, "quarry"));
-  // The bite is worth more on the thing he is holding than on anything else.
-  const other = B.enemies.find(e => isUp(e) && !has(e, "quarry")) || q1;
-  const onQuarry = calcDmg(ep, q2, 1, {}, true).dmg, offQuarry = calcDmg(ep, other, 1, {}, true).dmg;
-  ok("he bites his Quarry harder", onQuarry >= offQuarry, `${onQuarry} against ${offQuarry}`);
-  // And everything that is not his Quarry hits him for less while he is busy.
-  const fromOther = takenMult(ep, other), fromQuarry = takenMult(ep, q2);
-  ok("everything else hits him for less", fromOther <= fromQuarry, `${fromOther.toFixed(2)} against ${fromQuarry.toFixed(2)}`);
+  // ---- Ephraim: everything he does reads off his own health bar ----
+  setupBattle({ team: ["ephraim", "flynn", "leo"], enemies: [{ id: "brute" }] });
+  const ep = B.players[0];
+  const calm = stat(ep, "atk");
+  ok("at full health he is just a brawler", !has(ep, "riled") && !has(ep, "rabid"));
+  ok("and anything can stun him", addStatus(ep, "stun", 1));
+  removeStatus(ep, "stun");
+  // Under half he is Riled, and the badge arrives the moment the bar crosses.
+  ep.hp = Math.round(ep.maxHp * 0.45); rageCheck(ep);
+  ok("under half health he is Riled", has(ep, "riled") && !has(ep, "rabid"));
+  ok("Riled is 22% more ATK", Math.abs(stat(ep, "atk") / calm - 1.22) < 0.02, (stat(ep, "atk") / calm).toFixed(3));
+  ok("and nothing stuns him while he is", !addStatus(ep, "stun", 1));
+  // Under a quarter it changes again, and only one of the two is ever on him.
+  ep.hp = Math.round(ep.maxHp * 0.2); rageCheck(ep);
+  ok("under a quarter he is Rabid", has(ep, "rabid"));
+  ok("and never both at once", !has(ep, "riled"));
+  ok("Rabid is 42% more", Math.abs(stat(ep, "atk") / calm - 1.42) < 0.02, (stat(ep, "atk") / calm).toFixed(3));
+  // Mend him and it goes away again, so the badge always matches the bar.
+  ep.hp = ep.maxHp; rageCheck(ep);
+  ok("mended back up he calms down", !has(ep, "riled") && !has(ep, "rabid"));
+  // He mends himself while he is worked up, which is the only sustain he has.
+  ep.hp = Math.round(ep.maxHp * 0.3); rageCheck(ep);
+  const epBefore = ep.hp;
+  turnStart(ep);
+  ok("Riled mends him on his own turn", ep.hp > epBefore, `${epBefore} to ${ep.hp}`);
+  // Nothing he does marks an enemy any more, which was the confusing part.
+  ok("no status is left on the enemy by any of it", !B.enemies[0].statuses.some(x => x.key === "quarry"));
 
   // ---- Isaac: hard to hit, not impossible to pick ----
   setupBattle({ team: ["isaac", "flynn", "leo"], enemies: [{ id: "brute" }] });

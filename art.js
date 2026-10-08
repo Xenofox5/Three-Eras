@@ -86,15 +86,13 @@ function bodyArt(L) {
 <path d="M15 83 Q24 77 33 83 M67 83 Q76 77 85 83" stroke="${dk}" stroke-width="1" fill="none"/>
 <path d="M40 70 L50 77 L60 70" stroke="${t}" stroke-width="1.4" fill="none"/>`;
   if (L.body === 'bare') return `
-<path d="M16 100 Q20 76 36 70 L64 70 Q80 76 84 100Z" fill="${shade(b, 0.1)}"/>
-<path d="M40 70 Q50 78 60 70 Q58 82 50 84 Q42 82 40 70Z" fill="${dk}" opacity=".45"/>
-<path d="M30 84 Q40 90 50 88 Q60 90 70 84" stroke="${dk}" stroke-width="1.4" fill="none"/>
-<path d="M50 84 L50 100" stroke="${dk}" stroke-width="1.2"/>
-<ellipse cx="22" cy="84" rx="9" ry="11" fill="${shade(b, 0.14)}"/>
-<ellipse cx="78" cy="84" rx="9" ry="11" fill="${shade(b, 0.14)}"/>
-<g stroke="${t}" stroke-width="2.6" fill="none" opacity=".95">
-<path d="M14 92 Q22 88 30 92 M14 96 Q22 92 30 96 M70 92 Q78 88 86 92 M70 96 Q78 92 86 96"/></g>
-<path d="M38 74 L42 80 M62 74 L58 80" stroke="${dk}" stroke-width="1.1" fill="none" opacity=".6"/>`;
+<path d="M12 100 Q13 86 20 79 Q27 72 38 68 L62 68 Q73 72 80 79 Q87 86 88 100Z" fill="${b}"/>
+<path d="M38 68 Q50 75 62 68 Q61 79 50 82 Q39 79 38 68Z" fill="${dk}" opacity=".3"/>
+<path d="M50 82 L50 100" stroke="${dk}" stroke-width="1.1" opacity=".5"/>
+<path d="M20 79 Q24 90 23 100 M80 79 Q76 90 77 100" stroke="${dk}" stroke-width="1.1" fill="none" opacity=".4"/>
+<path d="M34 88 Q42 93 50 92 Q58 93 66 88" stroke="${dk}" stroke-width="1" fill="none" opacity=".35"/>
+<g stroke="${t}" stroke-width="2.8" fill="none" opacity=".95" stroke-linecap="round">
+<path d="M13 90 Q20 86 27 90 M13 95 Q20 91 27 95 M73 90 Q80 86 87 90 M73 95 Q80 91 87 95"/></g>`;
   if (L.body === 'robe') return `
 <path d="M12 100 Q14 74 36 68 L64 68 Q86 74 88 100Z" fill="${b}"/>
 <path d="M38 68 L50 90 L62 68" fill="${dk}"/>
@@ -135,7 +133,8 @@ function heroFace(L, o, id) {
   if (L.chain) s += `<path d="M36 74 Q50 92 64 74" stroke="#e8b830" stroke-width="2" fill="none" stroke-dasharray="2.5 1.2"/><circle cx="50" cy="86" r="3.4" fill="#e8b830" stroke="#8a6410" stroke-width=".8"/><circle cx="50" cy="86" r="1.3" fill="#c8102e"/>`;
   if (front) s += weaponArt(L.weapon, L, id);
   if (L.beads) { const bx = [64, 69, 74, 79, 84, 89], by = [92, 90, 89, 89, 90, 92]; s += `<path d="M62 93 Q76 86 91 93" stroke="#3a1a1a" stroke-width="1" fill="none"/>` + bx.map((x, i) => `<circle cx="${x}" cy="${by[i]}" r="2.3" fill="${['#5a0a14', '#8a1020', '#d1203a', '#a8102a', '#6a0a18', '#c01a34'][i]}" stroke="#ff8a9a" stroke-width=".4"/><circle cx="${x - 0.7}" cy="${by[i] - 0.8}" r=".6" fill="#ffd0d8" opacity=".8"/>`).join(''); }
-  if (L.bandana) s += `<path d="M36 70 Q50 80 64 70 L62 76 Q50 84 38 76Z" fill="${L.bandana}"/>`;
+  // The neck half of a bandana cuts straight across a bare chest, so it is for clothed bodies.
+  if (L.bandana && L.body !== 'bare') s += `<path d="M36 70 Q50 80 64 70 L62 76 Q50 84 38 76Z" fill="${L.bandana}"/>`;
   const rx = L.big ? 18.5 : 17;
   /* A collapsed look moves the skull away from where the head sits, so the plain head underneath
      would be left showing as a blank blob. Only draw it when something is still holding it up. */
