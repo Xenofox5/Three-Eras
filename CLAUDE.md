@@ -110,6 +110,11 @@ Every past entry in `UPDATES` and `BALANCE` was renamed onto this scheme on 2026
 - **Cleanse before you heal.** Every heal that also cleanses must cleanse first. It did not matter
   while `mended` was the only debuff touching healing, since that merely reduces it, but `withered`
   blocks healing outright, and three healers were removing the thing that had just eaten the heal.
+- **Half the `look` flags take a colour, not `true`.** `cloak`, `beard`, `bandana` and `scarf` are
+  drawn with `fill="${L.x}"`, so passing `true` renders `fill="true"` and draws nothing at all.
+  `gaunt`, `scars`, `big`, `young`, `skull`, `noBody` and `collapsed` are the boolean ones. All three
+  heroes added in v0.5.0 shipped with `true` in a colour slot, which is why they all looked alike.
+  Render a portrait and look at it before calling a hero done.
 - CSS class clashes: `.res`, `.top` and `.chan` are taken. Search `style.css` before using a short class name.
 - `lowest([])` returns null and `addStatus` can fail (dead or immune target): guard results before using them.
 - Leaving a battle must not leave `runBattle` running: `B.id` and `B.abort` guard it; hooks check `live()`.

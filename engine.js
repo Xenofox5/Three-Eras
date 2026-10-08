@@ -40,7 +40,11 @@ const sideList = u => (u.side === 'player' ? B.players : B.enemies);
 const spOf = u => (u.side === 'player' ? B.sp : (B.spE || 0));
 function addSp(u, n) { if (u.side === 'player') B.sp = clamp(B.sp + n, 0, B.spMax); else B.spE = clamp((B.spE || 0) + n, 0, B.spMaxE || 5); }
 function newStats() { return { falls: 0, dmg: 0, heal: 0, shield: 0, taken: 0, kills: 0, crits: 0, hits: 0, misses: 0, dodges: 0, big: 0, acts: 0, ults: 0, buffs: 0, debuffs: 0, absorbed: 0 }; }
-function lookOf(u) { return u.def.heroId ? HEROES[u.def.heroId].look : u.def.look; }
+function lookOf(u) {
+  const h = u.def.heroId ? HEROES[u.def.heroId] : (u.isHero ? HEROES[u.id] : null);
+  if (h && h.altLook && h.altLookWhen && (u.statuses || []).some(s => s.key === h.altLookWhen)) return h.altLook;
+  return h ? h.look : u.def.look;
+}
 
 function makeUnit(id, side, slot, o = {}) {
   const isHero = !o.minion && (side === 'player' || !!o.hero);
@@ -166,10 +170,11 @@ function dmgBonus(u, t) {
   if (u.isHero && u.id === 'vehra' && hpPct(t) < 0.5) m += bt(u, 'bloodlust') || 0.3;
   if (u.side && u.id !== 'ethan' && sideList(u).some(p => isUp(p) && p.isHero && p.id === 'ethan')) m += 0.08;
   if (u.isHero && u.id === 'ben' && (t.flags.delayed || has(t, 'stun'))) m += 0.55;
-  if (u.isHero && u.id === 'hbenjamin' && has(t, 'withered')) m += 0.2;
+  if (has(t, 'withered')) m += (u.isHero && u.id === 'hbenjamin') ? 0.2 : 0.12;
+  if (u.isHero && u.id === 'ephraim' && has(t, 'quarry')) m += bt(u, 'quarryDmg') || 0.16;
   /* Isaac only gets the ambush once per vanish: the first blow out of sight, not every blow
      while the status happens to still be on him. */
-  if (u.isHero && u.id === 'isaac' && has(u, 'hidden')) m += bt(u, 'ambush') || 0.3;
+  if (u.isHero && u.id === 'isaac' && has(u, 'invisible')) m += bt(u, 'ambush') || 0.25;
   if (u.flags && u.flags.pact && t.statuses.some(x => STATUS[x.key].type === 'debuff')) m += 0.15;
   if (u.isHero && u.id === 'yunze') {
     const f = foesOf(u);
@@ -183,6 +188,10 @@ function takenMult(t, u) {
   if (has(t, 'guarding')) m *= 1 - (bt(t, 'guardDr') || 0.5);
   if (t.isHero && t.id === 'chosen') { const g = getSt(t, 'grace'); if (g) m *= 1 - 0.02 * g.stacks; }
   if (has(t, 'stone')) m *= 1 - (bt(t, 'stoneDr') || 0.5);
+  // Frail on his feet and stubborn once he is down, which is the whole shape of him.
+  if (has(t, 'corpse')) m *= 1 - (t.flags.corpseDR || bt(t, 'corpseDR') || 0.55);
+  // Busy with one thing, so everything that is not that thing gets less of his attention.
+  if (t.isHero && t.id === 'ephraim' && u && !has(u, 'quarry') && foesOf(t).some(e => has(e, 'quarry'))) m *= 1 - (bt(t, 'offQuarryDR') || 0.12);
   /* The thing wearing him is harder to put down than he is. Locked into it the Vessel fell in
      75% of fights against the jester 50%, and the owner asked for its damage cut, not its
      survival, so the gap closes here. */
@@ -224,13 +233,37 @@ function returnBeads(victim) {
   if (c && c.src && c.src.flags && isUp(c.src)) { c.src.flags.beads = Math.min(c.src.flags.beadMax || 5, (c.src.flags.beads || 0) + (c.stacks || 1)); syncBeads(c.src); HOOK.float(c.src, `📿 +${c.stacks || 1}`, 'buff'); }
 }
 const wallMax = u => Math.round(u.maxHp * 0.55);
-const skullMax = u => (u.def && u.def.boss) ? 2 : (bt(u, 'skullMax') || 5);
 const witherTurns = u => (u.def && u.def.boss) ? 1 : 2;
-function giveSkull(u, n = 1) {
-  if (!isUp(u)) return;
-  const sk = getSt(u, 'skulls');
-  if (sk) sk.stacks = Math.min(skullMax(u), sk.stacks + n);
-  else addStatus(u, 'skulls', 99, { stacks: Math.min(skullMax(u), n), silent: true });
+// How far he has to be mended before he can stand up again.
+const riseAt = u => u.flags.riseAt || bt(u, 'riseAt') || 0.35;
+/* The first fall is not one. He comes apart into a Corpse that keeps acting with a weaker set
+   of moves and two Skulls that fight on their own, and mending the Corpse puts him back
+   together. It happens once: after he stands up, the next fall is a real one. */
+/* He can only have hold of one thing. Taking a new one lets the old one go, which is the
+   price of switching and the reason finishing what he started is worth something. */
+function takeHold(u, t) {
+  if (!isUp(t) || t.side === u.side) return;
+  if (has(t, 'quarry')) return;
+  for (const e of foesOf(u)) removeStatus(e, 'quarry');
+  addStatus(t, 'quarry', 99, { src: u });
+}
+function collapseBenjamin(u) {
+  u.flags.bargainSpent = true;
+  u.hp = Math.max(1, Math.round(u.maxHp * 0.25));
+  addStatus(u, 'corpse', 99, { silent: true });
+  HOOK.float(u, '\u{1F480} HE COMES APART', 'special');
+  HOOK.log(`${u.name} falls apart, and the pieces keep moving.`, 'i');
+  const n = u.def.boss ? 1 : 2;
+  for (let i = 0; i < n; i++) summonCreature(u, 'skullward');
+  HOOK.fx('skullspend', { tgt: u });
+}
+// Back on his feet, and the Skulls go with him.
+function riseBenjamin(u, pct) {
+  removeStatus(u, 'corpse');
+  u.hp = Math.max(u.hp, Math.round(u.maxHp * pct));
+  for (const c of sideList(u).filter(x => x.owner === u && isUp(x))) { c.hp = 0; HOOK.float(c, 'crumbles', 'info'); }
+  HOOK.float(u, '\u{1F56F} HE GETS UP', 'buff');
+  HOOK.fx('secondbreath', { src: u, tgts: [u] });
 }
 function giveHex(src, t, amt, hits) {
   if (!isUp(t)) return;
@@ -268,8 +301,10 @@ function raiseWall(u, amt) {
 const creaturesOf = u => sideList(u).filter(x => isUp(x) && x.owner === u);
 function summonCreature(owner, kind) {
   const list = sideList(owner), def = ENEMIES[kind], court = owner.flags.court ? 1.2 : 1;
-  const hpF = (kind === 'imp' ? 0.32 : 0.7) * (bt(owner, 'creatureHp') || 1) * court;
-  const atkF = (kind === 'imp' ? 0.75 * (bt(owner, 'impAtk') || 1) : 0.9) * court;
+  const SHARE = { imp: [0.32, 0.75], skullward: [0.24, 0.62] };
+  const [hpBase, atkBase] = SHARE[kind] || [0.7, 0.9];
+  const hpF = hpBase * (bt(owner, 'creatureHp') || 1) * court;
+  const atkF = atkBase * (kind === 'imp' ? (bt(owner, 'impAtk') || 1) : 1) * court;
   const slot = list.reduce((m, x) => Math.max(m, x.slot), -1) + 1;
   const c = makeUnit(kind, owner.side, slot, { minion: true, hpMul: owner.maxHp * hpF / def.stats.hp, atkMul: stat(owner, 'atk') * atkF / def.stats.atk });
   finalize(c); c.owner = owner; c.creature = true; c.gauge = 10000;
@@ -428,20 +463,13 @@ function applyDamage(t, dmg, o = {}) {
   }
   let nh = t.hp - left;
   if (nh <= 0 && has(t, 'undying')) nh = 1;
-  if (nh <= 0 && t.isHero && t.id === 'hbenjamin') {
-    const sk = getSt(t, 'skulls');
-    if (sk && sk.stacks > 0) {
-      nh = 1;
-      sk.stacks--; if (sk.stacks <= 0) removeStatus(t, 'skulls');
-      HOOK.float(t, '💀 A SKULL SPENT', 'special');
-      HOOK.fx('skullspend', { tgt: t });
-      t.flags.skullMend = Math.round(t.maxHp * (bt(t, 'skullMend') || 0.1));
-    }
-  }
+  // He has one bargain and he spends it the first time he would go down.
+  if (nh <= 0 && t.isHero && t.id === 'hbenjamin' && !t.flags.bargainSpent) { nh = 1; t.flags.collapsing = true; }
   if (nh <= 0 && t.flags.cheat) { t.flags.cheat = false; nh = 1; HOOK.float(t, 'NOT YET', 'special'); }
   const real = t.hp - Math.max(0, nh);
   t.hp = Math.max(0, nh);
-  if (t.flags.skullMend) { t.hp = Math.min(t.maxHp, t.hp + t.flags.skullMend); HOOK.float(t, '+' + t.flags.skullMend, 'heal'); t.flags.skullMend = 0; }
+  // The collapse runs once the blow has landed, so the number on screen stays honest.
+  if (t.flags.collapsing) { t.flags.collapsing = false; collapseBenjamin(t); }
   const total = real + absorbed;
   if (o.src && o.src.side !== t.side && B.st[o.src.uid]) {
     const ss = B.st[o.src.uid]; ss.dmg += total; if (!o.dot && total > ss.big) ss.big = total;
@@ -604,8 +632,7 @@ function battleStart(u) {
     if (u.id === 'harry') u.flags.cheat = true;
     if (u.id === 'alfred') shiftTempo(u, true);
     if (u.id === 'malakai') addStatus(u, 'mixture', 99, { value: 0, silent: true });
-    if (u.id === 'hbenjamin') giveSkull(u, u.def.boss ? 2 : (u.flags.skullStart || bt(u, 'skullStart') || 3));
-    if (u.id === 'isaac') addStatus(u, 'hidden', 99, { silent: true });
+    if (u.id === 'isaac') addStatus(u, 'invisible', 99, { silent: true });
     if (u.id === 'yunze' && u.flags.oldestDebt) u.flags.cheat = true;
     if (u.id === 'peguicha') { u.flags.beadMax = bt(u, 'beads') || 5; u.flags.beads = u.flags.beadMax; syncBeads(u); }
     if (u.id === 'gemia' && B.units.some(x => x !== u && x.heroId === 'yunze')) addStatus(u, 'terrified', 99, { silent: true });
@@ -679,6 +706,8 @@ async function turnStart(u) {
   const rg = getSt(u, 'regen');
   if (rg) heal(rg.src || u, u, u.maxHp * (rg.value || 0.05), { noCrit: true, tick: true });
   if (u.isHero && u.id === 'angus') heal(u, u, u.maxHp * 0.03);
+  // Mended far enough, he puts himself back together at the start of his own turn.
+  if (u.isHero && u.id === 'hbenjamin' && has(u, 'corpse') && u.hp >= u.maxHp * riseAt(u)) riseBenjamin(u, u.hp / u.maxHp);
   u.flags.delayed = false;
   if (u.isHero && u.id === 'ethan' && spOf(u) < (bt(u, 'treasuryBelow') || 3)) { addSp(u, 1); HOOK.float(u, '💰 +1 SP', 'buff'); }
   const sg = getSt(u, 'song'); if (sg) { cleanse(u, 1); heal(sg.src || u, u, u.maxHp * (sg.value || 0.06), { tick: true, noCrit: true }); }
@@ -731,12 +760,9 @@ async function processDeaths() {
         u.alive = false; u.statuses = []; u.shield = 0; u.intents = [];
         if (u.side === 'player' && u.isHero) B.kos++;
         tally(u, 'falls');
-        for (const b of B.units) if (isUp(b) && b.isHero && b.id === 'hbenjamin' && b.side !== u.side) {
-          giveSkull(b, 1); HOOK.float(b, '💀 +1', 'buff');
-        }
         if (u.flags.lastHitBy && isUp(u.flags.lastHitBy) && u.flags.lastHitBy.isHero && u.flags.lastHitBy.id === 'ephraim') {
           const ep = u.flags.lastHitBy;
-          heal(ep, ep, ep.maxHp * (ep.flags.kennel ? 0.1 : 0.06), { noCrit: true });
+          heal(ep, ep, ep.maxHp * (ep.flags.kennel ? 0.14 : 0.1), { noCrit: true });
         }
         HOOK.log(`${u.name} falls.`, 'ko');
         HOOK.sfx('ko');
@@ -1266,50 +1292,71 @@ const KIT = {
      has marked can be mended at all. */
   hbenjamin: {
     async basic(u, t) {
+      if (has(u, 'corpse')) {
+        const cr = await strike(u, t, 0.6, { fx: 'whisper' });
+        if (hitOK(cr) && isUp(cr.target)) addStatus(cr.target, 'withered', witherTurns(u), { src: u });
+        return;
+      }
       const all = bt(u, 'witherAll');
-      const r = await strike(u, t, bt(u, 'whisperMult') || 1.05, { fx: 'whisper' });
+      const r = await strike(u, t, bt(u, 'whisperMult') || 1.3, { fx: 'whisper' });
       if (hitOK(r) && isUp(r.target)) addStatus(r.target, 'withered', witherTurns(u), { src: u });
       if (all) for (const e of foesOf(u)) if (e !== r.target) addStatus(e, 'withered', witherTurns(u), { src: u });
     },
     async skill(u, t) {
       await HOOK.fx('marrow', { src: u, tgt: t });
+      // Feed: weaker, but it takes back far more, because it is how he gets off the floor.
+      if (has(u, 'corpse')) {
+        const cr = resolveHit(u, t, 0.8, { acc: 0.05 });
+        if (hitOK(cr)) heal(u, u, Math.round(cr.dmg * 1.1), { noCrit: true });
+        if (isUp(t)) addStatus(t, 'withered', witherTurns(u), { src: u });
+        return;
+      }
       const dry = has(t, 'withered');
-      const r = resolveHit(u, t, 1.15, { acc: 0.05 });
+      const r = resolveHit(u, t, 1.5, { acc: 0.05 });
       if (hitOK(r)) {
         const take = Math.round(r.dmg * (bt(u, 'drawSteal') || 1) * (dry ? 1 : 0.5));
         if (take > 0) { heal(u, u, take, { noCrit: true }); }
       }
       if (isUp(t)) addStatus(t, 'withered', witherTurns(u), { src: u });
     },
+    /* The old one handed the whole team two turns of not dying and gave him his Skulls back,
+       which he could then do again. He is a debuffer, so it takes the room apart instead. */
     async ult(u) {
-      const f = foesOf(u), mine = friendsOf(u);
-      await HOOK.fx('secondbreath', { src: u, tgts: [...mine, ...f] });
-      // What he lent Harry and Yunze, lent to everyone for two turns.
-      for (const a of mine) addStatus(a, 'undying', 2);
-      giveSkull(u, 3);
-      for (const e of f) addStatus(e, 'withered', u.def.boss ? 1 : 3, { src: u });
+      // The Corpse spends its ultimate hauling itself upright instead.
+      if (has(u, 'corpse')) { riseBenjamin(u, 0.35); return; }
+      const f = foesOf(u);
+      await HOOK.fx('secondbreath', { src: u, tgts: f });
+      for (const e of f) {
+        addStatus(e, 'withered', u.def.boss ? 1 : 3, { src: u });
+        addStatus(e, 'atkDown', 3, { value: 0.25 });
+        addStatus(e, 'defDown', 3, { value: 0.25 });
+      }
     }
   },
   /* Ephraim. The meter is the health bar: the more of it is gone the harder he bites, so there
      is nothing to count and nothing he can lose by being hit. */
   ephraim: {
     async basic(u, t) {
-      const m = bt(u, 'knuckle') || 0.48;
+      const m = bt(u, 'knuckle') || 0.46;
       // Too close to miss, so the hits are sure rather than accurate.
       for (let i = 0; i < 3; i++) { if (!isUp(t)) break; await strike(u, t, m, { fx: 'knuckle', i, sure: true }); }
+      takeHold(u, t);
     },
     async skill(u, t) {
-      const r = await strike(u, t, 1.35, { fx: 'seize', status: { key: 'bleed', turns: 3, dot: 0.3 } });
-      addStatus(u, 'taunt', bt(u, 'tauntTurns') || 2);
-      addStatus(u, 'defUp', 2, { value: bt(u, 'seizeDef') || 0.2 });
+      const r = await strike(u, t, 1.12, { fx: 'seize', status: { key: 'bleed', turns: 3, dot: 0.3 } });
+      // He drags it back rather than letting it act: the grip is the lockdown.
+      if (hitOK(r) && isUp(t)) delayUnit(t, t.def.boss ? 0.18 : (bt(u, 'dragDelay') || 0.35));
+      takeHold(u, t);
       return r;
     },
     async ult(u, t) {
       await HOOK.fx('wontlet', { src: u, tgt: t });
-      for (let i = 0; i < 6; i++) {
-        let e = isUp(t) ? t : foesOf(u)[0];
+      takeHold(u, t);
+      for (let i = 0; i < 5; i++) {
+        let e = isUp(t) ? t : foesOf(u).find(x => has(x, 'quarry')) || foesOf(u)[0];
         if (!e) break;
-        const r = await strike(u, e, 0.68, { fx: 'knuckle', i, sure: true });
+        if (e !== t) takeHold(u, e);
+        const r = await strike(u, e, 0.62, { fx: 'knuckle', i, sure: true, pierce: 0.4 });
         if (hitOK(r)) heal(u, u, u.maxHp * 0.03, { noCrit: true });
       }
     }
@@ -1319,15 +1366,15 @@ const KIT = {
      strike out of sight is the one worth waiting for. */
   isaac: {
     async basic(u, t) {
-      const ambush = has(u, 'hidden');
-      const r = await strike(u, t, 1.1, { fx: 'quickword', forceCrit: ambush });
-      if (ambush) { removeStatus(u, 'hidden'); HOOK.float(u, '👁 SEEN', 'info'); }
+      const ambush = has(u, 'invisible');
+      const r = await strike(u, t, 1.0, { fx: 'quickword', forceCrit: ambush });
+      if (ambush) { removeStatus(u, 'invisible'); HOOK.float(u, '👁 SEEN', 'info'); }
       return r;
     },
     async skill(u) {
       await HOOK.fx('slipaway', { src: u });
-      addStatus(u, 'hidden', 99, { silent: true });
-      HOOK.float(u, '🌫 OUT OF SIGHT', 'buff');
+      addStatus(u, 'invisible', 99, { silent: true });
+      HOOK.float(u, '🫥 INVISIBLE', 'buff');
       addStatus(u, 'spdUp', 2, { value: 0.3 });
       if (bt(u, 'courier')) for (const a of friendsOf(u)) if (a !== u) addStatus(a, 'spdUp', 2, { value: 0.1 });
       if (bt(u, 'noMark')) return;
@@ -1342,10 +1389,10 @@ const KIT = {
       for (const a of friendsOf(u)) addStatus(a, 'critUp', 2, { value: 0.2 });
       if (f.length) {
         const top = f.reduce((a, b) => (stat(b, 'atk') > stat(a, 'atk') ? b : a), f[0]);
-        resolveHit(u, top, 2.2, { sure: true });
+        resolveHit(u, top, 2.0, { sure: true });
       }
-      addStatus(u, 'hidden', 99, { silent: true });
-      HOOK.float(u, '🌫 OUT OF SIGHT', 'buff');
+      addStatus(u, 'invisible', 99, { silent: true });
+      HOOK.float(u, '🫥 INVISIBLE', 'buff');
     }
   },
   lachlan: {
@@ -1502,15 +1549,16 @@ function previewFor(u, kind, t) {
     case 'yunze.basic': return D(u, t, 0.4, { hits: 2, acc: 0.05 });
     case 'yunze.skill': return D(u, t, 1.25, { acc: 0.15 });
     case 'yunze.ult': return D(u, t, 0.4, { note: 'per hit', acc: 0.1 });
-    case 'hbenjamin.basic': return D(u, t, bt(u, 'whisperMult') || 1.05, { note: '+Withered' });
-    case 'hbenjamin.skill': return D(u, t, 1.15, { acc: 0.05, note: has(t, 'withered') ? 'drains it all' : 'drains half' });
-    case 'hbenjamin.ult': return { txt: '🕯 no deaths' };
-    case 'ephraim.basic': return D(u, t, bt(u, 'knuckle') || 0.48, { sure: true, hits: 3 });
-    case 'ephraim.skill': return D(u, t, 1.35, { note: '+Bleed, +Taunt' });
-    case 'ephraim.ult': return D(u, t, 0.68, { sure: true, hits: 6 });
-    case 'isaac.basic': return D(u, t, 1.1, { forceCrit: has(u, 'hidden'), note: has(u, 'hidden') ? 'out of sight' : undefined });
-    case 'isaac.skill': return { txt: '🌫 vanish, 💨▲' };
-    case 'isaac.ult': return D(u, t, 2.2, { sure: true, note: 'on the hardest hitter' });
+    case 'hbenjamin.basic': return has(u, 'corpse') ? D(u, t, 0.6, { note: '+Withered' }) : D(u, t, bt(u, 'whisperMult') || 1.3, { note: '+Withered' });
+    case 'hbenjamin.skill': return has(u, 'corpse') ? D(u, t, 0.8, { acc: 0.05, note: 'mends him 110%' })
+      : D(u, t, 1.5, { acc: 0.05, note: has(t, 'withered') ? 'drains it all' : 'drains half' });
+    case 'hbenjamin.ult': return has(u, 'corpse') ? { txt: '🕯 get up' } : { txt: '🥀 rot the room' };
+    case 'ephraim.basic': return D(u, t, bt(u, 'knuckle') || 0.46, { sure: true, hits: 3, note: has(t, 'quarry') ? 'his Quarry' : 'takes hold' });
+    case 'ephraim.skill': return D(u, t, 1.12, { note: '+Bleed, delays' });
+    case 'ephraim.ult': return D(u, t, 0.62, { sure: true, hits: 5, pierce: 0.4 });
+    case 'isaac.basic': return D(u, t, 1.0, { forceCrit: has(u, 'invisible'), note: has(u, 'invisible') ? 'unseen' : undefined });
+    case 'isaac.skill': return { txt: '🫥 vanish, 💨▲' };
+    case 'isaac.ult': return D(u, t, 2.0, { sure: true, note: 'on the hardest hitter' });
     case 'malakai.basic': return D(u, t, 1.0, { note: mixOf(u).name + (mixSlot(u) === 2 ? ', on the house' : '') });
     case 'malakai.skill': { const n = sellable(t).length; return { txt: (n ? '⚗️▸' + n + ' ' : '') + '⚔️▲ 💨▲' + (bt(u, 'freeBargain') ? ' ✚' : '') }; }
     case 'malakai.ult': return { txt: '⚗️ strip' };
@@ -1627,10 +1675,20 @@ function aiChoose(u) {
         break;
       }
       // Wither first, then drain: the draw takes everything from something already marked.
-      case 'hbenjamin': { const dry = en.filter(e => has(e, 'withered')); if (sp >= skillCost(u) && (dry.length || hpPct(u) < 0.6)) return { kind: 'skill', target: dry.length ? lowest(dry) : tgtFor('skill') }; break; }
-      case 'ephraim': { if (sp >= skillCost(u) && !has(u, 'taunt')) return { kind: 'skill', target: tgtFor('skill') }; break; }
+      case 'hbenjamin': {
+        if (has(u, 'corpse')) { if (sp >= skillCost(u)) return { kind: 'skill', target: tgtFor('skill') }; break; }
+        const dry = en.filter(e => has(e, 'withered'));
+        if (sp >= skillCost(u) && (dry.length || hpPct(u) < 0.6)) return { kind: 'skill', target: dry.length ? lowest(dry) : tgtFor('skill') };
+        break;
+      }
+      case 'ephraim': {
+        const held = en.find(e => has(e, 'quarry'));
+        if (sp >= skillCost(u)) return { kind: 'skill', target: held || tgtFor('skill') };
+        if (held) return { kind: 'basic', target: held };
+        break;
+      }
       // Vanish when he is seen, strike when he is not. The cooldown stops him doing only that.
-      case 'isaac': { if (!has(u, 'hidden') && sp >= skillCost(u) && !(u.flags.skillCd > 0)) return { kind: 'skill', target: u }; break; }
+      case 'isaac': { if (!has(u, 'invisible') && sp >= skillCost(u) && !(u.flags.skillCd > 0)) return { kind: 'skill', target: u }; break; }
       case 'malakai': {
         const pool = al.filter(a => a !== u && hpPct(a) > 0.4 && (sellable(a).length || !has(a, 'atkUp')));
         const c = pool.sort((a, b) => (sellable(b).length - sellable(a).length) || (stat(b, 'atk') - stat(a, 'atk')))[0];

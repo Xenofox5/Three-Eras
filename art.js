@@ -85,6 +85,16 @@ function bodyArt(L) {
 <ellipse cx="76" cy="81" rx="12" ry="8" fill="${lt}" stroke="${t}" stroke-width="1.4"/>
 <path d="M15 83 Q24 77 33 83 M67 83 Q76 77 85 83" stroke="${dk}" stroke-width="1" fill="none"/>
 <path d="M40 70 L50 77 L60 70" stroke="${t}" stroke-width="1.4" fill="none"/>`;
+  if (L.body === 'bare') return `
+<path d="M16 100 Q20 76 36 70 L64 70 Q80 76 84 100Z" fill="${shade(b, 0.1)}"/>
+<path d="M40 70 Q50 78 60 70 Q58 82 50 84 Q42 82 40 70Z" fill="${dk}" opacity=".45"/>
+<path d="M30 84 Q40 90 50 88 Q60 90 70 84" stroke="${dk}" stroke-width="1.4" fill="none"/>
+<path d="M50 84 L50 100" stroke="${dk}" stroke-width="1.2"/>
+<ellipse cx="22" cy="84" rx="9" ry="11" fill="${shade(b, 0.14)}"/>
+<ellipse cx="78" cy="84" rx="9" ry="11" fill="${shade(b, 0.14)}"/>
+<g stroke="${t}" stroke-width="2.6" fill="none" opacity=".95">
+<path d="M14 92 Q22 88 30 92 M14 96 Q22 92 30 96 M70 92 Q78 88 86 92 M70 96 Q78 92 86 96"/></g>
+<path d="M38 74 L42 80 M62 74 L58 80" stroke="${dk}" stroke-width="1.1" fill="none" opacity=".6"/>`;
   if (L.body === 'robe') return `
 <path d="M12 100 Q14 74 36 68 L64 68 Q86 74 88 100Z" fill="${b}"/>
 <path d="M38 68 L50 90 L62 68" fill="${dk}"/>
@@ -120,16 +130,42 @@ function heroFace(L, o, id) {
   if (L.wings === 'demon') s += `<g fill="#2a0c18" stroke="#c0507a" stroke-width="1"><path d="M38 66 Q20 40 2 34 Q8 44 6 52 Q12 48 16 54 Q14 60 20 62 Q24 58 28 64 Q30 66 34 70Z"/><path d="M62 66 Q80 40 98 34 Q92 44 94 52 Q88 48 84 54 Q86 60 80 62 Q76 58 72 64 Q70 66 66 70Z"/></g><path d="M36 64 Q22 46 6 38 M64 64 Q78 46 94 38" stroke="#5a1a30" stroke-width="1" fill="none"/>`;
   if (!front) s += weaponArt(L.weapon, L, id);
   s += backHair(L);
-  s += `<rect x="44" y="58" width="12" height="14" fill="${sd}"/>`;
-  s += bodyArt(L);
+  // No neck on a collapsed look either: there is nothing left holding the head on.
+  if (!L.noBody) { if (!L.collapsed) s += `<rect x="44" y="58" width="12" height="14" fill="${sd}"/>`; s += bodyArt(L); }
   if (L.chain) s += `<path d="M36 74 Q50 92 64 74" stroke="#e8b830" stroke-width="2" fill="none" stroke-dasharray="2.5 1.2"/><circle cx="50" cy="86" r="3.4" fill="#e8b830" stroke="#8a6410" stroke-width=".8"/><circle cx="50" cy="86" r="1.3" fill="#c8102e"/>`;
   if (front) s += weaponArt(L.weapon, L, id);
   if (L.beads) { const bx = [64, 69, 74, 79, 84, 89], by = [92, 90, 89, 89, 90, 92]; s += `<path d="M62 93 Q76 86 91 93" stroke="#3a1a1a" stroke-width="1" fill="none"/>` + bx.map((x, i) => `<circle cx="${x}" cy="${by[i]}" r="2.3" fill="${['#5a0a14', '#8a1020', '#d1203a', '#a8102a', '#6a0a18', '#c01a34'][i]}" stroke="#ff8a9a" stroke-width=".4"/><circle cx="${x - 0.7}" cy="${by[i] - 0.8}" r=".6" fill="#ffd0d8" opacity=".8"/>`).join(''); }
   if (L.bandana) s += `<path d="M36 70 Q50 80 64 70 L62 76 Q50 84 38 76Z" fill="${L.bandana}"/>`;
   const rx = L.big ? 18.5 : 17;
-  s += `<ellipse cx="32.8" cy="49" rx="2.4" ry="3.6" fill="${sd}"/><ellipse cx="67.2" cy="49" rx="2.4" ry="3.6" fill="${sd}"/>`;
-  s += `<path d="M${50 - rx} 44 Q${50 - rx} 66 50 68 Q${50 + rx} 66 ${50 + rx} 44 Q${50 + rx} 24 50 24 Q${50 - rx} 24 ${50 - rx} 44Z" fill="${sk}"/>`;
-  s += `<path d="M${50 - rx + 2} 56 Q50 70 ${50 + rx - 2} 56 Q${50 + rx - 4} 66 50 67.6 Q${50 - rx + 4} 66 ${50 - rx + 2} 56Z" fill="${sd}" opacity=".35"/>`;
+  /* A collapsed look moves the skull away from where the head sits, so the plain head underneath
+     would be left showing as a blank blob. Only draw it when something is still holding it up. */
+  if (!L.collapsed) {
+    s += `<ellipse cx="32.8" cy="49" rx="2.4" ry="3.6" fill="${sd}"/><ellipse cx="67.2" cy="49" rx="2.4" ry="3.6" fill="${sd}"/>`;
+    s += `<path d="M${50 - rx} 44 Q${50 - rx} 66 50 68 Q${50 + rx} 66 ${50 + rx} 44 Q${50 + rx} 24 50 24 Q${50 - rx} 24 ${50 - rx} 44Z" fill="${sk}"/>`;
+    s += `<path d="M${50 - rx + 2} 56 Q50 70 ${50 + rx - 2} 56 Q${50 + rx - 4} 66 50 67.6 Q${50 - rx + 4} 66 ${50 - rx + 2} 56Z" fill="${sd}" opacity=".35"/>`;
+  }
+  if (L.skull) {
+    const bone = sk, hollow = '#090d0b', edge = shade(bone, -0.32);
+    let k = '';
+    // Cranium, temples and jaw as one piece, so the silhouette itself is a skull.
+    k += `<path d="M33 43 Q33 23 50 23 Q67 23 67 43 Q67 53 62.5 57 L58 57 L58 62 Q50 69 42 62 L42 57 L37.5 57 Q33 53 33 43Z" fill="${bone}" stroke="${edge}" stroke-width=".9"/>`;
+    k += `<ellipse cx="42.3" cy="46.5" rx="6.2" ry="6.8" fill="${hollow}"/><ellipse cx="57.7" cy="46.5" rx="6.2" ry="6.8" fill="${hollow}"/>`;
+    // Something is still looking out of them, which is the whole of him.
+    const pin = L.glowEye || L.eye;
+    k += `<g filter="url(#gl${id})"><circle cx="42.3" cy="47" r="2.8" fill="${pin}"/><circle cx="57.7" cy="47" r="2.8" fill="${pin}"/></g>`;
+    k += `<circle cx="42.3" cy="47" r="1.4" fill="#fff" opacity=".9"/><circle cx="57.7" cy="47" r="1.4" fill="#fff" opacity=".9"/>`;
+    k += `<path d="M50 51.5 L46.4 58.5 Q50 60.5 53.6 58.5Z" fill="${hollow}"/>`;
+    // Teeth, with the line between the jaws drawn so it reads at thumbnail size.
+    k += `<path d="M41.5 61.5 Q50 67 58.5 61.5 L58.5 65.5 Q50 70.5 41.5 65.5Z" fill="#f2ecde" stroke="${edge}" stroke-width=".8"/>`;
+    k += `<path d="M41.5 63.6 Q50 68.4 58.5 63.6" stroke="${edge}" stroke-width=".7" fill="none"/>`;
+    k += `<path d="M45 62.6 L45 67.9 M48 63.6 L48 69 M52 63.6 L52 69 M55 62.6 L55 67.9" stroke="${edge}" stroke-width=".8"/>`;
+    k += `<path d="M35.5 43 Q38.5 51.5 42 54 M64.5 43 Q61.5 51.5 58 54" stroke="${edge}" stroke-width="1.4" fill="none" opacity=".75"/>`;
+    k += `<path d="M43.5 24 L46 32 L43 37.5" stroke="${edge}" stroke-width=".9" fill="none" opacity=".85"/>`;
+    if (L.helm === 'cowl') k += `<path d="M26 92 Q22 60 30 38 Q38 16 50 15 Q62 16 70 38 Q78 60 74 92 L66 92 Q68 66 66 50 Q64 30 50 28 Q36 30 34 50 Q32 66 34 92Z" fill="#0c1210" stroke="${shade(bone, -0.55)}" stroke-width="1"/>`;
+    // Collapsed: the same skull, tipped over, for the shape he leaves behind when he falls.
+    if (L.collapsed) return s + `<ellipse cx="50" cy="93" rx="34" ry="8" fill="#000" opacity=".55"/><g transform="translate(-6 26) rotate(-52 50 58)">${k}</g><rect width="100" height="100" fill="#000" opacity=".22"/>`;
+    return s + k;
+  }
   if (L.helm === 'jester') {
     const s2 = s;
     s += eyesArt(L, o.glow, id);
@@ -179,6 +215,13 @@ function heroFace(L, o, id) {
   if (L.scars) s += `<path d="M39 52 L44.5 55.5 M39.6 54.6 L44 57.6 M61 52 L55.5 55.5 M60.4 54.6 L56 57.6" stroke="#b0405a" stroke-width="1.1" stroke-linecap="round"/>`;
   if (L.beard) s += `<path d="M34 54 Q36 70 50 74 Q64 70 66 54 Q62 62 56 60 Q50 63 44 60 Q38 62 34 54Z" fill="${L.beard}"/><path d="M44.5 60.5 Q50 62.5 55.5 60.5" stroke="#3a1a10" stroke-width="1.2" fill="none"/>`;
   if (L.gaunt) s += `<path d="M37 55 Q39 62 43 64 M63 55 Q61 62 57 64" stroke="${shade(sk, -0.35)}" stroke-width="1.6" fill="none" opacity=".6"/><path d="M38.5 51.5 Q43 53.5 47 51.5 M53 51.5 Q57 53.5 61.5 51.5" stroke="#3a1a2a" stroke-width="1.3" fill="none" opacity=".55"/>`;
+  if (L.scarf) {
+    const sc = L.scarf, scd = shade(sc, -0.3);
+    s += `<path d="M35.5 53 Q50 48 64.5 53 Q65 65 50 70.5 Q35 65 35.5 53Z" fill="${sc}" stroke="${scd}" stroke-width=".9"/>`;
+    s += `<path d="M39 56.5 Q50 53 61 56.5 M40 61 Q50 58 60 61" stroke="${scd}" stroke-width=".9" fill="none" opacity=".8"/>`;
+    // A loose end over the shoulder, so he looks like he is about to be somewhere else.
+    s += `<path d="M63 60 Q74 64 78 74 Q72 70 69 72 Q70 66 62 65Z" fill="${sc}" stroke="${scd}" stroke-width=".7"/>`;
+  }
   if (L.ink) s += `<path d="M57 55 Q60 53 62 56 Q60 58 58 57Z" fill="#1a1c2a" opacity=".75"/><circle cx="63.5" cy="58" r=".8" fill="#1a1c2a" opacity=".7"/>`;
   if (L.glasses) s += `<g fill="rgba(220,235,255,.18)" stroke="#c8a24a" stroke-width="1.3"><circle cx="43" cy="48" r="4.6"/><circle cx="57" cy="48" r="4.6"/></g><path d="M47.6 47.6 Q50 46.2 52.4 47.6 M38.4 47 L34 45.5 M61.6 47 L66 45.5" stroke="#c8a24a" stroke-width="1.1" fill="none"/>`;
   s += frontHair(L);

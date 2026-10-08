@@ -126,7 +126,6 @@ function badge(st) {
   else if (st.key === 'hexshield') num = st.hits + '✦';
   else if (st.key === 'tempo') { icon = (TEMPO[st.value] || TEMPO.andante).icon; num = ''; }
   else if (st.key === 'mixture') { icon = MIXTURE[st.value || 0].icon; num = ''; }
-  else if (st.key === 'skulls') num = st.stacks;
   else if (d.max && st.stacks > 1) num = '×' + st.stacks;
   else if (st.turns < 99) num = st.turns;
   return `<span class="sb ${d.type}" style="--c:${d.color}">${icon}${num !== '' ? `<b>${num}</b>` : ''}</span>`;
@@ -160,7 +159,9 @@ function updateUnit(u) {
   c.classList.toggle('unseen', up && unseen(u));
   if (u.isHero) c.classList.toggle('ready', up && u.ult >= 100);
   const glow = !!u.flags.glow || has(u, 'unsealed') || has(u, 'vessel');
-  if (c._glow !== glow) { if (c._glow !== undefined) c.querySelector('.pi').innerHTML = unitPortrait(u); c._glow = glow; }
+  // A second look keyed to a status counts as a repaint too, not just a change of eye glow.
+  const form = glow + '|' + ((u.def.heroId && HEROES[u.def.heroId].altLookWhen && has(u, HEROES[u.def.heroId].altLookWhen)) ? 'alt' : '');
+  if (c._glow !== form) { if (c._glow !== undefined) c.querySelector('.pi').innerHTML = unitPortrait(u); c._glow = form; }
   const hpP = Math.max(0, u.hp / u.maxHp * 100), shP = Math.min(100, u.shield / u.maxHp * 100);
   const f = c.querySelector('.hp .f'), g = c.querySelector('.hp .g'), s = c.querySelector('.hp .s'), b = c.querySelector('.hp b');
   f.style.width = hpP + '%'; g.style.width = hpP + '%';

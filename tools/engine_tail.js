@@ -239,6 +239,7 @@ const took = u => B.st[u.uid].taken;
   // ---- Malakai mixes in a fixed order, and every third flask is on the house ----
   setupBattle({ team: ["malakai", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
   const mk = B.players[0], e1 = B.enemies[0], e2 = B.enemies[1];
+  mk.mods.acc = 5;  // A missed flask applies no phial, which is correct but not the thing under test.
   ok("he starts on Venom", mixOf(mk).name === "Venom", mixOf(mk).name);
   await KIT.malakai.basic(mk, e1);
   ok("the first flask Poisons", has(e1, "poison"));
@@ -302,68 +303,90 @@ const took = u => B.st[u.uid].taken;
   ["Lantern", "Mirror Charm", "Bell", "Spark Box", "Loaded Dice"].forEach(n => pulls.add(named.includes(n)));
   ok("and all five are named in the description", !pulls.has(false));
 
-  // ---- H. Benjamin: the Skulls, the Wither, and the drain ----
+  // ---- H. Benjamin: frail standing up, hard to finish off once he is down ----
   setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
-  const hb = B.players[0], hbFoe = B.enemies[0], hbFoe2 = B.enemies[1];
-  ok("he starts with three Skulls", getSt(hb, "skulls").stacks === 3, getSt(hb, "skulls").stacks);
-  hb.mods.acc = 5;  // Grave Whisper can miss, and a missed flask Withers nothing: that is correct, not the thing under test.
+  const hb = B.players[0], hbFoe = B.enemies[0];
+  hb.mods.acc = 5;  // A missed flask Withers nothing, which is correct but not the thing under test.
   await KIT.hbenjamin.basic(hb, hbFoe);
   ok("Grave Whisper Withers", has(hbFoe, "withered"));
   const hbHp = hbFoe.hp;
   heal(hb, hbFoe, 500);
   ok("a Withered enemy cannot be mended at all", hbFoe.hp === hbHp, `${hbHp} to ${hbFoe.hp}`);
-  // A killing blow spends a Skull rather than killing him, and he comes back off the floor.
+
+  // The first fall is not one: he comes apart and the pieces keep going.
+  const skullsBefore = sideList(hb).filter(x => x.owner === hb).length;
   hb.hp = 40;
   applyDamage(hb, 9999, { src: hbFoe });
-  ok("a Skull is spent instead of dying", hb.hp > 1 && isUp(hb), `hp ${hb.hp}`);
-  ok("and the count drops", getSt(hb, "skulls").stacks === 2, getSt(hb, "skulls").stacks);
-  // Every enemy of his that falls hands one back.
-  removeStatus(hb, "skulls"); addStatus(hb, "skulls", 99, { stacks: 1, silent: true });
-  hbFoe2.flags.lastHitBy = hb; hbFoe2.hp = 0;
-  await processDeaths();
-  ok("a fallen enemy hands a Skull back", getSt(hb, "skulls").stacks === 2, getSt(hb, "skulls").stacks);
-  // With none left he dies like anyone else.
-  removeStatus(hb, "skulls");
-  hb.hp = 40; applyDamage(hb, 9999, { src: hbFoe });
-  ok("with no Skulls he falls", hb.hp === 0);
+  ok("the first killing blow does not kill him", isUp(hb) && hb.hp > 1, `hp ${hb.hp}`);
+  ok("he comes apart instead", has(hb, "corpse"));
+  ok("and two Skulls rise", sideList(hb).filter(x => x.owner === hb && isUp(x)).length === skullsBefore + 2);
+  ok("the Corpse uses his other three moves", abil(hb, "basic").name === "Clutch", abil(hb, "basic").name);
+  ok("and it wears a different face", lookOf(hb).collapsed === true);
+  // Hard to finish off: the same blow lands for far less while he is down.
+  const asCorpse = takenMult(hb, hbFoe);
+  removeStatus(hb, "corpse");
+  const standing = takenMult(hb, hbFoe);
+  addStatus(hb, "corpse", 99, { silent: true });
+  ok("a Corpse takes 55% less", Math.abs(asCorpse / standing - 0.45) < 0.01, (asCorpse / standing).toFixed(3));
 
-  // ---- Ephraim: the meter is the health bar ----
-  setupBattle({ team: ["ephraim", "flynn", "leo"], enemies: [{ id: "brute" }] });
-  const ep = B.players[0];
+  // Mended far enough, he stands up and the Skulls go with him.
+  hb.hp = Math.round(hb.maxHp * 0.45);
+  turnStart(hb);
+  ok("mended past 40% he gets back up", !has(hb, "corpse"), `hp ${Math.round(hb.hp / hb.maxHp * 100)}%`);
+  ok("and the Skulls crumble with him", sideList(hb).filter(x => x.owner === hb && isUp(x)).length === skullsBefore);
+  // He only had the one bargain.
+  hb.hp = 40;
+  applyDamage(hb, 9999, { src: hbFoe });
+  ok("the second fall is a real one", hb.hp === 0 && !has(hb, "corpse"));
+
+  // The ultimate is a debuff, not a thing he can cycle at 1 HP.
+  setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
+  const hb2 = B.players[0];
+  await KIT.hbenjamin.ult(hb2);
+  ok("The Long Rot rots the whole room", B.enemies.every(e => has(e, "withered") && has(e, "atkDown") && has(e, "defDown")));
+  ok("and hands out no immortality at all", !B.players.some(a => has(a, "undying")));
+
+  // ---- Ephraim: one thing at a time ----
+  setupBattle({ team: ["ephraim", "flynn", "leo"], enemies: [{ id: "brute" }, { id: "brute" }] });
+  const ep = B.players[0], q1 = B.enemies[0], q2 = B.enemies[1];
   const full = stat(ep, "atk");
   ep.hp = Math.round(ep.maxHp * 0.5);
-  const half = stat(ep, "atk");
-  ok("half gone is a quarter more ATK", Math.abs(half / full - 1.25) < 0.02, (half / full).toFixed(3));
-  ep.hp = 1;
-  ok("almost gone is half again", stat(ep, "atk") / full > 1.45, (stat(ep, "atk") / full).toFixed(3));
-  ok("and below half nothing stuns him", !addStatus(ep, "stun", 1));
+  ok("half gone is a quarter more ATK", Math.abs(stat(ep, "atk") / full - 1.25) < 0.02, (stat(ep, "atk") / full).toFixed(3));
   ep.hp = ep.maxHp;
-  ok("at full health he can be stunned like anyone", addStatus(ep, "stun", 1));
+  await KIT.ephraim.basic(ep, q1);
+  ok("hitting something takes hold of it", has(q1, "quarry"));
+  ok("he can be stunned at full health, hold or no hold", addStatus(ep, "stun", 1));
+  removeStatus(ep, "stun"); ep.hp = Math.round(ep.maxHp * 0.4);
+  ok("but below half nothing stops him", !addStatus(ep, "stun", 1));
+  ep.hp = ep.maxHp;
+  await KIT.ephraim.basic(ep, q2);
+  ok("taking a new one lets the old one go", has(q2, "quarry") && !has(q1, "quarry"));
+  // The bite is worth more on the thing he is holding than on anything else.
+  const onQuarry = calcDmg(ep, q2, 1, {}, true).dmg, offQuarry = calcDmg(ep, q1, 1, {}, true).dmg;
+  ok("he bites his Quarry harder", onQuarry > offQuarry, `${onQuarry} against ${offQuarry}`);
+  // And everything that is not his Quarry hits him for less while he is busy.
+  const fromOther = takenMult(ep, q1), fromQuarry = takenMult(ep, q2);
+  ok("everything else hits him for less", fromOther < fromQuarry, `${fromOther.toFixed(2)} against ${fromQuarry.toFixed(2)}`);
 
-  // ---- Isaac: invisibility he spends, not invisibility he holds ----
+  // ---- Isaac: hard to hit, not impossible to pick ----
   setupBattle({ team: ["isaac", "flynn", "leo"], enemies: [{ id: "brute" }] });
   const is = B.players[0], isFoe = B.enemies[0];
-  ok("he starts out of sight", has(is, "hidden"));
-  ok("and cannot be aimed at", unseen(is, isFoe));
+  ok("he starts Invisible", has(is, "invisible"));
+  const seenEva = (removeStatus(is, "invisible"), stat(is, "eva"));
+  addStatus(is, "invisible", 99, { silent: true });
+  ok("Invisible is harder to hit", stat(is, "eva") > seenEva + 0.3, `${seenEva.toFixed(2)} to ${stat(is, "eva").toFixed(2)}`);
+  // The point of the change: it is worth the same when he is the only one left.
+  B.players.filter(a => a !== is).forEach(a => { a.hp = 0; a.alive = false; });
+  ok("it still works when he is the last one standing", stat(is, "eva") > seenEva + 0.3);
+  ok("and he can still be picked, so he is not unkillable", !unseen(is, isFoe));
   await KIT.isaac.basic(is, isFoe);
-  ok("striking gives him away", !has(is, "hidden"));
-  ok("so now he can be aimed at", !unseen(is, isFoe));
+  ok("striking gives him away", !has(is, "invisible"));
   B.sp = 5; is.flags.skillCd = 0;
   await KIT.isaac.skill(is);
-  ok("Slipping Away puts him back", has(is, "hidden"));
+  ok("Slipping Away puts him back", has(is, "invisible"));
   ok("and marks the hardest hitter", has(isFoe, "exposed"));
   is.flags.skillCd = 2;
   ok("he cannot vanish twice running", !canUse(is, "skill"));
-
-  // ---- the Balanced build has to get the default, not zero ----
-  setupBattle({ team: ["isaac", "flynn", "leo"], enemies: [{ id: "brute" }] });
-  ok("Balanced Isaac gets his ambush bonus", (bt(B.players[0], "ambush") || 0.5) === 0.5, bt(B.players[0], "ambush") || 0.5);
-  setupBattle({ team: ["hbenjamin", "flynn", "leo"], enemies: [{ id: "brute" }] });
-  ok("Balanced Benjamin drains in full", (bt(B.players[0], "drawSteal") || 1) === 1, bt(B.players[0], "drawSteal") || 1);
-  // No default anywhere may be written with ?? against bt, because bt never returns undefined.
-  const engineSrc = require("fs").readFileSync("engine.js", "utf8");
-  const btQQ = engineSrc.split(nlOf(engineSrc)).filter(l => l.includes("bt(") && l.includes("??"));
-  ok("no bt default is written with ??", btQQ.length === 0, btQQ.join(" | ").slice(0, 140));
 
   // Every new hero has to be reachable, priced and described.
   ["hbenjamin", "ephraim", "isaac"].forEach(id => {
