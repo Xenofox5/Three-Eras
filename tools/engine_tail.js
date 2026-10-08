@@ -328,9 +328,16 @@ const took = u => B.st[u.uid].taken;
   await processDeaths();
   ok("and anything that falls does pay", (getSt(fb, "skulls") || {}).stacks === 2, (getSt(fb, "skulls") || {}).stacks);
   // One is spent every turn, so the pile runs down on its own and the mend is what it buys.
+  // At full health a Skull is worth more in his hand than in his chest, so he keeps it.
+  fb.hp = fb.maxHp;
+  const kept = (getSt(fb, "skulls") || {}).stacks;
+  turnStart(fb);
+  ok("he does not spend one at full health", (getSt(fb, "skulls") || {}).stacks === kept, (getSt(fb, "skulls") || {}).stacks);
+  // Hurt enough for it to be worth it, and he spends.
+  fb.hp = Math.round(fb.maxHp * 0.5);
   const carried = fb.hp;
   turnStart(fb);
-  ok("a Skull is spent on his turn", (getSt(fb, "skulls") || {}).stacks === 1, (getSt(fb, "skulls") || {}).stacks);
+  ok("a Skull is spent once he is hurt", (getSt(fb, "skulls") || {}).stacks === kept - 1, (getSt(fb, "skulls") || {}).stacks);
   ok("and spending it mends him", fb.hp > carried, `${carried} to ${fb.hp}`);
   // And coming apart costs him everything he was still carrying.
   fb.hp = 20;

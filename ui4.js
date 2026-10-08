@@ -3,7 +3,7 @@ const BIO = {
   angus: 'A swordsman who is very hard to bring down. An aura surrounds him wherever he stands.',
   flynn: 'An electricity user of the First Era.',
   leo: 'Fights by blasting beams of fire.',
-  hbenjamin: 'The oldest name in the record, and the only one with nothing written before it. A skull in a hood with more skulls drifting at his hands, who found a way to keep going long before the First Era had a name for itself. There is not much left of him and he is easy to knock down, but knocking him down does not finish it: he comes apart and the pieces carry on without him. Whatever he did to himself is where the near-immortality of Harry and Yunze comes from, and neither of them has given it back.',
+  hbenjamin: 'The oldest name in the record: a hooded skull who found a way to keep going before the First Era had one, and the source of whatever keeps Harry and Yunze alive.',
   ephraim: 'A short brawler from the First Era who fights with his hands and nothing else. Black hair, black eyes, and a habit of getting worse to deal with the more of him you take off. He latches on and does not let go, which is how he got the name.',
   isaac: 'The fastest thing in the Current Era and the hardest to look at directly. He watches from roofs and doorways and takes what he sees down to the basement, where Aamay writes it into the Chronicle. Wild black hair, black eyes, and no interest at all in being thanked for it.',
   harry: 'A wanderer few people know exists, almost never seen fighting. His real strength is force: he crushes people from the inside at a distance. Present in all three eras. In the Second Era he defeated The Chosen and killed Elphi.',
@@ -414,7 +414,7 @@ function statusLine(st, u) {
   if (st.key === 'pages') desc = `${st.stacks} of ${u ? pageCap(u) : '?'} Pages. The Last Page spends them all: ${Math.round(st.stacks * (u ? (bt(u, 'pageMult') || 0.15) : 0.15) * 100)}% ATK to every enemy right now.`;
   if (st.key === 'vengeance') desc = `${st.stacks} stored. Next Spear Thrust: +${st.stacks * 12}% damage and heals ${st.stacks * 2}% max HP.`;
   if (st.key === 'mixture') desc = ['Venom: the next flask Poisons for 2 turns.', 'Sedative: the next flask lowers ATK by 22%.', 'Solvent: the next flask lowers DEF by 22%, splashes every other enemy for 55% ATK, and pays the team a Skill Point.'][st.value || 0];
-  if (st.key === 'skulls') desc = `${st.stacks} of ${u ? skullCap(u) : 4} carried. One is spent at the start of each of his turns and mends him ${Math.round((u ? (bt(u, 'skullMend') || 0.14) : 0.09) * 100)}% of his max HP. The Corpse can spend the lot at once, and coming apart costs him all of them.`;
+  if (st.key === 'skulls') desc = `${st.stacks} of ${u ? skullCap(u) : 4} carried. One is spent at the start of each of his turns and mends him ${Math.round((u ? (bt(u, 'skullMend') || 0.14) : 0.14) * 100)}% of his max HP, but only while he is hurt enough for it to be worth spending. The Corpse can spend the lot at once, and coming apart costs him all of them.`;
   if (st.key === 'corpse') desc = `He has come apart. He barely hurts anything, takes ${Math.round((u ? ((u.flags && u.flags.corpseDR) || bt(u, 'corpseDR') || 0.65) : 0.65) * 100)}% less damage, and his three moves are about putting himself back together. Mend him to ${Math.round((u ? ((u.flags && u.flags.riseAt) || bt(u, 'riseAt') || 0.45) : 0.45) * 100)}% of his max HP and he gets up.`;
   if (st.key === 'hunted') desc = `Takes ${pctTxt(st.value || 0.25)} more damage from the Yunze who marked it.`;
   const extra = [];

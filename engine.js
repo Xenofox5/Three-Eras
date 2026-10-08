@@ -294,6 +294,7 @@ function skullTick(u) {
   const st = getSt(u, 'skulls');
   if (!st || !st.stacks) return;
   const per = u.def.boss ? 0.04 : (bt(u, 'skullMend') || 0.14);
+  if (u.maxHp - u.hp < u.maxHp * per * 0.5) return;
   st.stacks--;
   if (st.stacks <= 0) removeStatus(u, 'skulls');
   HOOK.fx('skullfeed', { src: u, tgt: u });

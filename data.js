@@ -547,7 +547,7 @@ HEROES.harry.passive.desc = '15% evasion. Cannot be stunned. Once per battle, su
 HEROES.yunze.passive.desc = 'Lone Hunter. 17% evasion. Extremely fast: SPD 190, so he acts about twice as often as most heroes. He works alone: his basics give the team no SP and his skill costs none. Deals 30% more damage to the enemy with the highest max HP. His ultimate charges 30% slower per action.';
 
 /* ---------- Unlocks ---------- */
-const GAME_VERSION = '0.5.5';
+const GAME_VERSION = '0.5.6';
 
 const STARTERS = ['angus', 'flynn', 'leo'];
 const UNLOCK_FROM = {};
@@ -616,6 +616,10 @@ const buildOf = (id, bid) => (BUILDS[id] || [BALANCED]).find(b => b.id === bid) 
    t: buff | nerf | rework | new | harder | easier | adjust
    kind: hero (who = hero id) | enemy (who = enemy id) | stage (who = stage id) | system (who = label) */
 const BALANCE = [
+  { v: '0.5.6', d: '2026-10-08', date: 'A Skull is never thrown away', changes: [
+    { t: 'adjust', kind: 'hero', who: 'hbenjamin', what: 'His descriptions', text: 'How much text he carries', from: 'an 824 character passive and a 513 character character note', to: '348 and 177, one sentence', note: 'Each rework added a clause and none removed one. The status badges carry the detail.' },
+    { t: 'buff', kind: 'hero', who: 'hbenjamin', what: 'When a Skull is spent', text: 'Whether he burns one he cannot use', from: 'one went every turn regardless, so at full health it healed nothing', to: 'he keeps it until there is enough missing to be worth spending', note: 'They are scarce on purpose now, and nothing about him should waste the dead. Composite 45.3 to 46.6.' }
+  ] },
   { v: '0.5.5', d: '2026-10-08', date: 'The Balance screen unbroken, and Skulls worth carrying', changes: [
     { t: 'fix', kind: 'system', who: 'Balance screen', text: 'A change logged with a type the renderer had no row style for', from: 'the Balance screen and every hero sheet that showed that change threw and did nothing when tapped', to: 'the type exists, and an unknown one falls back instead of throwing', note: 'Two entries last update used t: fix, which was not in the table. One missing key took out the whole screen and H. Benjamin\u2019s sheet with it, and nothing failed until it was clicked. The browser suite now opens every hero sheet and the Balance screen on every run.' },
     { t: 'rework', kind: 'hero', who: 'hbenjamin', what: 'How Skulls are earned and lost', from: 'one for every fresh Wither, kept forever, mending him while held', to: 'one per enemy ever, one per death anywhere, and one spent at the start of each of his turns', note: 'A mark wears off, so he could re-mark the same enemy over and over and the pile only ever went up. Now a given enemy pays once, the pile runs down on its own, and coming apart spends every one he is carrying. That leaves the dead as the only renewable source, which is what makes a death worth something.' },
@@ -1080,6 +1084,10 @@ const BALANCE = [
   ] }
 ];
 const UPDATES = [
+  { v: '0.5.6', d: '2026-10-08', items: [
+    'H. Benjamin says far less. Every rework added a clause to his text and none ever took one away, so his passive had grown to five times the length of anyone else’s and his character note to half a page. The badges already explain Withered, the Skulls and the Corpse in full, so his abilities only say what they do, and his note is one sentence like everybody else’s.',
+    'He no longer throws a Skull away. One was spent at the start of every one of his turns whether it did anything or not, so at full health he was burning the scarcest thing he has for nothing. He keeps it now until there is enough missing for it to be worth spending.'
+  ] },
   { v: '0.5.5', d: '2026-10-08', items: [
     'The Balance screen works again, and so does H. Benjamin\u2019s page. Two changes in the last update were logged with a type the renderer did not have a style for, so it threw the moment anything tried to draw them: the whole Balance screen and every hero sheet that mentioned one of those changes simply did nothing when you tapped it. The type exists now, an unrecognised one falls back quietly instead of taking the screen down, and the test suite opens every hero sheet and the Balance screen on every run.',
     'Skulls are worth something now. They were free: a mark wears off after a couple of turns, so he could put it back on the same enemy and take another Skull, forever, and the pile only ever went up. A given enemy pays him once and never again, one Skull is spent at the start of each of his turns, and coming apart spends every one he is carrying. That leaves the dead as the only thing that keeps the pile topped up, on either side, which is the point: a death should be worth something to him.',
@@ -1365,7 +1373,7 @@ Object.assign(STATUS, {
   tempo:     { name: 'Tempo', icon: '🎼', type: 'buff', fixed: true, color: '#9fb8ff', desc: 'Alfred\'s rhythm, which changes every turn.' },
   song:      { name: 'Song', icon: '🎵', type: 'buff', color: '#7ad06a', desc: 'Kingsley\'s music: heals 7% max HP and removes a debuff at the start of each of its turns.' },
   withered:  { name: 'Withered', icon: '🥀', type: 'debuff', fixed: true, color: '#8fd6b4', desc: 'Marked by H. Benjamin. It cannot be healed at all while this lasts, no cleanse will take the mark off, and it takes 20% more damage from him and 12% more from the rest of his side. It only runs out.' },
-  skulls:    { name: 'Skulls', icon: '💀', type: 'buff', fixed: true, max: 4, color: '#b8e0c8', desc: 'The dead he is carrying, up to 4. One is spent at the start of each of his turns and mends him 14% of his max HP, so the pile runs down on its own. He takes one the first time he Withers each enemy, and one for every unit that falls anywhere, either side. Coming apart costs him all of them.' },
+  skulls:    { name: 'Skulls', icon: '💀', type: 'buff', fixed: true, max: 4, color: '#b8e0c8', desc: 'The dead he is carrying, up to 4. One is spent at the start of each of his turns and mends him 14% of his max HP, but only while he is hurt enough for it to be worth it: at full health he keeps them. He takes one the first time he Withers each enemy, and one for every unit that falls anywhere, either side. Coming apart costs him all of them.' },
   corpse:    { name: 'Corpse', icon: '🪦', type: 'buff', fixed: true, color: '#8fd6b4', desc: 'He has come apart. He takes 65% less damage but barely hurts anything, and his three moves are about putting himself back together. Mend him to 45% of his max HP, or spend the Skulls, and he gets back up.' },
   riled:     { name: 'Riled', icon: '😤', type: 'buff', fixed: true, mods: { atk: 0.22 }, color: '#e0603a', desc: 'Hurt and getting worse for it: ATK +22%, nothing can Stun him, and he mends 5% of his max HP at the start of each of his turns. It lasts while he is under 65% health.' },
   rabid:     { name: 'Rabid', icon: '🩸', type: 'buff', fixed: true, mods: { atk: 0.42 }, color: '#ff3b3b', desc: 'Past caring: ATK +42%, nothing can Stun him, and he mends 7% of his max HP at the start of each of his turns. It lasts while he is under 30% health.' },
@@ -1455,17 +1463,17 @@ Object.assign(HEROES, {
        the same robe. Keyed to the status so the card repaints the moment he goes down. */
     altLookWhen: 'corpse',
     altLook: { skin: '#cfc8b2', hair: '#101410', hairStyle: 'bald', eye: '#3f8f72', glowEye: '#3f8f72', body: 'robe', bodyColor: '#0b100c', trim: '#4a7a62', bg: '#050a08', skull: true, collapsed: true },
-    passive: { name: 'The Oldest Bargain', desc: 'He carries the dead at his hands, up to 4 Skulls, and the badge says how many. A Skull is spent at the start of each of his turns to mend him 14% of his max HP, so the pile runs down whether he wants it to or not. He takes one the first time he Withers each enemy and never again from that one, and one for every unit that falls anywhere on the field, his own side included, which is what keeps him going in a long fight. He is very frail and dies easily, except once: the first blow that would finish him spends every Skull he is carrying and leaves him at 18% of his max HP as a Corpse, which barely hurts anything, takes 65% less damage, and has its own three moves for putting him back together. Mend him to 45% and he stands up. One bargain a battle.' },
-    basic: { name: 'Grave Whisper', icon: '🦴', target: 'enemy', desc: 'Deal 115% ATK to one enemy and Wither it for 2 turns, which hands him a Skull. Nothing can mend a Withered enemy and no cleanse will lift it, it takes 20% more damage from him, and 12% more from everyone else on his side.' },
-    skill: { name: 'Marrow Draw', icon: '💀', cost: 1, target: 'enemy', desc: 'Deal 140% ATK and take half the damage back as his own health. Against an enemy that is already Withered he takes all of it. The target is Withered for 2 turns either way.' },
-    ult: { name: 'The Long Rot', icon: '🥀', target: 'allEnemies', desc: 'Every enemy is Withered for 3 turns, so nothing on their side can be mended at all, and they each lose 25% ATK and 25% DEF for 3 turns.' },
+    passive: { name: 'The Oldest Bargain', desc: 'He carries up to 4 Skulls: one from each enemy the first time he Withers it, and one from anything that falls on either side. On his turn he spends one to mend 14% of his max HP, unless he is too healthy to need it. The first blow that would kill him spends them all and leaves him a Corpse instead, once a battle.' },
+    basic: { name: 'Grave Whisper', icon: '🦴', target: 'enemy', desc: '115% ATK to one enemy, Withered for 2 turns.' },
+    skill: { name: 'Marrow Draw', icon: '💀', cost: 1, target: 'enemy', desc: '140% ATK, Withered for 2 turns, and he takes half the damage back as health. Against an already Withered enemy he takes all of it.' },
+    ult: { name: 'The Long Rot', icon: '🥀', target: 'allEnemies', desc: 'Every enemy is Withered for 3 turns and takes ATK Down and DEF Down of 25% for 3 turns.' },
     /* What is left of him after the bargain. Everything that reads an ability off a unit goes
        through abil(), which swaps to this while the Corpse status is on him. */
     altWhen: 'corpse',
     alt: {
-      basic: { name: 'Gnaw', icon: '🦴', target: 'enemy', desc: 'What is left of him bites at one enemy for 25% ATK. It barely hurts, but it still Withers for 2 turns and the Skull still comes to him.' },
-      skill: { name: 'Gather the Dead', icon: '💀', cost: 1, target: 'self', desc: 'No attack. He spends every Skull he is carrying and each one pulls 9% of his max HP back into him, so four of them is 36%. This is the route up that does not need a healer: reach 45% and he stands.' },
-      ult: { name: 'The Second Breath', icon: '🕯', target: 'self', desc: 'He hauls himself upright without waiting for any of it, and stands at 45% of his max HP.' }
+      basic: { name: 'Gnaw', icon: '🦴', target: 'enemy', desc: '25% ATK, Withered for 2 turns. It barely hurts, but the Skull still comes.' },
+      skill: { name: 'Gather the Dead', icon: '💀', cost: 1, target: 'self', desc: 'No attack. He spends every Skull he carries, each one mending 9% of his max HP.' },
+      ult: { name: 'The Second Breath', icon: '🕯', target: 'self', desc: 'He hauls himself upright at 45% of his max HP.' }
     } },
   ephraim: { id: 'ephraim', name: 'Ephraim', title: 'The Pitbull', eras: ['first'], role: 'Brawler', color: '#e0603a',
     stats: { hp: 1280, atk: 120, def: 94, spd: 104, crit: 0.1, cdmg: 0.55, eva: 0.04 },
